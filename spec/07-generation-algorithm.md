@@ -1,4 +1,4 @@
-# 07 — Generation algorithm (v5.1, architect)
+# 07 — Generation algorithm (v5.2, architect)
 
 Serves criteria 5 (explicit deterministic rules, stated defaults), 3 and 9 (fail closed with options), 7 (load limits enforced on every output), 11 (rule-engine ready), 13 (testable invariants). Rule ranges: GEN-001…099 (pipeline), INV-01…49 (validator invariants), REP-001…049 (repairs).
 
@@ -26,6 +26,8 @@ Serves criteria 5 (explicit deterministic rules, stated defaults), 3 and 9 (fail
 
 `plan = f(profile, goal, log, today, ruleset_version, registry_version)`; no hidden state, no randomness. Each stage writes to the `FiredRuleLog`.
 
+**v5.2 (engine glue).** Written in full, the function is `result = f(input)` where `input` (`spec/schema/input-profile.schema.json`) holds the profile, goal, log, flags, events, `today`, the stored **EngineState** and the parent plan (12 §3.8); `result` (`spec/schema/result.schema.json`) is one of `plan`, `fail_closed`, `gate_stop`, `hold`, `safe_state` (12 §3.12). EngineState is an explicit input, so the function stays pure. Each rule runs at the stage and over the binding given by its `stage` and `scope` (12 §3.5); writes to one target compose by 12 §3.6; each stage repeats to a fixpoint (12 §3.7).
+
 | Stage | Does | Output | Fail exit |
 |---|---|---|---|
 | S0 Normalise | units (m, s), defaults for "I don't know", confidence flags, plausibility checks (§4) | `NormalisedInput` | — |
@@ -35,7 +37,7 @@ Serves criteria 5 (explicit deterministic rules, stated defaults), 3 and 9 (fail
 | S4 Phases | 04 | `Phase[]` | `PHASES_DO_NOT_FIT` → S9 |
 | S5 Template | choose `SchoolPreset` (T6) + `PhaseTemplate`s; resolve parameters: registry → preset → context modifiers (MIN) | `ParentTemplate` | preset incompatible with T3 → default preset + ledger entry |
 | S6 Weeks | 05: weekly volume, long-run curve, deload placement (04), key-session count | `Week[]` skeleton | — |
-| S7 Sessions | 06 modules chosen by CMP-007 among eligible modules; placed on available days | `Session[]` | — |
+| S7 Sessions | 06 modules chosen by CMP-007 among eligible modules; placed on available days; **v5.2: eight ordered sub-steps S7.1–S7.8, §2b** | `Session[]` | — |
 | S8 Validate | independent validator (§5) | `ValidationReport` | violations → S8r |
 | S8r Repair | ranked plan repairs (§6.1), ≤ `repair.max_passes` | revised plan → S8 | still failing → S9 |
 | S9 Fail closed | ranked goal-level repairs (§6.2), each pre-validated | `RepairOption[]`; **no plan for the requested goal** | — |
@@ -48,6 +50,35 @@ RULE GEN-003 | priority T4.350 | when S3 verdict = infeasible on volume, long-ru
 RULE GEN-004 | priority T5.350 | when the same inputs, ruleset_version and registry_version are given | then the output must be byte-identical | because re-planning is a pure function; LLM-style variability is unacceptable | evidence hearing-1 §5, CORROBORATED | basis evidence | default? no
 RULE GEN-005 | priority T6.350 | when two eligible session modules tie on every criterion | then choose the lower module ID | because a fixed tie-break keeps output deterministic | evidence opening-systemsarchitect R1, UNKNOWN (design default) | basis design_default | default? yes
 ```
+
+### 2b. Step S7 in order: choosing and placing the week's sessions (v5.2)
+
+> **In plain words.** For each week the tool first decides how many hard sessions fit, then sets the long run, then picks what each hard session trains, puts the sessions on your days, sets how big each one is, fills the rest with easy running, adds strides and strength, and finally writes the cards you read.
+
+S7 runs once per plan week, in week order, after S6 has fixed the week's phase, `V(w)`, `LR(w)`, deload and taper status. Its eight sub-steps run in this order; each sub-step is a stage of 12 §3.5 (`S7.1` … `S7.8`) and reads only what the earlier ones wrote. The procedures named here are specified in 12 §2b.4.
+
+| Sub-step | Does | Rules (in this order) | Output |
+|---|---|---|---|
+| **S7.1 Count** | the week's key-session count `k` | SES-007 (method_default count by phase and level) → SES-006 (MIN with the preset count, the run-count term and the phase allowance) → caps LOD-034 (0 in ONBOARD, RTR, TRANSITION, restricted gate), LOD-040 (`deload.quality_max`), CTX-006 (`ctx.lowfreq_quality_max`) | `week.quality_max`, provisional `k` |
+| **S7.2 Long run** | the long run's day and content | SES-005 (day) → DST-005 (short family: E1 only) → DST-006 (HM time goal: race-effort segment) → NUT-010 (fuelling practice) → DST-004/NUT-040 (heat exposure on easy runs, never the long run) | `week.long_run` |
+| **S7.3 Choose** | the module of each key slot | procedure `choose_key_modules(week, k)`: DST-002 candidate filter → CMP-007 weighted gap per slot → fallback chain (preset list rotation in BUILD/SPECIFIC, strides) → DST-018 race-effort override (time goals, SPECIFIC) → SES-012 level-test substitution → SES-016 (deload) / SES-015 (taper) / SES-018 (MAINTAIN) overrides; SES-001 filters every candidate; GEN-005 breaks ties | `slot.module` per slot, ranked |
+| **S7.4 Place** | the day of every session | procedure `place_in_order(week, ['long', 'key', 'easy', 'strides', 'strength'])` with SES-004 (hard-day spacing) and SES-005 (days); if no valid placement holds `k` key sessions, `k − 1` and back to S7.3 (the slot ranked last is dropped) | session dates |
+| **S7.5 Dose** | the size of every key session | SES-011 (next step), SES-013 (freeze after a failed test), SES-016 (start size in a deload), SES-015 (taper touch size); then the TID check LOD-033: a slot whose **start** dose does not fit the week's hard or E2 budget is dropped (SES-006 budget term) before any segment is shortened; emits `sessions_set` | `session.segments`, `dose_step` |
+| **S7.6 Easy fill** | easy runs | procedure `water_fill(week, lod.min_run_s)` (LOD-031) with LOD-013 (days next to the long run), LOD-016 (volume-carrying long run) | easy sessions |
+| **S7.7 Extras** | strides, strength, run-walk | SES-021 (strides on easy runs), SES-022 (hill sprints → strides without hill access), SES-020 (strength), SES-009/SES-010 (run-walk rendering and ratio) | attachments, rendering |
+| **S7.8 Render** | the runner's cards | SES-017 (effort first) → FEA-014 (pace only when INV-15 allows) → NUT-020 (race-day fuelling) → messages | final `Session[]` |
+
+Priorities follow the order: CMP-007 (T4.110) chooses first and DST-018 (now T4.458, v5.2) overrides afterwards inside the same procedure, so the override is never lost to the PRIORITY hit policy (it was T5.458 below CMP-007 in v5, and could never fire). DST-002's v5 easy-run fallback is replaced by the CMP-007 fallback chain: a key slot never becomes a plain easy run unless strides are not allowed that week (RTR, TRANSITION, an effort ceiling below E3), and then the slot is simply not filled.
+
+**Projection (v5.2).** A plan is generated weeks ahead, but dose steps, level tests and fuelling steps depend on what the runner logs. Every week after the current one shows each module **one step** above its last logged instance (or at its start dose), never compounded; later weeks repeat that step. The weekly re-plan (08) then moves the steps as the log confirms them. A reduction is always allowed (INV-04); an increase only appears through a re-plan.
+
+### 2c. Repair procedure (S8r, v5.2)
+
+1. **Validate** the whole plan (all INV of §5 that apply; S group re-derived, B group from raw fields).
+2. If it passes, go to S10. If not, take the **earliest violation**: earliest session date (week start for week-level invariants), then the lowest INV id.
+3. Apply the REP record of **lowest rank** whose `fixes` list holds that INV (§6.1 machine records). If that repair cannot change anything (e.g. no free day for REP-003), the next rank whose `fixes` holds the INV is tried.
+4. One **pass** = repair every violation dated on that earliest date, then re-validate. At most `repair.max_passes` passes; a plan still failing after the last pass sets `plan.s8r_exhausted` and goes to S9 (GEN-003). Each repair writes a DeviationLedgerEntry; volume removed is dropped (§6.1).
+5. A repair on a feasible persona of the grid is a generator defect (parity, TST-092).
 
 ## 3. State estimation from a manual log
 
@@ -126,13 +157,13 @@ Rules for the S group:
 | INV-08 | T5 | Taper keeps frequency (≥ `taper.freq_min_ratio` × pre-taper runs/week, race week excepted) and intensity (≥ 1 E3+ touch per non-race taper week if the pre-taper block had one) | repair | wg1 §5 Bosquet, CORROBORATED |
 | INV-09 | T2 | No HR zone derived from an age-predicted HRmax; HR zones only from measured HRmax/LTHR | block | wg1 §4, factdesk2 §6, CORROBORATED/CREDIBLE |
 | INV-10 | T2 | (static) No rule uses ACWR, monotony or Banister output in a blocking condition | build fail | wg1 §3, wg4 §1, CORROBORATED/CONTRADICTED |
-| INV-11 | T5 | Week totals = sum of sessions (time and distance) | block | consistency, N/A (engineering: arithmetic consistency) |
+| INV-11 | T5 | Week totals = sum of sessions (time and distance); v5.2: the goal race is listed in its week but not counted in the week's planned time (spec/schema README §6) | block | consistency, N/A (engineering: arithmetic consistency) |
 | INV-12 | T5 | Every parameter used resolves to a registry entry with grade and basis | build fail | opening-executor I6, N/A (engineering: build check) |
 | INV-13 | T5 | Long run ≤ max(active preset cap, `L_hold`) (v4, p1-A R1); the ultra tune-up is exempt from the ultra time cap only, never from INV-01/02/03 (DST-012) | repair | wg2 §1, CREDIBLE as choice; p1-A case 1 |
 | INV-14 | T2 | No implausible or unconfirmed entry contributes to L30_eff, V28 or level attainment | block | §4, N/A (engineering: data-quality rule; GEN-020 thresholds are design defaults) |
 | INV-15 | T2 | No pace target from an anchor with confidence ≠ measured or older than `anchor.max_age_days`. Paces only from the 03 §3b pace model (FEA-014), never from the target, logged pace or HR formulas | repair (→ effort) | opening-outsider §2; factdesk2 §6; F-12, CREDIBLE (factdesk2 §6) |
 | INV-16 | T5 | Weekly volume increase ≤ active profile ceiling, measured against the last non-deload week if it is ≤ `prog.baseline_max_age_weeks` old, else against the most recent completed week's logged volume (LOD-003/004) | repair | wg4 impl. 3, CORROBORATED figures / weak evidence → default |
-| INV-17 | T5 | No two sessions ≥ E3 on consecutive days unless the preset declares it | repair | hearing-1 §2 practice, CREDIBLE → default |
+| INV-17 | T5 | No two hard days on consecutive days unless the preset declares it (v5.2: hard = a segment at E3 or E4, or the long run, SES-004; strides do not count) | repair | hearing-1 §2 practice, CREDIBLE → default |
 | INV-18 | T2 | Race-day fuelling plan ≤ highest intake tolerated in logged training (GI score ≤ `fuel.gi_pass_max`) | repair | wg5 impl. 3, CORROBORATED/CREDIBLE |
 | INV-19 | T5 | No deload inside TAPER; no deload when W < `deload.min_plan_weeks` | repair | 04 PHS-002/003, UNKNOWN (design default) |
 | INV-20 | T5 | Every session's module prerequisites (02) hold on its date | repair | 02 CMP-006, N/A (engineering: prerequisite graph) |
@@ -164,6 +195,26 @@ Modules may register further invariants in their own ID ranges (e.g. `NUT-INV-*`
 | 6 | REP-006 | Lower the plan's peak volume / long-run targets to the highest reachable value; re-run feasibility | anything still failing |
 
 Volume removed by a repair is **dropped**, never redistributed beyond the same week's easy sessions, and only if that keeps every invariant. `repair.max_passes` = 3 (design default). Each pass re-runs the full validator.
+
+**Repair records (v5.2, engine glue Q7).** Each rank is a rule with a machine record (op `repair`, 12 §3.3) bound to one validator violation (root `violation`, stage S8r). The procedure of §2c applies them.
+
+```
+RULE REP-001 | priority T5.360 | when a validator violation of INV-01, 02, 03, 13, 15, 18, 28, 29 or 30 is the earliest one | then clamp the session to the binding limit: shorten its duration or distance to the limit (rounded down), or remove its pace or effort above the limit | because the smallest change that restores the limit keeps the rest of the plan | evidence 07 §6.1, N/A (engineering: structure or procedure, no physiological claim) | basis eng | default? no
+RULE REP-002 | priority T5.361 | when the earliest violation is INV-01, 02 or 16 caused by a step-up | then repeat the previous loading step (hold step) and shift the later steps by one week | because a template that rises faster than the caps is held, not squeezed | evidence 07 §7; 05 LOD-014, N/A (engineering: structure or procedure, no physiological claim) | basis eng | default? no
+RULE REP-003 | priority T5.362 | when the earliest violation is INV-03, 17 or 21 | then move the session to another available day of the same week that keeps every invariant, the earliest such day first | because a different day often removes the conflict without changing the dose | evidence 07 §6.1, N/A (engineering: structure or procedure, no physiological claim) | basis eng | default? no
+RULE REP-004 | priority T5.363 | when the earliest violation is INV-06, 07, 17 or 20 on a key session | then replace it with an easy run (SES-M-001) of equal or lower duration | because an easy run is always admissible where a hard one is not | evidence 07 §6.1; 06 SES-002, N/A (engineering: structure or procedure, no physiological claim) | basis eng | default? no
+RULE REP-005 | priority T5.364 | when the earliest violation is INV-16 or 20 and the phase minimums of 04 allow it | then move the BASE/BUILD boundary one week later and re-run S6–S7 from that week | because more base weeks lower the required ramp | evidence 07 §6.1; 04 §3, N/A (engineering: structure or procedure, no physiological claim) | basis eng | default? no
+RULE REP-006 | priority T5.365 | when a violation remains that no lower rank fixes | then lower the plan's peak volume and long-run targets to the highest values that validate and re-run feasibility (S3) | because a plan must never ship with a broken limit; if the goal no longer fits, S9 offers options | evidence 07 §6.1, N/A (engineering: structure or procedure, no physiological claim) | basis eng | default? no
+```
+
+```rulexpr
+{"id": "REP-001", "condition": "violation.inv_id in ['INV-01', 'INV-02', 'INV-03', 'INV-13', 'INV-15', 'INV-18', 'INV-28', 'INV-29', 'INV-30']", "on_unknown": "fire", "action": {"op": "repair", "rank": 1, "fixes": ["INV-01", "INV-02", "INV-03", "INV-13", "INV-15", "INV-18", "INV-28", "INV-29", "INV-30"], "method": "clamp_to_limit", "then": [{"op": "log_deviation"}]}, "stage": "S8r"}
+{"id": "REP-002", "condition": "violation.inv_id in ['INV-01', 'INV-02', 'INV-16'] && violation.week.is_step_up", "on_unknown": "skip", "action": {"op": "repair", "rank": 2, "fixes": ["INV-01", "INV-02", "INV-16"], "method": "hold_step_and_shift", "then": [{"op": "log_deviation"}]}, "stage": "S8r"}
+{"id": "REP-003", "condition": "violation.inv_id in ['INV-03', 'INV-17', 'INV-21']", "on_unknown": "skip", "action": {"op": "repair", "rank": 3, "fixes": ["INV-03", "INV-17", "INV-21"], "method": "move_to_free_day", "then": [{"op": "log_deviation"}]}, "stage": "S8r"}
+{"id": "REP-004", "condition": "violation.inv_id in ['INV-06', 'INV-07', 'INV-17', 'INV-20'] && violation.session.is_key", "on_unknown": "fire", "action": {"op": "repair", "rank": 4, "fixes": ["INV-06", "INV-07", "INV-17", "INV-20"], "method": "replace_with_easy", "then": [{"op": "log_deviation"}]}, "stage": "S8r"}
+{"id": "REP-005", "condition": "violation.inv_id in ['INV-16', 'INV-20']", "on_unknown": "skip", "action": {"op": "repair", "rank": 5, "fixes": ["INV-16", "INV-20"], "method": "move_phase_boundary", "then": [{"op": "log_deviation"}]}, "stage": "S8r"}
+{"id": "REP-006", "condition": "violation.unfixed", "on_unknown": "fire", "action": {"op": "repair", "rank": 6, "fixes": ["INV-01", "INV-02", "INV-03", "INV-08", "INV-11", "INV-13", "INV-16", "INV-17", "INV-19", "INV-20", "INV-21", "INV-27", "INV-28", "INV-29", "INV-30"], "method": "lower_peak_targets", "then": [{"op": "regenerate", "from_stage": "S3"}]}, "stage": "S8r"}
+```
 
 ### 6.2 Goal-level repairs (S9), fail closed
 
@@ -230,7 +281,7 @@ Source of `rules.json` (12 §3.2). One JSON object per line: `id`, `condition` (
 ```rulexpr
 {"id": "GEN-001", "condition": "state.gate in ['pause_until_clearance', 'no_plan']", "on_unknown": "fire", "action": {"op": "block_sessions", "filter": "s.is_run", "until": "state.gate in ['proceed', 'proceed_restricted']", "msg": "MSG-SAF-001"}}
 {"id": "GEN-002", "condition": "state.gate == 'proceed_restricted'", "on_unknown": "fire", "action": {"op": "block_sessions", "filter": "effort_rank(s.effort_target) >= effort_rank('E3')", "until": "has(screen.clearance_attested_on)"}}
-{"id": "GEN-003", "condition": "(feas.verdict == 'infeasible' && !plan.is_regeneration) || feas.s4_phases_do_not_fit || plan.s8r_passes > p('repair.max_passes')", "on_unknown": "fire", "action": {"op": "fail_closed", "reasons_expr": "feas.reasons", "then": [{"op": "generate_options", "order": ["change_availability", "change_availability+move_date", "move_date", "lower_goal", "shorter_distance", "base_plan", "alternative_preset"]}]}}
+{"id": "GEN-003", "condition": "(feas.verdict == 'infeasible' && !plan.is_regeneration) || feas.s4_phases_do_not_fit || plan.s8r_exhausted", "on_unknown": "fire", "action": {"op": "fail_closed", "reasons_expr": "feas.reasons", "then": [{"op": "generate_options", "order": ["change_availability", "change_availability+move_date", "move_date", "lower_goal", "shorter_distance", "base_plan", "alternative_preset"]}]}}
 {"id": "GEN-004", "condition": "true", "on_unknown": "fire", "action": {"op": "constraint", "check": "test: hash(output) == hash(output') for equal inputs, ruleset_version, registry_version (TST determinism)"}, "status": "static"}
 {"id": "GEN-005", "condition": "event.type == 'tie'", "on_unknown": "skip", "action": {"op": "set", "target": "slot.module", "expr": "min(tied.module_ids)"}}
 {"id": "GEN-010", "condition": "state.log_status == 'rich'", "on_unknown": "skip", "action": {"op": "set", "target": "state.L30_eff_time_s", "expr": "max_or_zero(log.measured_ok_runs_30d, x, x.duration_s)", "then": [{"op": "set", "target": "state.L30_eff_dist_m", "expr": "max_or_zero(log.measured_ok_runs_30d, x, x.distance_m)"}]}}
@@ -256,19 +307,19 @@ Each line holds `id`, `assert` (must be true for every emitted plan) and the val
 {"id": "INV-02", "assert": "all(plan.sessions, s, s.is_goal_race || s.ladder == 'start' || s.planned_duration_s <= p('spike.warn_ratio') * l30_time(s.date))", "check": "B"}
 {"id": "INV-03", "assert": "all(plan.long_runs, lr, lr.is_b2b_pair || all(adjacent(lr), d, d.planned_duration_s <= min(p('two_day.adjacent_ratio') * lr.planned_duration_s, p('two_day.cap_ratio') * l30_time(lr.date) - lr.planned_duration_s)))", "check": "B"}
 {"id": "INV-04", "assert": "event.goal_changed || all(plan.future_weeks, w, w.planned_time_s <= parent_week(w).planned_time_s && w.lr_s <= parent_week(w).lr_s)", "check": "S"}
-{"id": "INV-05", "assert": "all(flags.active, f, !(f.kind in p('flag.pause_kinds')) || count(plan.sessions, s, s.date >= f.raised_on && s.is_run) == 0)", "check": "B"}
+{"id": "INV-05", "assert": "all(flags.active, f, !(f.subkind in p('flag.pause_kinds')) || count(plan.sessions, s, s.date >= f.raised_on && s.is_run) == 0)", "check": "B"}
 {"id": "INV-06", "assert": "state.gate != 'proceed_restricted' || all(plan.sessions, s, effort_rank(s.effort_target) <= effort_rank('E2'))", "check": "B"}
 {"id": "INV-07", "assert": "all(plan.sessions, s, (profile.special_status != 'pregnant' || (effort_rank(s.effort_target) <= effort_rank(p('pregnancy.max_effort')))) && (age_low(s.date) >= p('minor.adult_age') || !s.is_b2b_pair)) && (profile.special_status != 'pregnant' || all(plan.weeks, w, w.planned_time_s <= p('pregnancy.vol_cap_ratio') * state.V28_at_status_start_s))", "check": "B"}
 {"id": "INV-08", "assert": "all(plan.taper_weeks, w, w.is_race_week || (w.runs >= p('taper.freq_min_ratio') * plan.pre_taper_runs && (!plan.pre_taper_had_e3 || w.has_e3_touch)))", "check": "S"}
 {"id": "INV-09", "assert": "all(plan.sessions, s, !has(s.hr_zone) || s.hr_source in ['hrmax_measured', 'lthr_measured'])", "check": "B"}
 {"id": "INV-10", "assert": "static: no blocking condition references acwr, monotony, strain, banister or an age-predicted HRmax", "check": "B"}
-{"id": "INV-11", "assert": "all(plan.weeks, w, w.planned_time_s == sum(w.sessions, s, s.planned_duration_s))", "check": "B"}
+{"id": "INV-11", "assert": "all(plan.weeks, w, w.planned_time_s == sum(w.sessions, s, s.is_goal_race ? 0 : s.planned_duration_s))", "check": "B"}
 {"id": "INV-12", "assert": "static: every p() id resolves to a registry entry with a grade or basis eng", "check": "S"}
 {"id": "INV-13", "assert": "all(plan.long_runs, lr, lr.planned_duration_s <= max(preset_cap(lr), state.L_hold_s))", "check": "S"}
 {"id": "INV-14", "assert": "all(state.denominator_entries, e, e.plausibility != 'flagged')", "check": "B"}
 {"id": "INV-15", "assert": "all(plan.sessions, s, !has(s.pace_range) || (anchor.confidence == 'measured' && days_between(anchor.date, s.date) <= p('anchor.max_age_days')))", "check": "S"}
 {"id": "INV-16", "assert": "all(plan.loading_weeks, w, w.planned_time_s <= (1 + p('prog.' + state.progression_profile + '.week_max')) * baseline(w))", "check": "S"}
-{"id": "INV-17", "assert": "all(plan.sessions, s, !(s.is_hard && next_day(s).is_hard) || preset.consecutive_hard_allowed)", "check": "B"}
+{"id": "INV-17", "assert": "all(plan.sessions, s, !(s.is_hard && s.next_day_is_hard) || preset.consecutive_hard_allowed)", "check": "B"}
 {"id": "INV-18", "assert": "!has(plan.race_fuel_g_h) || plan.race_fuel_g_h <= state.max_tolerated_g_h", "check": "B"}
 {"id": "INV-19", "assert": "count(plan.taper_weeks, w, w.is_deload) == 0 && (plan.W >= p('deload.min_plan_weeks') || count(plan.weeks, w, w.is_deload) == 0)", "check": "B"}
 {"id": "INV-20", "assert": "all(plan.sessions, s, prereqs_hold(module(s.module_id), s.date))", "check": "S"}

@@ -1,4 +1,4 @@
-# 13 — Worked examples (v5.1)
+# 13 — Worked examples (v5.2)
 
 Serves criteria 11 and 12. Feeds the fixtures of 14: TST-075, TST-083…089, TST-093, TST-095…106 (red team), TST-110…112 (oracle agreement), TST-120 and TST-122…125 (renumbered), TST-127 (Karim) and TST-128 (Rose). This module has no rules. **v5 is self-contained:** every table below is computed under the v5 rules and parameters (v5.1: P3 weeks 5–7 and the week-6 card recomputed under LOD-007/008, Tom's re-test row added for ADP-067; see R-06); nothing is deferred to an earlier version (p2-A R1).
 
@@ -11,6 +11,7 @@ Serves criteria 11 and 12. Feeds the fixtures of 14: TST-075, TST-083…089, TST
 - **`S_slow`** is used for demand only (FEA-002). **Time governs demand,** but a *measured* distance already run meets the long-run demand (03 §2).
 - **"S8 pass (hand-checked, not executed)"** = INV-01…31 were checked by hand against the table; no generator or validator has run (parity, TST-092, is a future test).
 - **Deload placement** (04 PHS-001/004/006; the same reading as the PHS-004 record): a deload every `deload.every` weeks, counted from the last deload placed. `weeks_to_phase_boundary` (12 §2b) = full weeks left in the current phase after this week (0 = last week). A deload with `weeks_to_phase_boundary` ≤ 1 moves to the last week of its phase; if that leaves fewer than `deload.min_gap_weeks` loading weeks since the previous deload, it stays (PHS-006); deloads within `deload.exclusion_before_taper` weeks of the taper are dropped (PHS-002).
+- **Week rows (v5.2).** A week row shows the week as published at its Monday, with every earlier session logged as planned (behaviour model `as_planned`, `spec/fixtures-input/`). Complete inputs of every persona are in `spec/fixtures-input/` (v5.2); where this module is silent, those files say which values were invented.
 - **Headlines** (messages.md §1): ambitious, tight, uncertain. **ESTIMATED_INPUTS** is a label, never a verdict reason.
 - **Band wording** (messages.md §0): `{fast_edge}` = P_race × (1 − B_fast), `{point}` = P_race, `{slow_edge}` = P_race × (1 + B_slow); the card always says whether the target is inside the range. Displayed times are rounded up to the minute.
 
@@ -45,33 +46,35 @@ Serves criteria 11 and 12. Feeds the fixtures of 14: TST-075, TST-083…089, TST
 
 **Demand (03 §2).** L_req_time = max(min(42.195/1.40 km at S_slow = 219, 180), 21.1 km at S_slow = 154) = **180 min**; distance stop min(42.195/1.40, 32) = **30.1 km** ("180 min or 30.1 km, whichever comes first"). V_req = max(AER, TOL, floor 240, 180/0.50 = 360) = **360** ≤ 360 available. HAB 2 (3 runs) suffices; she has 4.
 
-**Weeks needed (03 §4, dry run).** n_L: 85 → 180 at ×1.10 = 8 loading weeks; n_V: 210 → 360 (slow for 3 weeks, then LOD-007 at the same 10% until the baseline is confirmed: closed form = 6 loading weeks; dry run: 360 in week 7, v5.1); with deloads G = 10 growth weeks (ONBOARD inside them). BUILD 1 and SPECIFIC 4 overlap the last growth weeks, leaving base 5: weeks needed = base 5 + build 1 + specific 4 + taper 3 = 13 → **slack = 18 − 13 = 5** (≥ `feas.stretch_margin_weeks`) → **feasible**. The plan uses the slack as a longer BASE and BUILD, not as extra load. Prediction: information only (finish goal), band around 4:40 with the slow side widened (estimated anchor, low volume). Label ESTIMATED_INPUTS.
+**Weeks needed (03 §4, dry run; v5.2 recomputed by script, `docs/scripts/recompute_13_ana_v5_2.py`).** Closed form: n_L = ⌈ln(180/85) / ln 1.10⌉ = 8 loading weeks; n_V = ⌈ln(360/210) / ln 1.10⌉ = 6 (slow profile, then LOD-007 at the same 10% until the baseline is confirmed); G = 8 + ⌊8/3⌋ = 10. The **dry run is authoritative** (FEA-020) and iterates with the phase layout (12 §2b.4 `dry_run_weeks_needed`): with the floor() of every cap the long run is 178 min after 8 steps, not 180, so it reaches L_target in week **11** (G = 11, demand met within `load.round_down_s` only at 180). Hence base = G − build_min − specific_min = 11 − 1 − 4 = **6**. v5.2 counting (03 §4, 04 §3 step 5): ONBOARD weeks are growth weeks inside BASE, so **slack = W − (rtr + max(base, onboard − rtr) + build + specific + taper) = 18 − (0 + 6 + 1 + 4 + 3) = 4** (≥ `feas.stretch_margin_weeks`) → **feasible**. v5 said slack 5 (closed-form G = 10); the 03 formula of v5 gave 3 (ONBOARD counted twice). Prediction: information only (finish goal): HM 2:08 recalled → 4:40 point; P_race 4:34:43; slow edge widened twice (estimated anchor 1.5, low volume 1.5: B_slow 15.75%) = 5:18 → **expected race duration 318 min** (03 §2, v5.2), so FUEL L2 is required (CMP-008; it is also in the marathon finish set of 02 §5). Label ESTIMATED_INPUTS.
 
-**Phases.** ONBOARD 1–2 · BASE 3–8 · BUILD 9–11 · SPECIFIC 12–15 · TAPER 16–18 (race Sunday of week 18). **Deloads:** 4 (`weeks_to_phase_boundary` 4 → stays), 8 (last BASE week, 0 → stays), **12** (3 → stays; v5-preaudit moved it to 11 under a two-sided reading the record did not implement, R-03/R-05), 16 falls in the taper → dropped (PHS-002).
+**Phases (04 §3, v5.2).** W 18, T 3, R = 15, base_needed 6: S = min(8, max(4, 15 − 6 − 1)) = **8**; B = max(6, 2) = 6 (ONBOARD weeks 1–2 inside it); U = 15 − 6 − 8 = 1. **ONBOARD 1–2 · BASE 3–6 · BUILD 7 · SPECIFIC 8–15 · TAPER 16–18** (race Sunday of week 18). v5 showed BASE 3–8 / BUILD 9–11 / SPECIFIC 12–15, which did not follow 04 §3 (CHANGELOG-v5.1 §5 item a). **Deloads:** 4 (`weeks_to_phase_boundary` 2 → stays), 8 (SPECIFIC, 7 → stays), 12 (3 → stays), 16 falls in the taper → dropped (PHS-002). The first layout tried (closed-form G = 10: BASE to week 5, BUILD 6–7) put the deloads at 5, 9 and 13, but its own dry run gave G = 11, so the second iteration is the fixpoint.
+
+**How to read the table (v5.2).** Each row is the week **as published at its Monday**, with every earlier session logged as planned (behaviour model `as_planned` of `spec/fixtures-input/p3-ana.json`): FT-1 3 km 16:30 at the end of week 2, RPE at target, pain taps answered "No", stomach 0/10 at the planned intake, level-test questions yes / yes / no pain. Key sessions follow 07 §2b with the v5.2 defaults (06 §2c doses, CMP-007 node choice).
 
 | Wk | Phase | Profile | V (min) | LR (min) | LR share | Key sessions (06) | E3+ min (≤ 10%) | Checks and notes |
 |---|---|---|---|---|---|---|---|---|
-| 1 | ONBOARD | slow | 231 | 93 | 0.40 | none; strides | 0 | V ≤ 1.10 × 210; LR ≤ 1.10 × 85 |
-| 2 | ONBOARD | slow | 252 | 102 | 0.40 | **FT-1** (SES-M-019) at week end | test | V ≤ 1.20 × 210 (2-week cap); test sets paces |
-| 3 | BASE | slow | 277 | 112 | 0.40 | strides; 1 progression run (SES-M-012) | ≤ 8 | last probation week |
-| 4 | BASE **deload** | — | 207 | 84 | 0.41 | 1 short key at kept intensity | ≤ 6 | floor(0.75 × 277) = 207 (R-05) |
-| 5 | BASE | standard + LOD-007 | **304** | 123 | 0.40 | THR intervals 3 × 5 min (SES-M-008) | 15 | v5.1: baseline unconfirmed (4 logged weeks) → V ≤ floor(1.10 × max(231, 252, 277, 207)) = 304 (LOD-003 alone: 1.15 × 277 = 318); LR ≤ 1.10 × 112 (wk 3, 14 days ago) |
-| 6 | BASE | standard + LOD-007 | **334** | 135, fuelled 30 g/h | 0.40 | THR 3 × 8 min | 24 | v5.1: V ≤ floor(1.10 × max(252, 277, 207, 304)) = 334 (LOD-003 alone: min(1.15 × 304, 1.30 × 277) = 349); FUEL L1 practice (SES-M-004, `fuel.start_g_h`); **§6 shows this week as the runner sees it** |
-| 7 | BASE | standard | 360 | 148, fuelled 30 g/h | 0.41 | THR 3 × 8 min | 24 | v5.1: weeks 1–6 logged at ≥ 0.80 × planned → baseline confirmed (LOD-008), LOD-007 lifts; V ≤ min(1.15 × 334, 1.30 × 304) → V_req 360 reached; 2nd fuelled run → **FUEL L1** (`fuel.exit_runs` 2), needed to schedule runs > 150 min (02 §3) |
-| 8 | BASE **deload** | — | 270 | 111 | 0.41 | THR 2 × 8 min | 16 | |
-| 9 | BUILD | standard | 360 | **162**, fuelled 45 g/h | 0.45 | THR 4 × 8 min + steady 30 min E2 (SES-M-013) | 32 | LR ≤ floor(1.10 × 148) = 162 (R-05; v5-preaudit had 163, an INV-01/02 breach) |
-| 10 | BUILD | standard | 360 | **178**, fuelled 45 g/h | 0.49 | THR 2 × 15 min (SES-M-009) + steady 30 min | 30 | floor(1.10 × 162) = 178; 2nd run at 45 g/h with GI ≤ 2 → **FUEL L2**; **TOL L4 measured** (non-deload V28 360, L30 ≥ 150) |
-| 11 | BUILD | standard | 360 | 180 | 0.50 | THR 2 × 15 min | 30 | min(floor(1.10 × 178) = 195, L_target 180) |
-| 12 | SPECIFIC **deload** | — | 270 | 135 | 0.50 | THR 2 × 10 min | 20 | PHS-004 (record reading): `weeks_to_phase_boundary` = 3 → stays in wk 12 (R-03, R-05) |
-| 13 | SPECIFIC | standard | 360 | **180** or optional **extension** "29 km or 198 min" (≈ 189 min at her logged 6:30) | 0.50 / 0.53 | THR 2 × 15 min + fuelled long run 45–50 g/h | 30 | extension: DST-019 needs TOL L4 measured ✓ (wk 10) and FUEL L2 ✓ (wk 10), no flags; ≤ floor(1.10 × L30_eff 180) = 198; expected 189 > 180 → LOD-017 needs TOL L4 measured ✓ |
-| 14 | SPECIFIC | standard | 360 | 180 | 0.50 | THR 2 × 15 min + race rehearsal in the long run (SES-M-023) | 30 | LOD-018: no other run > 180 min within 14 days of wk 13 (180 is not > 180) |
-| 15 | SPECIFIC | standard | 360 | 180 | 0.50 | THR 2 × 12 min | 24 | a 2nd extension would need wk 16 (21 days, `lr.m_ext_min_gap_days`), which is taper → none |
-| 16 | TAPER k1 | — | 288 | 144 | 0.50 | sharpener (SES-M-024) 2 × 8 min E3 | 16 | V_ref 360, LR_ref 180; −20% (05 §6) |
-| 17 | TAPER k2 | — | 234 | 117 | 0.50 | sharpener 2 × 5 min | 10 | −35% |
+| 1 | ONBOARD | slow | 231 | 93 | 0.40 | none (LOD-034); strides on 2 easy runs | 0 | V ≤ 1.10 × 210; LR ≤ 1.10 × 85 |
+| 2 | ONBOARD | slow | 252 | 102 | 0.40 | none; **FT-1** (SES-M-019) at week end | test | V ≤ 1.20 × 210 (2-week cap); the test sets paces; LR 102 ≥ 90 → DUR L2 (test long run) |
+| 3 | BASE | slow | 277 | 112 | 0.40 | 1 slot → strides (CMP-007: DUR has the largest weighted gap and is a volume node; BASE → strides) | 0 | last probation week |
+| 4 | BASE **deload** | standard | 207 | 84 | 0.41 | strides | 0 | floor(0.75 × 277) = 207; LR 0.75 × 112 |
+| 5 | BASE | standard + LOD-007 | **304** | 123, fuelled 30 g/h | 0.40 | strides | 0 | V ≤ floor(1.10 × max(231, 252, 277, 207)) = 304 (LOD-003 alone: 318); late BASE (second half of BASE 3–6) → fuelling practice starts (NUT-010) |
+| 6 | BASE | standard + LOD-007 | **334** | 135, fuelled 30 g/h | 0.40 | strides | 0 | V ≤ floor(1.10 × 304) = 334 (LOD-003 alone: 349); 2nd run at 30 g/h → **FUEL L1** (NUT-013); **§6 shows this week as the runner sees it** |
+| 7 | BUILD | standard | 360 | 148, fuelled 45 g/h | 0.41 | THR intervals 3 × 5 min (SES-M-008, start) + progression run 40 min (SES-M-012, start) | 21 | weeks 1–6 logged → baseline confirmed (LOD-008); V_req 360 reached; TOL L3 measured; 2 slots (4 runs); DUR still wins → preset list rotation: 008, then 012 (010 needs THR L1) |
+| 8 | SPECIFIC **deload** | — | 270 | 111, fuelled 45 g/h | 0.41 | THR intervals 3 × 5 min (start dose, SES-016) | 15 | 2nd run at 45 g/h → **FUEL L2**; SPECIFIC list (011, 009) not yet eligible → BUILD list fallback (008) |
+| 9 | SPECIFIC | standard | 360 | **162**, fuelled 60 g/h | 0.45 | THR 3 × 6 min (next step) + strides | 18 | floor(1.10 × 148) = 162 (FUEL L1 held, needed above 150 min); step 60 g/h = the FUEL L2 ceiling for a finish goal |
+| 10 | SPECIFIC | standard | 360 | **178**, fuelled 60 g/h | 0.49 | THR 3 × 7 min + strides | 21 | floor(1.10 × 162) = 178; two THR sessions ≥ 16 min E3 → THR L1 test due (SES-012) |
+| 11 | SPECIFIC | standard | 360 | 180, fuelled 60 g/h | 0.50 | **THR L1 test** 2 × 8 min (SES-024) + strides | 16 | min(195, L_target 180); test passed → THR L1; end of week: non-deload V28 360, L30 ≥ 150 → **TOL L4 measured** |
+| 12 | SPECIFIC **deload** | — | 270 | 135, fuelled 60 g/h | 0.50 | race-effort intervals 2 × 15.5 min E2 (SES-M-011, start: 0.10 × 318 min) | 0 | MSP L1 prerequisites now hold (THR L1, DUR L1), so the preset list rotation reaches SES-M-011 |
+| 13 | SPECIFIC | standard | 360 | **180** or optional **extension** "29 km or 198 min" | 0.50 / 0.55 | race-effort 3 × 15.5 min E2 + THR 3 × 8 min | 24 | extension (DST-019): TOL L4 measured ✓ (wk 11), FUEL L2 ✓ (wk 8), no flags; ≤ floor(1.10 × 180) = 198; expected ≈ 189 at her logged 6:30 > 180 → LOD-017 needs TOL L4 measured ✓ |
+| 14 | SPECIFIC | standard | 360 | 180 | 0.50 | race-effort 4 × 15.5 min E2 + THR 4 × 8 min | 32 | E2 62 ≤ 72 (20%); LOD-018: no other run > 180 min within 14 days of wk 13 |
+| 15 | SPECIFIC | standard | 360 | 180 | 0.50 | race-effort 4 × 15.5 min E2 + THR 4 × 8 min (both held: the next steps, 0.25 share = 78 min E2 and 5 × 8 = 40 min E3, exceed the week's E2 and E3 budgets, 07 §2b S7.5) | 32 | a 2nd extension would need wk 16 (21 days), which is taper → none |
+| 16 | TAPER k1 | — | 288 | 144 | 0.50 | sharpener (SES-M-024) 2 × 5 min E3 inside an easy run | 10 | V_ref 360, LR_ref 180; −20% (05 §7) |
+| 17 | TAPER k2 | — | 234 | 117 | 0.50 | sharpener 2 × 5 min E3 | 10 | −35% |
 | 18 | TAPER k3 / RACE | — | 180 + race | none | — | strides; race Sunday | — | −50%; race week: easy runs and strides, no long run |
-| 19–20 | TRANSITION | — | ≤ 180 | — | — | easy only | 0 | `phs.transition_weeks` M 2; ≤ 0.50 × V_ref |
+| 19–20 | TRANSITION | — | ≤ 180 | — | — | easy only | 0 | `phs.transition_weeks` M 2; ≤ 0.50 × V_ref (PHS-013) |
 
-Runs per week: 4 (long run Sunday, key Tuesday, easy Thursday and Saturday). The days next to the long run obey LOD-013 (Saturday ≤ min(0.50 × LR, 1.60 × L30_eff − LR)). **S8 pass (hand-checked, not executed):** INV-01/02 (each LR ≤ 1.10 × the previous 30-day max), INV-03 (Saturday), INV-13 (LR ≤ 180, extensions are ledger entries under `lr.over_cap_pct` 0.60), INV-16 (≤ 15% on the last non-deload week; v5.1: ≤ 10% on the best logged week of the last 4 until week 7, LOD-007), INV-19 (no deload in the taper), INV-28 (extension needs TOL L4 measured; Ana is 31). **INV-25:** peak LR 180 ≥ L_req 180 ✓.
+Runs per week: 4 (long run Sunday, key Tuesday, easy Thursday and Saturday; in weeks with 2 key sessions: Tuesday and Thursday, SES-004 with the long run counted as a hard day). The days next to the long run obey LOD-013 (Saturday ≤ min(0.50 × LR, 1.60 × L30_eff − LR)). **S8 pass (hand-checked by script, not executed by an engine):** INV-01/02 (each LR ≤ 1.10 × the previous 30-day max), INV-03 (Saturday), INV-13 (LR ≤ 180, the extension is a ledger entry under `lr.over_cap_pct` 0.60), INV-16 (≤ 15% on the last non-deload week; ≤ 10% on the best logged week of the last 4 until week 7, LOD-007), INV-17 (no hard days back to back), INV-19 (no deload in the taper), INV-28 (extension needs TOL L4 measured; Ana is 31). **INV-25:** peak LR 180 ≥ L_req 180 ✓. LOD-033: E3+E4 ≤ 10% and E2 ≤ 20% of V in every week (script check). **Not applied:** DST-007 (marathon race-effort segments inside long runs) stays text-only until the marathon release (R2); once formalised it adds E2 segments to some SPECIFIC long runs from week 13, and this table must be recomputed.
 
 **Adaptation: the week-13 extension is missed.** ADP-020 drops it; ADP-022 holds week 14 at the last completed comparable week (LR 180). No second extension fits before the taper. Extensions are not demand, so feasibility is unchanged; INV-04 ✓.
 
@@ -144,21 +147,21 @@ No deloads inside the ladder; no quality sessions; no paces. A rung advances aft
 
 **Backfill branch (v5).** If she backfills week 7 the same evening (3 sessions dated Tue/Thu/Sat with pain answers), INP-021 does not fire (≤ `log.bulk_backfill_max`), the sessions are estimated, and SAF-082 credits at most one rung from backfill in 7 days → S7 → S8 as planned.
 
-## 6. One week as the runner sees it — P3 Ana, week 6
+## 6. One week as the runner sees it — P3 Ana, week 6 (v5.2, recomputed by script)
 
-Displayed with the rounding of messages.md §0. FT-1 at the end of week 2: 3 km in 16:30, logged the same day (measured) → paces from the 03 §3b model (10K-equivalent 59:07, CS 2.82 m/s; E3 = CS × 0.92–0.97 ≈ 6:05–6:25 /km; v5.1 corrects the v5 value 5:55–6:10, which did not follow the model).
+Displayed with the rounding of messages.md §0. FT-1 at the end of week 2: 3 km in 16:30, logged the same day (measured) → paces from the 03 §3b model: 10K-equivalent 59:07, CS 2.82 m/s; marathon-equivalent 5:28 h, so E1 = M speed × 0.72–0.92 ≈ 8:25–10:50 /km, always shown with "or slower: talk test rules". Week 6 is now a **BASE** week (v5.2 phases): its one key slot becomes strides on an easy run (CMP-007), so the card holds no threshold session (v5.1's card showed THR 3 × 8 min, which came from the old phase outline).
 
 > **Week 6 of 18 · Base**
 > *Your plan grows a little each week. This week: about 5 h 30 of running.*
 >
-> **Tuesday — Threshold intervals · 60 min**
-> 15 min easy. Then 3 × 8 min **hard but controlled** (you can say only a few words), about 6:05–6:25 /km, with 3 min easy jog between. 15 min easy to finish.
-> *Why? This raises the pace you can hold for a long time.*
+> **Tuesday — Easy run with strides · 60 min**
+> Easy: you can talk in full sentences, about 8:25–10:50 /km or slower. In the last 10 minutes: 4 × 20 seconds of fast, relaxed running, walking back for a minute between them.
+> *Why? Strides keep your legs quick without tiring you.*
 >
-> **Thursday — Easy run · 70 min**
-> Easy: you can talk in full sentences. If you can't, slow down or walk.
+> **Thursday — Easy run with strides · 60 min**
+> Same as Tuesday.
 >
-> **Saturday — Easy run · 1 h**
+> **Saturday — Easy run · 60 min**
 > Easy, the day before your long run.
 >
 > **Sunday — Long run · 2 h 10**
@@ -169,7 +172,7 @@ Displayed with the rounding of messages.md §0. FT-1 at the end of week 2: 3 km 
 >
 > *Based partly on your estimates until your log is complete.* (label shown until GEN-014 ends)
 
-Engine values (v5.1, V 334 under LOD-007): Tue 60 (15 + 24 + 2 × 3 jog + 15), Thu 78 (water-filling: the Saturday cap leaves 334 − 60 − 135 − 61), Sat 61 (LOD-013: ≤ min(0.50 × 135, 1.60 × 123 − 135 = 61)), Sun 135 → V 334. E3 time 24 min ≤ 0.10 × 334 ✓; E0–E1 share 0.93 ✓ (LOD-033). Displayed durations: 78 → "70 min", 135 → "2 h 10", week 334 → "5 h 30" (rounded down to 10 min above 60 min; hours above 90 min). v5 had V 360 with a 104-min ("1 h 40") weekday easy run.
+Engine values (v5.2, V 334 under LOD-007): Sun 135; Sat 61 (LOD-013: ≤ min(0.50 × 135, 1.60 × 123 − 135 = 61); L30_eff on Saturday = wk 5's 123); Tue and Thu share the rest by water-filling: (334 − 135 − 61) / 2 = 69 each (each ≤ LR and ≤ 1.10 × L30_eff) → V 334. Strides: SES-M-006 start step 4 × 20 s E5 with 60 s walk-backs inside the last minutes of each 69-min run (the strides slot of CMP-007 counts as one of the `ses.strides_per_week` = 2). E3 time 0 ≤ 0.10 × 334 ✓; E0–E1 share 1.00 ✓ (strides count in their run's E1 time, 05 §5). Displayed durations (messages.md §0: above 60 min, rounded down to 10 min; hours only above 90 min): 69 and 61 → "60 min"; 135 → "2 h 10"; week 334 → "5 h 30".
 
 ## 7. Fixture list (all v5 expected outcomes)
 
@@ -221,4 +224,5 @@ All verdicts are as in v4 13 §3–§4, with v5 band wording on every time goal 
 | R-04 | **H** | **INV-29 vs ultra non-peak and deload long runs.** v4 LOD-018 moved or capped "the later" of two runs over 180 min. In P5 every deload (190–210 min) and non-peak (195–216 min) long run sits 7 days from a peak, so the later run was often the **peak**, which would have lost the long-run demand. v4's P5 table had this defect unnoticed | **fixed in v5 LOD-018**: the non-peak or deload run is capped at 180; only when both are peaks does the later one move (§4 shows the emitted values) |
 | R-03 | L | v5-preaudit read PHS-004 as "last week before or first week after a boundary", while the record tested `weeks_to_phase_boundary ≤ 1` and P5 used the record | **post-audit:** one reading everywhere: forward-looking `weeks_to_phase_boundary` (12 §2b), as in the record; 04 PHS-004 text and §0 aligned; P3's deloads recomputed (4, 8, 12); P5 unchanged |
 | R-06 | **M** | **v5.1 recomputation** (external review v5 items 3–4; recomputed by a short script, floor() of every cap): P3 wk 5 V 318 → **304**, wk 6 360 → **334**, wk 7 360 (V_req now reached in wk 7, not 6); LR, deloads and every later week unchanged (wk 8 deload 0.75 × 360 = 270); LR shares wk 5/6 0.40. Week-6 card: Thursday 104 → **78** min, week ≈ 5 h 30; E3 pace corrected to **6:05–6:25 /km** (the model gives 365.7–385.6 s/km from FT-1 3 km 16:30). Feasibility unchanged: n_V closed form 6, G 10 | corrected above; oracle fixtures in 14 §10e |
+| R-07 | **M** | **v5.2 phase outline of P3** (CHANGELOG-v5.1 §5 a, b): rewritten to the 04 §3 allocation with the dry-run G (11, not the closed-form 10): ONBOARD 1–2, BASE 3–6, BUILD 7, SPECIFIC 8–15; deloads 4, 8, 12 (unchanged); slack 4 (03 and 04 now count ONBOARD inside BASE); key sessions, fuelling steps and the week-6 card recomputed by script under the v5.2 S7 order. V and LR of every week are unchanged | corrected in §3 and §6; 14 §10e updated (FUEL L2 now in week 8) |
 | R-05 | **M** | **Post-audit arithmetic corrections** (audit-final §A, recomputed with `tools/audit_final.py` and floor() of every cap): P3 wk 4 V 208 → **207**; wk 9 LR 163 → **162** (163 broke LOD-010/INV-01 while the table claimed "S8 pass"); wk 10 179 → **178**; with the PHS-004 reading of R-03 the deload is wk 12 (LR 135) and wk 11 is LR 180; the extension moves to wk 13 (≤ 198, after FUEL L2 is reached in wk 10 by two fuelled runs at 45 g/h: audit fix 15). P5 illness: wk 18 LR **224**, tune-up **246**. Lea's slow edge **52:26** (B_slow 7%, not 4%). Tom's day-0 fast edge **47:24**; FT-1 fast edge 46:48; Karim's fast edge 52:52 (rounding). Tuesday card sums to 60 min | corrected above; each corrected value is an oracle fixture (14 TST-110…112, list in 14 §10e) |

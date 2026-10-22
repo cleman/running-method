@@ -1,0 +1,1017 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://running-method/spec/schema/input-profile.schema.json",
+  "title": "Generator input (v5.2)",
+  "description": "The complete input of plan = f(profile, goal, log, today, ruleset_version, registry_version) (07 §2), plus the stored EngineState and the parent plan for re-plans (12 §3.8). Every field a rule reads through the roots profile, screen, claim, anchor, log, goal, flags, event and today is here. Blank vs unknown vs null (12 §3.9): a field the runner was asked and answered 'I don't know' or left blank is listed in declared_unknown and carries null; a field not asked or not applicable is null and NOT listed; a field never null is required.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "today",
+    "timezone",
+    "profile",
+    "screening",
+    "claim",
+    "anchors",
+    "log",
+    "goal",
+    "flags",
+    "declared_unknown",
+    "engine_state",
+    "parent_plan",
+    "events"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "v5.2"
+    },
+    "today": {
+      "$ref": "common.schema.json#/$defs/date",
+      "description": "Evaluation date; never read from a device clock (12 §2b.1)."
+    },
+    "now": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "Optional evaluation timestamp; defaults to today 12:00 local."
+    },
+    "timezone": {
+      "type": "string",
+      "description": "IANA zone of the runner; every date is local to it (12 §3.10)."
+    },
+    "ruleset_version": {
+      "type": "string"
+    },
+    "registry_version": {
+      "type": "string"
+    },
+    "declared_unknown": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(profile|claim|screen|anchor|goal|log\\[[0-9]+\\]|event\\[[0-9]+\\])\\.[A-Za-z_0-9.]+$"
+      },
+      "description": "Paths answered 'I don't know' or left blank (12 §3.2 rule 1). They evaluate to unknown. Fields of inp.no_unknown_fields may never appear here (INP-001)."
+    },
+    "profile": {
+      "type": "object",
+      "required": [
+        "id",
+        "birth_month",
+        "birth_year",
+        "sex",
+        "training_age_years",
+        "never_run",
+        "other_sport_background",
+        "injury_last_12m",
+        "available_days",
+        "max_runs_per_week",
+        "available_minutes_per_week",
+        "blocked_dates",
+        "long_run_day",
+        "run_walk_preference",
+        "run_walk_preference_explicit",
+        "preset_preference",
+        "night_shift_dates",
+        "hill_access",
+        "nutrition_referral_flag",
+        "caffeine_sensitive",
+        "b2b_opt_in",
+        "created_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "birth_month": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Required (inp.no_unknown_fields). null only while onboarding is incomplete: the engine then returns kind 'hold' asking for it (INP-001/002, TST-103); it is never listed in declared_unknown."
+        },
+        "birth_year": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1900,
+          "description": "As birth_month."
+        },
+        "sex": {
+          "enum": [
+            "f",
+            "m",
+            null
+          ]
+        },
+        "body_mass_kg": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "training_age_years": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "enum": [
+            0,
+            0.15,
+            0.6,
+            2,
+            5,
+            12,
+            null
+          ],
+          "description": "Band values of 01 §1.1."
+        },
+        "never_run": {
+          "type": "boolean"
+        },
+        "other_sport_background": {
+          "enum": [
+            "none",
+            "cycling",
+            "swimming",
+            "triathlon",
+            "team",
+            "other",
+            null
+          ]
+        },
+        "injury_last_12m": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "injuries_history_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "available_days": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "common.schema.json#/$defs/weekday"
+          },
+          "uniqueItems": true
+        },
+        "max_runs_per_week": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 14
+        },
+        "available_minutes_per_week": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "blocked_dates": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/date"
+          }
+        },
+        "long_run_day": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/weekday"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "run_walk_preference": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "run_walk_preference_explicit": {
+          "type": "boolean",
+          "description": "True only when the runner set the preference themselves (SES-009)."
+        },
+        "preset_preference": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/preset_id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "night_shift_dates": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/date"
+          }
+        },
+        "hill_access": {
+          "type": "boolean"
+        },
+        "nutrition_referral_flag": {
+          "type": "boolean"
+        },
+        "caffeine_sensitive": {
+          "type": "boolean"
+        },
+        "b2b_opt_in": {
+          "type": "boolean"
+        },
+        "double_threshold_opt_in": {
+          "type": "boolean",
+          "description": "SES-019 (not MVP)."
+        },
+        "units_pref": {
+          "enum": [
+            "metric",
+            "imperial"
+          ]
+        },
+        "created_at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "special_status": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "start_date",
+              "attested"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": [
+                  "minor",
+                  "pregnant",
+                  "postpartum",
+                  "masters_65_vigorous"
+                ]
+              },
+              "start_date": {
+                "$ref": "common.schema.json#/$defs/date"
+              },
+              "attested": {
+                "type": "boolean"
+              },
+              "due_date": {
+                "$ref": "common.schema.json#/$defs/date"
+              },
+              "has_given_birth": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          },
+          "description": "SpecialStatus records (a runner can hold several, e.g. minor and pregnant). The scalar path profile.special_status reads the most restrictive active type (12 §2b.2, v5.2)."
+        },
+        "attestations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "msg_id",
+              "attested_on"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "msg_id": {
+                "type": "string"
+              },
+              "attested_on": {
+                "$ref": "common.schema.json#/$defs/date"
+              },
+              "flag_id": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Clearance and consent attestations (MSG-SAF-011/012/013/021/031/033/040); they set profile.saf031_attested_on etc."
+        },
+        "level_tests_opt_out": {
+          "type": "boolean",
+          "description": "v5.2 (owner answer to question 4): the runner turned level tests off; levels then come from training (SES-025). Default false."
+        }
+      }
+    },
+    "screening": {
+      "type": "object",
+      "required": [
+        "instrument",
+        "answers",
+        "followup_answers",
+        "completed_on"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "instrument": {
+          "const": "PAR-Q+ 2023"
+        },
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "description": "Item id → answer. PLACEHOLDER item ids (parq_placeholder_01…07) until the licensed text and item map exist (blocker B-1); null = not answered (then SCR-001 gives no_plan)."
+        },
+        "followup_answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "item_factor": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "symptom",
+              "known_disease",
+              "musculoskeletal",
+              "other"
+            ]
+          },
+          "description": "PLACEHOLDER ScreeningItemMap (clinical sign-off pending, B-1/B-3)."
+        },
+        "current_symptoms": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "description": "10 §1 items asked at onboarding (C1–C4, B1–B5, H1–H2, E1, P1–P2, I1–I3)."
+        },
+        "guardian_attested_on": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "guardian_hardcap_optin": {
+          "type": "boolean"
+        },
+        "completed_on": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid_until": {
+          "$ref": "common.schema.json#/$defs/date"
+        },
+        "clearance_attested_on": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saf060_attested_on": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "masters_checked": {
+          "type": "boolean"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "description": "OnboardingClaim (01 §1.2). Every value is estimated (INP-003). null = no claim; 'I don't know' answers are also listed in declared_unknown.",
+      "required": [
+        "runs_per_week",
+        "weekly_distance_m",
+        "weekly_time_s",
+        "L30_distance_m",
+        "L30_duration_s",
+        "last_run_band",
+        "continuous_30min"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "runs_per_week": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "weekly_distance_m": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "weekly_time_s": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "L30_distance_m": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "L30_duration_s": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "last_run_band": {
+          "enum": [
+            "this_week",
+            "1_2_weeks",
+            "2_4_weeks",
+            "1_3_months",
+            "3_12_months",
+            "over_a_year",
+            "never",
+            null
+          ],
+          "description": "01 §1.2 bands → days_since_last_run 3 / 11 / 22 / 60 / 180 / 400; never → never_run."
+        },
+        "last_run_date": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Derived: today − band days."
+        },
+        "continuous_30min": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "anchors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "distance_m",
+          "time_s",
+          "date",
+          "entered_at"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "race",
+              "field_test",
+              "cs_test",
+              "recalled"
+            ]
+          },
+          "distance_m": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "time_s": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "date": {
+            "$ref": "common.schema.json#/$defs/date"
+          },
+          "entered_at": {
+            "$ref": "common.schema.json#/$defs/timestamp"
+          },
+          "conditions_hot": {
+            "type": "boolean"
+          },
+          "effort_all_out": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "confirmed_by_runner": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Answer to INP-025's confirm prompt."
+          }
+        }
+      },
+      "description": "PerformanceAnchors. confidence is derived by INP-005 (never supplied)."
+    },
+    "hr_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "value_bpm",
+          "date",
+          "method"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "hrmax_measured",
+              "lthr_measured"
+            ]
+          },
+          "value_bpm": {
+            "type": "integer"
+          },
+          "date": {
+            "$ref": "common.schema.json#/$defs/date"
+          },
+          "method": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "log": {
+      "type": "array",
+      "description": "ActivityRecords (12 §2) in any order; the engine sorts by (date, entered_at, id). confidence and plausibility are derived (INP-020, GEN-020) unless the runner confirmed a flagged entry (plausibility_answer).",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "date",
+          "entered_at",
+          "type",
+          "source",
+          "duration_s"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "$ref": "common.schema.json#/$defs/date"
+          },
+          "entered_at": {
+            "$ref": "common.schema.json#/$defs/timestamp"
+          },
+          "type": {
+            "enum": [
+              "run",
+              "run_walk",
+              "race",
+              "test",
+              "cross_training",
+              "strength"
+            ]
+          },
+          "source": {
+            "enum": [
+              "tick",
+              "manual_add",
+              "onboarding_claim",
+              "backfill"
+            ]
+          },
+          "planned_session_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "module_id": {
+            "oneOf": [
+              {
+                "$ref": "common.schema.json#/$defs/module_id"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration_s": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "distance_m": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "rpe_0_10": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 10
+          },
+          "pain_any": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "pain_0_10": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 10
+          },
+          "pain_next_morning": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "pain_settled_24h": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "gi_score_0_10": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 10
+          },
+          "carb_g_per_h": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "fuel_products": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fatigue_flag": {
+            "type": "boolean"
+          },
+          "stopped_early_reason": {
+            "enum": [
+              "pain",
+              "illness",
+              "fatigue",
+              "time",
+              "other",
+              null
+            ]
+          },
+          "short_sleep_or_night_shift": {
+            "type": "boolean"
+          },
+          "conditions_hot": {
+            "type": "boolean"
+          },
+          "effort_all_out": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "is_goal_race": {
+            "type": "boolean"
+          },
+          "test_completed": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Level-test question 1 (v5.2, SES-024): 'Did you finish every part as planned?'"
+          },
+          "test_held_effort": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Level-test question 2 (v5.2, SES-024): 'Could you hold the effort to the end without slowing down or walking?'"
+          },
+          "plausibility_answer": {
+            "enum": [
+              "confirmed",
+              "corrected",
+              null
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sweat_tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "date",
+          "duration_s",
+          "rate_ml_h"
+        ],
+        "properties": {
+          "date": {
+            "$ref": "common.schema.json#/$defs/date"
+          },
+          "duration_s": {
+            "type": "integer"
+          },
+          "rate_ml_h": {
+            "type": "integer"
+          },
+          "conditions": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reds_screens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "date",
+          "answers",
+          "trigger"
+        ],
+        "properties": {
+          "date": {
+            "$ref": "common.schema.json#/$defs/date"
+          },
+          "answers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          "trigger": {
+            "enum": [
+              "onboarding",
+              "interval",
+              "off_cycle"
+            ]
+          }
+        }
+      }
+    },
+    "goal": {
+      "$ref": "common.schema.json#/$defs/goal"
+    },
+    "goal_edits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "submitted_at",
+          "changed_fields",
+          "verdict"
+        ],
+        "properties": {
+          "submitted_at": {
+            "$ref": "common.schema.json#/$defs/timestamp"
+          },
+          "changed_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verdict": {
+            "$ref": "common.schema.json#/$defs/verdict"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "common.schema.json#/$defs/reason_code"
+            }
+          },
+          "feasibility_rerun": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "subkind",
+          "rule_id",
+          "raised_on",
+          "status"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "red_flag",
+              "screening",
+              "reds_screen",
+              "pain",
+              "illness"
+            ]
+          },
+          "subkind": {
+            "enum": [
+              "cardiac",
+              "bone_stress",
+              "bone_stress_highrisk",
+              "heat",
+              "eah",
+              "pregnancy_stop",
+              "reds_escalated",
+              "pain_persistent",
+              "illness",
+              "reds_screen"
+            ]
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rule_id": {
+            "$ref": "common.schema.json#/$defs/rule_id"
+          },
+          "raised_on": {
+            "$ref": "common.schema.json#/$defs/date"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "cleared"
+            ]
+          },
+          "cleared_on": {
+            "oneOf": [
+              {
+                "$ref": "common.schema.json#/$defs/date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clearance_attested_on": {
+            "oneOf": [
+              {
+                "$ref": "common.schema.json#/$defs/date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "description": "AdaptationEvents and UI events not yet processed by a previous call, ordered by ADP-012 inside the engine. kind follows 12 §2 (v5.2 adds goal_edit).",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "date",
+          "payload"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "missed_session",
+              "partial_session",
+              "unlogged_week",
+              "illness",
+              "pain",
+              "fatigue",
+              "result",
+              "life_change",
+              "availability_change",
+              "goal_change",
+              "goal_edit",
+              "red_flag",
+              "gap",
+              "something_felt_wrong",
+              "night_shift_tap",
+              "week_marked_busy",
+              "clearance_attested",
+              "drinking_plan_requested",
+              "option_chosen",
+              "test_declined"
+            ]
+          },
+          "date": {
+            "$ref": "common.schema.json#/$defs/date"
+          },
+          "payload": {
+            "type": "object",
+            "description": "Answers keyed by the 10 §1 item ids (C1…I3) and the 12 §2b.2 event fields (fever, above_neck_only, option_chosen, …); unanswered items are listed in declared_unknown as event[i].<item>."
+          }
+        }
+      }
+    },
+    "engine_state": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/engine_state"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "parent_plan": {
+      "oneOf": [
+        {
+          "$ref": "result.schema.json#/$defs/plan"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The previous published plan version (INV-04 reference, published window ADP-014); null at first generation."
+    }
+  }
+}

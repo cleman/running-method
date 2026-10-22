@@ -2,6 +2,8 @@
 
 Written 22 Oct 2026, on spec v5 (before the v5.1 fixes). This is read-only analysis: nothing here changes the spec by itself. Three detailed reports, each written separately:
 
+> **Status (22 Oct 2026, spec v5.2):** the gaps below were addressed in v5.2; see `spec/CHANGELOG-v5.2.md` for what was decided and `docs/questions.md` for what is still open.
+
 - [`gap/engine.md`](gap/engine.md): can the **rule engine** be built from module 12 and `rules.json`?
 - [`gap/prose-rules.md`](gap/prose-rules.md): the **27 MVP rules** still in prose (blocker B-4).
 - [`gap/oracle.md`](gap/oracle.md): can an **independent oracle** be written from the spec alone (blocker B-5)?

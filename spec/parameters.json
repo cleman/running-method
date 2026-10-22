@@ -1,0 +1,6208 @@
+{
+ "version": "v5.2",
+ "source": "parameters.md (tables + ```param block); built by tools/build_parameters.py",
+ "count": 344,
+ "parameters": [
+  {
+   "id": "anchor.jump_confirm_mult",
+   "type": "int",
+   "unit": "× pace.deadband_pct",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CREDIBLE for the scale (retest CV 2.4–3.4%, Machado 2015, single study, factdesk4 §6; v5.1); multiplier UNKNOWN",
+   "basis": "dd",
+   "range": "1.5–3",
+   "presets": "—",
+   "source": "p2-C R6 (INP-025)",
+   "default_text": "2"
+  },
+  {
+   "id": "anchor.max_age_days",
+   "type": "int",
+   "unit": "days",
+   "default": 120,
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "60–180",
+   "presets": "—",
+   "source": "07 §3",
+   "default_text": "120"
+  },
+  {
+   "id": "ask.no_answer_days",
+   "type": "int",
+   "unit": "days before an ask_confirm counts as unanswered",
+   "default": 7,
+   "limit_direction": "none",
+   "owner": "12",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "3–14",
+   "presets": "—",
+   "source": "gap/engine.md §1 #9",
+   "default_text": "7"
+  },
+  {
+   "id": "b2b.day2_ratio",
+   "type": "number",
+   "unit": "× day 1",
+   "default": 0.6,
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "CORROBORATED as practice (100K plans: day 2 ≈ 55–60%)",
+   "basis": "conv",
+   "range": "0.50–0.60",
+   "presets": "—",
+   "source": "hearing-2 coach-field; wg2 impl. 5",
+   "default_text": "0.60"
+  },
+  {
+   "id": "b2b.day2_start_ratio",
+   "type": "number",
+   "unit": "× day 1 (first pair)",
+   "default": 0.4,
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "0.30–0.50",
+   "presets": "—",
+   "source": "wg2 §4",
+   "default_text": "0.40"
+  },
+  {
+   "id": "b2b.enabled_default",
+   "type": "bool",
+   "unit": "bool",
+   "default": false,
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "ALLEGED (no trial)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "ultra: opt-in only",
+   "source": "wg1 §6; wg2 §4",
+   "default_text": "false"
+  },
+  {
+   "id": "b2b.min_dur_level",
+   "type": "int",
+   "unit": "levels",
+   "default": 4,
+   "limit_direction": "lower",
+   "owner": "09",
+   "grade": "N/A (engineering: DUR L5 prerequisites of 02)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "09 DST-010",
+   "default_text": "4 / 5"
+  },
+  {
+   "id": "b2b.min_interval_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "lower",
+   "owner": "09",
+   "grade": "CREDIBLE (practice)",
+   "basis": "conv",
+   "range": "2–3",
+   "presets": "—",
+   "source": "wg2 §4",
+   "default_text": "2"
+  },
+  {
+   "id": "b2b.min_tol_level",
+   "type": "int",
+   "unit": "levels",
+   "default": 5,
+   "limit_direction": "lower",
+   "owner": "09",
+   "grade": "N/A (engineering: DUR L5 prerequisites of 02)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "09 DST-010",
+   "default_text": "4 / 5"
+  },
+  {
+   "id": "b2b.pair_cap_ratio",
+   "type": "number",
+   "unit": "× L30_eff",
+   "default": 1.75,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "ALLEGED (must exceed the general two-day cap)",
+   "basis": "dd",
+   "range": "1.50–1.80",
+   "presets": "—",
+   "source": "opening-contrarian §2",
+   "default_text": "1.75"
+  },
+  {
+   "id": "b2b.pair_week_share_max",
+   "type": "number",
+   "unit": "× V(w)",
+   "default": 0.65,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CORROBORATED as derived practice (100K plans: weekend pair ≈ 55–65% of the week)",
+   "basis": "conv",
+   "range": "0.55–0.70",
+   "presets": "—",
+   "source": "hearing-2 coach-field",
+   "default_text": "0.65"
+  },
+  {
+   "id": "caffeine.default",
+   "type": "int",
+   "unit": "mg/kg",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "2–3 / 3–6",
+   "presets": "—",
+   "source": "wg5 §3",
+   "default_text": "3 / 6"
+  },
+  {
+   "id": "caffeine.max",
+   "type": "int",
+   "unit": "mg/kg",
+   "default": 6,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "2–3 / 3–6",
+   "presets": "—",
+   "source": "wg5 §3",
+   "default_text": "3 / 6"
+  },
+  {
+   "id": "cho.daily_bands",
+   "type": "list",
+   "unit": "g/kg/day",
+   "default": [
+    {
+     "day_min": 0,
+     "g_kg": [
+      3,
+      5
+     ]
+    },
+    {
+     "day_min": 60,
+     "g_kg": [
+      5,
+      7
+     ]
+    },
+    {
+     "day_min": 90,
+     "g_kg": [
+      6,
+      10
+     ]
+    },
+    {
+     "day_min": 240,
+     "g_kg": [
+      8,
+      12
+     ]
+    }
+   ],
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CORROBORATED range; CREDIBLE edges",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg5 §1",
+   "default_text": "light 3–5; ~1 h 5–7; 1–3 h 6–10; ≥ 4 h 8–12"
+  },
+  {
+   "id": "cho.loading_band",
+   "type": "list",
+   "unit": "g/kg/day",
+   "default": [
+    10,
+    12
+   ],
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CORROBORATED (glycogen) / UNKNOWN (benefit)",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg5 §1",
+   "default_text": "10–12 for 36–48 h"
+  },
+  {
+   "id": "claim.agegrade_confirm_pct",
+   "type": "int",
+   "unit": "WMA %",
+   "default": 80,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CORROBORATED (bands)",
+   "basis": "conv",
+   "range": "70–90",
+   "presets": "—",
+   "source": "wg3 §1",
+   "default_text": "80"
+  },
+  {
+   "id": "claim.l30_cap_by_tol",
+   "type": "map",
+   "unit": "min",
+   "default": {
+    "0": 30,
+    "1": 60,
+    "2": 90,
+    "3": 120,
+    "4": null,
+    "5": null
+   },
+   "keys": "tol_tier",
+   "limit_direction": "upper",
+   "owner": "07",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "± 30",
+   "presets": "—",
+   "source": "p2-C R7 (case 7)",
+   "default_text": "TOL 0: 30; TOL 1: 60; TOL 2: 90; TOL 3: 120; TOL ≥ 4: no cap"
+  },
+  {
+   "id": "claim.l30_check_min_runs",
+   "type": "int",
+   "unit": "runs/week",
+   "default": 2,
+   "limit_direction": "lower",
+   "owner": "07",
+   "grade": "N/A (engineering: a single weekly run makes L30 = weekly distance legitimate)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "07 GEN-022",
+   "default_text": "2"
+  },
+  {
+   "id": "claim.l30_discount",
+   "type": "number",
+   "unit": "× claimed",
+   "default": 0.9,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CREDIBLE (weekly distance self-report reliable; L30 claim unstudied)",
+   "basis": "dd",
+   "range": "0.75–1.00",
+   "presets": "—",
+   "source": "factdesk2 §6",
+   "default_text": "0.90"
+  },
+  {
+   "id": "claim.l30_week_ratio_max",
+   "type": "number",
+   "unit": "× claimed weekly distance",
+   "default": 0.6,
+   "limit_direction": "upper",
+   "owner": "01",
+   "note": "1.00 when claimed runs/week ≤ 1",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.5–1.0",
+   "presets": "—",
+   "source": "07 GEN-011",
+   "default_text": "0.60 (1.00 if claimed runs/week ≤ 1)"
+  },
+  {
+   "id": "cmp.decay_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 6,
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "CORROBORATED direction, size UNKNOWN",
+   "basis": "dd",
+   "range": "4–8",
+   "presets": "—",
+   "source": "wg3 §3",
+   "default_text": "6"
+  },
+  {
+   "id": "cmp.heat_required_level",
+   "type": "int",
+   "unit": "HEAT level",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "N/A (engineering: 03 FEA-004 names L2)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "03 FEA-004",
+   "default_text": "2"
+  },
+  {
+   "id": "cmp.max_level.<node>",
+   "type": "map",
+   "unit": "level",
+   "default": {
+    "HAB": 4,
+    "TOL": 5,
+    "AER": 5,
+    "THR": 4,
+    "VO2": 3,
+    "ECO": 3,
+    "DUR": 5,
+    "MSP": 3,
+    "FUEL": 4,
+    "HEAT": 2,
+    "PACE": 3
+   },
+   "keys": "node",
+   "limit_direction": "upper",
+   "owner": "02",
+   "grade": "N/A (engineering: the 02 §2 table)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "02 §2",
+   "default_text": "HAB 4; TOL 5; AER 5; THR 4; VO2 3; ECO 3; DUR 5; MSP 3; FUEL 4; HEAT 2; PACE 3"
+  },
+  {
+   "id": "cmp.min_weeks_per_level.<node>",
+   "type": "int",
+   "unit": "weeks",
+   "default": 4,
+   "limit_direction": "lower",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "3–8",
+   "presets": "—",
+   "source": "02 §5",
+   "default_text": "4 (TOL/AER derived from the progression profile)"
+  },
+  {
+   "id": "cmp.node_tie_order",
+   "type": "list",
+   "unit": "order",
+   "default": [
+    "DUR",
+    "THR",
+    "AER",
+    "MSP",
+    "VO2",
+    "ECO",
+    "FUEL"
+   ],
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "N/A (engineering: CMP-007 tie order)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "02 CMP-007",
+   "default_text": "DUR, THR, AER, MSP, VO2, ECO, FUEL"
+  },
+  {
+   "id": "cmp.pace_split_tol",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.03,
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.02–0.05",
+   "presets": "—",
+   "source": "02 PACE",
+   "default_text": "0.03"
+  },
+  {
+   "id": "cmp.required.<distance>.<node>",
+   "type": "map",
+   "unit": "level",
+   "default": {
+    "5K": {
+     "finish": {
+      "HAB": 2,
+      "AER": 1,
+      "TOL": 1
+     },
+     "time": {
+      "THR": 1,
+      "VO2": 2,
+      "MSP": 1
+     }
+    },
+    "10K": {
+     "finish": {
+      "HAB": 2,
+      "AER": 1,
+      "TOL": 1,
+      "DUR": 1
+     },
+     "time": {
+      "THR": 2,
+      "VO2": 2,
+      "MSP": 1
+     }
+    },
+    "HM": {
+     "finish": {
+      "HAB": 2,
+      "AER": 2,
+      "TOL": 2,
+      "DUR": 2
+     },
+     "time": {
+      "THR": 2,
+      "MSP": 2,
+      "AER": 3
+     }
+    },
+    "M": {
+     "finish": {
+      "HAB": 2,
+      "AER": 3,
+      "TOL": 3,
+      "DUR": 3,
+      "FUEL": 2
+     },
+     "time": {
+      "HAB": 3,
+      "THR": 2,
+      "MSP": 2,
+      "FUEL": 3
+     }
+    },
+    "50K": {
+     "finish": {
+      "HAB": 3,
+      "AER": 3,
+      "TOL": 4,
+      "DUR": 4,
+      "FUEL": 3
+     },
+     "time": {
+      "MSP": 2
+     }
+    },
+    "100K": {
+     "finish": {
+      "HAB": 4,
+      "AER": 4,
+      "TOL": 4,
+      "DUR": 4,
+      "FUEL": 3
+     },
+     "time": {
+      "MSP": 2
+     }
+    }
+   },
+   "keys": "distance, goal_type, node",
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "CORROBORATED tiers / ALLEGED thresholds; Toresdahl ≥ 4 runs/week associated with training injury (possibly confounded)",
+   "basis": "dd",
+   "range": "±1",
+   "presets": "—",
+   "source": "wg2 §4; wg3 §4; factdesk4 §2; Rooms A–C, d2-B R5, d2-C R4",
+   "default_text": "02 §5 table (v3: 10K AER 1 / TOL 1; HM HAB 2; **M finish HAB 2** (HAB 3 for time goals); 50K HAB 3, **AER 3**; 100K AER 4 / TOL 4)"
+  },
+  {
+   "id": "cmp.self_report_level_cap",
+   "type": "map",
+   "unit": "level",
+   "default": {
+    "HAB": 2,
+    "AER": 2,
+    "TOL": 2,
+    "DUR": 2,
+    "THR": 1,
+    "VO2": 1,
+    "MSP": 1,
+    "FUEL": 1
+   },
+   "limit_direction": "upper",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–3",
+   "presets": "—",
+   "source": "02 CMP-004",
+   "default_text": "HAB/AER/TOL/DUR 2; THR/VO2/MSP/FUEL 1"
+  },
+  {
+   "id": "cmp.weight.<distance>.<node>",
+   "type": "map",
+   "unit": "weight",
+   "default": {
+    "5K": {
+     "AER": 0.25,
+     "THR": 0.2,
+     "VO2": 0.3,
+     "ECO": 0.15,
+     "DUR": 0.0,
+     "MSP": 0.1,
+     "FUEL": 0.0
+    },
+    "10K": {
+     "AER": 0.25,
+     "THR": 0.3,
+     "VO2": 0.2,
+     "ECO": 0.1,
+     "DUR": 0.05,
+     "MSP": 0.1,
+     "FUEL": 0.0
+    },
+    "HM": {
+     "AER": 0.3,
+     "THR": 0.3,
+     "VO2": 0.1,
+     "ECO": 0.05,
+     "DUR": 0.1,
+     "MSP": 0.15,
+     "FUEL": 0.0
+    },
+    "M": {
+     "AER": 0.3,
+     "THR": 0.15,
+     "VO2": 0.05,
+     "ECO": 0.05,
+     "DUR": 0.25,
+     "MSP": 0.15,
+     "FUEL": 0.05
+    },
+    "50K": {
+     "AER": 0.35,
+     "THR": 0.1,
+     "VO2": 0.05,
+     "ECO": 0.0,
+     "DUR": 0.3,
+     "MSP": 0.1,
+     "FUEL": 0.1
+    },
+    "100K": {
+     "AER": 0.35,
+     "THR": 0.05,
+     "VO2": 0.0,
+     "ECO": 0.05,
+     "DUR": 0.35,
+     "MSP": 0.05,
+     "FUEL": 0.15
+    }
+   },
+   "keys": "distance, node",
+   "limit_direction": "none",
+   "owner": "02 (09 may refine)",
+   "grade": "CREDIBLE (synthesis)",
+   "basis": "dd",
+   "range": "each column sums to 1",
+   "presets": "—",
+   "source": "wg1 §1",
+   "default_text": "02 §5 table"
+  },
+  {
+   "id": "ctx.lowfreq_quality_max",
+   "type": "int",
+   "unit": "sessions/week",
+   "default": 1,
+   "limit_direction": "upper",
+   "owner": "01",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "0–1",
+   "presets": "first: 3 (labelled alternative)",
+   "source": "wg1 impl. 2",
+   "default_text": "1"
+  },
+  {
+   "id": "ctx.lowfreq_runs",
+   "type": "int",
+   "unit": "runs/week",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CORROBORATED (cycling, untrained)",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "wg3 §2",
+   "default_text": "3"
+  },
+  {
+   "id": "ctx.masters_age",
+   "type": "int",
+   "unit": "years",
+   "default": 50,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CREDIBLE (decline from ~50)",
+   "basis": "conv",
+   "range": "45–55",
+   "presets": "—",
+   "source": "wg3 §2",
+   "default_text": "50"
+  },
+  {
+   "id": "ctx.novice_training_age_years",
+   "type": "int",
+   "unit": "years",
+   "default": 1,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CREDIBLE (readiness criteria 3 months–1 year)",
+   "basis": "dd",
+   "range": "0.25–1",
+   "presets": "—",
+   "source": "wg3 §4",
+   "default_text": "1"
+  },
+  {
+   "id": "deload.every",
+   "type": "int",
+   "unit": "weeks",
+   "default": 4,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "ALLEGED/UNKNOWN",
+   "basis": "conv",
+   "range": "3–6",
+   "presets": "—",
+   "source": "wg1 §5 impl. 11",
+   "default_text": "4 (3 via deload.every_ctx)"
+  },
+  {
+   "id": "deload.every_ctx",
+   "type": "int",
+   "unit": "weeks",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "ALLEGED",
+   "basis": "conv",
+   "range": "2–4",
+   "presets": "—",
+   "source": "wg1 impl. 11",
+   "default_text": "3"
+  },
+  {
+   "id": "deload.exclusion_before_taper",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–2",
+   "presets": "—",
+   "source": "04 PHS-002",
+   "default_text": "2"
+  },
+  {
+   "id": "deload.min_gap_weeks",
+   "type": "int",
+   "unit": "loading weeks between deloads",
+   "default": 2,
+   "limit_direction": "lower",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "F-07",
+   "default_text": "2"
+  },
+  {
+   "id": "deload.min_plan_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 6,
+   "limit_direction": "lower",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "5–8",
+   "presets": "—",
+   "source": "04 PHS-003",
+   "default_text": "6"
+  },
+  {
+   "id": "deload.quality_max",
+   "type": "int",
+   "unit": "sessions",
+   "default": 1,
+   "limit_direction": "upper",
+   "owner": "05 (used by 06)",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "0–2",
+   "presets": "—",
+   "source": "wg1 impl. 11",
+   "default_text": "1"
+  },
+  {
+   "id": "deload.volume_cut",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.25,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "ALLEGED",
+   "basis": "conv",
+   "range": "0.20–0.30",
+   "presets": "—",
+   "source": "wg1 impl. 11",
+   "default_text": "0.25"
+  },
+  {
+   "id": "display.distance_round_km",
+   "type": "map",
+   "unit": "km",
+   "default": {
+    "default": 0.5,
+    "ge20km": 1
+   },
+   "limit_direction": "none",
+   "owner": "12",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "0.1–1",
+   "presets": "—",
+   "source": "p1-C R7",
+   "default_text": "0.5 (long runs ≥ 20 km: 1)"
+  },
+  {
+   "id": "display.duration_round_min",
+   "type": "map",
+   "unit": "min",
+   "default": {
+    "le60": 5,
+    "gt60": 10
+   },
+   "limit_direction": "upper",
+   "owner": "12",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "1–10",
+   "presets": "—",
+   "source": "p1-C R7 (avoid false precision, e.g. \"198 min\")",
+   "default_text": "5 (≤ 60 min: 5; > 60 min: 10)"
+  },
+  {
+   "id": "display.max_reasons_card",
+   "type": "int",
+   "unit": "reasons",
+   "default": 2,
+   "limit_direction": "upper",
+   "owner": "12",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "1–3",
+   "presets": "—",
+   "source": "p1-C R1",
+   "default_text": "2"
+  },
+  {
+   "id": "display.pace_round_s",
+   "type": "int",
+   "unit": "s/km",
+   "default": 5,
+   "limit_direction": "none",
+   "owner": "12",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "1–10",
+   "presets": "—",
+   "source": "03 §3b",
+   "default_text": "5"
+  },
+  {
+   "id": "display.time_round_s",
+   "type": "map",
+   "unit": "s",
+   "default": {
+    "default": 60,
+    "races_le30min": 15
+   },
+   "limit_direction": "none",
+   "owner": "12",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "5–60",
+   "presets": "—",
+   "source": "p1-C R3",
+   "default_text": "60 (≤ 30 min races: 15)"
+  },
+  {
+   "id": "dst.msp_every_weeks",
+   "type": "int",
+   "unit": "weeks (time goals, SPECIFIC)",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "CORROBORATED (rising specificity) / interval dd",
+   "basis": "dd",
+   "range": "1–3",
+   "presets": "—",
+   "source": "Room A R3",
+   "default_text": "2"
+  },
+  {
+   "id": "dst.msp_segment_max_min",
+   "type": "map",
+   "unit": "min",
+   "default": {
+    "M": 90,
+    "HM": 40
+   },
+   "keys": "distance",
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "ALLEGED (Hansons 10 mi MP)",
+   "basis": "dd",
+   "range": "M 60–100; HM 30–50",
+   "presets": "—",
+   "source": "Room B R5",
+   "default_text": "M 90; HM 40"
+  },
+  {
+   "id": "dst.msp_segment_max_ratio",
+   "type": "number",
+   "unit": "× the long run's duration (race-effort segment)",
+   "default": 0.6,
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "ALLEGED (replaces the literal 0.60 of DST-006/007)",
+   "basis": "dd",
+   "range": "0.5–0.7",
+   "presets": "—",
+   "source": "09 §4",
+   "default_text": "0.60"
+  },
+  {
+   "id": "dst.msp_share.<d>.L1",
+   "type": "map",
+   "unit": "share of race duration",
+   "default": {
+    "5K": {
+     "1": 0.1,
+     "2": 0.3,
+     "3": 0.75
+    },
+    "10K": {
+     "1": 0.1,
+     "2": 0.3,
+     "3": 0.65
+    },
+    "HM": {
+     "1": 0.1,
+     "2": 0.3,
+     "3": 0.55
+    },
+    "M": {
+     "1": 0.1,
+     "2": 0.3,
+     "3": 0.5
+    },
+    "50K": {
+     "1": 0.1,
+     "2": 0.3,
+     "3": 0.3
+    },
+    "100K": {
+     "1": 0.1,
+     "2": 0.3,
+     "3": 0.3
+    }
+   },
+   "keys": "distance, level",
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "L3 ±0.15",
+   "presets": "—",
+   "source": "02 §2; wg2 §1",
+   "default_text": "0.10 / 0.30 / 5K 0.75, 10K 0.65, HM 0.55, M 0.50"
+  },
+  {
+   "id": "dst.phase_nodes",
+   "type": "map",
+   "unit": "node sets",
+   "default": {
+    "short": {
+     "BASE": [
+      {
+       "node": "AER",
+       "max_level": 5
+      },
+      {
+       "node": "DUR",
+       "max_level": 5
+      },
+      {
+       "node": "ECO",
+       "max_level": 1
+      },
+      {
+       "node": "VO2",
+       "max_level": 1
+      },
+      {
+       "node": "THR",
+       "max_level": 1
+      }
+     ],
+     "BUILD": [
+      {
+       "node": "THR",
+       "max_level": 4
+      },
+      {
+       "node": "VO2",
+       "max_level": 3
+      }
+     ],
+     "SPECIFIC": [
+      {
+       "node": "MSP",
+       "max_level": 3
+      },
+      {
+       "node": "VO2",
+       "max_level": 3
+      },
+      {
+       "node": "THR",
+       "max_level": 4
+      }
+     ],
+     "TAPER": [
+      {
+       "node": "MSP",
+       "max_level": 3
+      }
+     ]
+    },
+    "road_classic": {
+     "BASE": [
+      {
+       "node": "AER",
+       "max_level": 5
+      },
+      {
+       "node": "DUR",
+       "max_level": 5
+      },
+      {
+       "node": "ECO",
+       "max_level": 1
+      },
+      {
+       "node": "THR",
+       "max_level": 1
+      }
+     ],
+     "BUILD": [
+      {
+       "node": "THR",
+       "max_level": 4
+      },
+      {
+       "node": "DUR",
+       "max_level": 5
+      },
+      {
+       "node": "VO2",
+       "max_level": 3
+      }
+     ],
+     "SPECIFIC": [
+      {
+       "node": "MSP",
+       "max_level": 3
+      },
+      {
+       "node": "DUR",
+       "max_level": 5
+      },
+      {
+       "node": "THR",
+       "max_level": 4
+      },
+      {
+       "node": "FUEL",
+       "max_level": 4
+      }
+     ],
+     "TAPER": [
+      {
+       "node": "MSP",
+       "max_level": 3
+      }
+     ]
+    },
+    "ultra": {
+     "BASE": [
+      {
+       "node": "AER",
+       "max_level": 5
+      },
+      {
+       "node": "DUR",
+       "max_level": 5
+      },
+      {
+       "node": "ECO",
+       "max_level": 3
+      }
+     ],
+     "BUILD": [
+      {
+       "node": "VO2",
+       "max_level": 3
+      },
+      {
+       "node": "THR",
+       "max_level": 4
+      },
+      {
+       "node": "AER",
+       "max_level": 5
+      }
+     ],
+     "SPECIFIC": [
+      {
+       "node": "DUR",
+       "max_level": 5
+      },
+      {
+       "node": "MSP",
+       "max_level": 3
+      },
+      {
+       "node": "FUEL",
+       "max_level": 4
+      },
+      {
+       "node": "HEAT",
+       "max_level": 2
+      }
+     ],
+     "TAPER": [
+      {
+       "node": "MSP",
+       "max_level": 3
+      }
+     ]
+    }
+   },
+   "keys": "family, phase",
+   "limit_direction": "none",
+   "owner": "09",
+   "note": "[node, max level]; road_classic BUILD VO2 for HM only; phases without a row (ONBOARD, RTR, TRANSITION, RACE) have no key slots; SHARPEN uses the SPECIFIC row, MAINTAIN the BUILD row (v5.2)",
+   "grade": "CORROBORATED structure / CREDIBLE ultra",
+   "basis": "dd",
+   "range": "—",
+   "presets": "koop_ultra = ultra row",
+   "source": "hearing-1 §2; wg2 §4",
+   "default_text": "09 §3 table"
+  },
+  {
+   "id": "dst.race_long_every_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "1–3",
+   "presets": "pfitzinger_classic 2",
+   "source": "hearing-1 §1",
+   "default_text": "2"
+  },
+  {
+   "id": "dst.tuneup_dist_km",
+   "type": "map",
+   "unit": "km",
+   "default": {
+    "50K": 42.2,
+    "100K": 50
+   },
+   "keys": "distance",
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "CREDIBLE (Comrades) / dd for 50K",
+   "basis": "conv",
+   "range": "100K 50–56",
+   "presets": "—",
+   "source": "wg2 §4",
+   "default_text": "50K: 42.2; 100K: 50"
+  },
+  {
+   "id": "dst.tuneup_recovery_days",
+   "type": "int",
+   "unit": "days",
+   "default": 7,
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "5–10",
+   "presets": "—",
+   "source": "hearing-1 §2",
+   "default_text": "7"
+  },
+  {
+   "id": "dst.tuneup_weeks_out",
+   "type": "int",
+   "unit": "weeks before race",
+   "default": 5,
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "4–6",
+   "presets": "—",
+   "source": "wg2 §4",
+   "default_text": "5"
+  },
+  {
+   "id": "dst.ultra_alt_long_ratio",
+   "type": "number",
+   "unit": "× last peak",
+   "default": 0.7,
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "0.6–0.8",
+   "presets": "—",
+   "source": "wg2 §4",
+   "default_text": "0.70"
+  },
+  {
+   "id": "dst.ultra_build_split",
+   "type": "list",
+   "unit": "share of BUILD (VO2 / THR / steady)",
+   "default": [
+    0.33,
+    0.33,
+    0.34
+   ],
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "CREDIBLE order, UNKNOWN dose",
+   "basis": "dd",
+   "range": "±0.15",
+   "presets": "koop_ultra",
+   "source": "wg2 §4",
+   "default_text": "0.33 / 0.33 / 0.34"
+  },
+  {
+   "id": "eah.warning_above_h",
+   "type": "int",
+   "unit": "h",
+   "default": 4,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "3–4",
+   "presets": "—",
+   "source": "wg5 §4",
+   "default_text": "4"
+  },
+  {
+   "id": "engine.max_iterations",
+   "type": "int",
+   "unit": "passes per stage",
+   "default": 5,
+   "limit_direction": "upper",
+   "owner": "12",
+   "grade": "N/A (engineering: fixpoint bound, 12 §3.7)",
+   "basis": "eng",
+   "range": "3–10",
+   "presets": "—",
+   "source": "gap/engine.md Q3",
+   "default_text": "5"
+  },
+  {
+   "id": "fatigue.clear_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 1,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–2",
+   "presets": "—",
+   "source": "wg4 impl. 12",
+   "default_text": "1"
+  },
+  {
+   "id": "fatigue.persist_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "wg4 impl. 12",
+   "default_text": "2"
+  },
+  {
+   "id": "fatigue.refer_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "3–4",
+   "presets": "—",
+   "source": "wg4 impl. 12",
+   "default_text": "3"
+  },
+  {
+   "id": "fatigue.rpe_excess",
+   "type": "int",
+   "unit": "RPE points",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–3",
+   "presets": "—",
+   "source": "08",
+   "default_text": "2"
+  },
+  {
+   "id": "fatigue.signals_required",
+   "type": "int",
+   "unit": "signals",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "CORROBORATED principle; count UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "hearing-1 §5",
+   "default_text": "2"
+  },
+  {
+   "id": "fatigue.window_days",
+   "type": "int",
+   "unit": "days",
+   "default": 7,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "5–10",
+   "presets": "—",
+   "source": "08",
+   "default_text": "7"
+  },
+  {
+   "id": "feas.default_planning_pace_s_per_km",
+   "type": "int",
+   "unit": "s/km",
+   "default": 480,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "420–600",
+   "presets": "—",
+   "source": "03",
+   "default_text": "480"
+  },
+  {
+   "id": "feas.finish_floor.peak_week",
+   "type": "map",
+   "unit": "time/dist",
+   "default": {
+    "5K": {
+     "runs": 3
+    },
+    "10K": {
+     "time_min": 90
+    },
+    "HM": {
+     "time_min": 150
+    },
+    "M": {
+     "time_min": 240,
+     "dist_km": 32
+    },
+    "50K": {
+     "dist_km": 50
+    },
+    "100K": {
+     "dist_km": 60
+    }
+   },
+   "keys": "distance",
+   "limit_direction": "lower",
+   "owner": "03",
+   "grade": "ALLEGED (readiness thresholds); Comrades finish tier CORROBORATED",
+   "basis": "dd",
+   "range": "±25%",
+   "presets": "—",
+   "source": "wg3 §4; factdesk1 §7; wg2 §4",
+   "default_text": "5K 3 runs; 10K 90 min; HM 150 min; M 240 min and 32 km; 50K 50 km; 100K 60 km"
+  },
+  {
+   "id": "feas.peak_credit_days",
+   "type": "int",
+   "unit": "days before the race within which a logged peak long run counts",
+   "default": 70,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN (durability retention)",
+   "basis": "dd",
+   "range": "42–84",
+   "presets": "—",
+   "source": "F-21",
+   "default_text": "70"
+  },
+  {
+   "id": "feas.planning_speed_margin",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.1,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "CREDIBLE (pace self-report moderate)",
+   "basis": "dd",
+   "range": "0.05–0.20",
+   "presets": "—",
+   "source": "factdesk2 §6",
+   "default_text": "0.10"
+  },
+  {
+   "id": "feas.stretch_margin_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–4",
+   "presets": "—",
+   "source": "opening-contrarian §1.1",
+   "default_text": "2"
+  },
+  {
+   "id": "flag.clearance_min_delay_days",
+   "type": "int",
+   "unit": "days",
+   "default": 1,
+   "limit_direction": "lower",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–3",
+   "presets": "—",
+   "source": "opening-contrarian §1.3",
+   "default_text": "1"
+  },
+  {
+   "id": "flag.high_risk_regions",
+   "type": "set",
+   "unit": "set",
+   "default": [
+    "hip_groin",
+    "front_of_shin",
+    "midfoot",
+    "outer_foot"
+   ],
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CORROBORATED (sites) / mapping dd",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "factdesk1 §1",
+   "default_text": "first four body-region options of B5"
+  },
+  {
+   "id": "flag.pause_kinds",
+   "type": "set",
+   "unit": "set",
+   "default": [
+    "cardiac",
+    "bone_stress",
+    "bone_stress_highrisk",
+    "heat",
+    "eah",
+    "pregnancy_stop",
+    "reds_escalated",
+    "pain_persistent",
+    "illness"
+   ],
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CORROBORATED (stop rules)",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg4 §4",
+   "default_text": "cardiac, bone_stress, bone_stress_highrisk, heat, eah, pregnancy_stop, reds_escalated, pain_persistent, illness"
+  },
+  {
+   "id": "flag.professional_kinds",
+   "type": "set",
+   "unit": "set",
+   "default": [
+    "cardiac",
+    "bone_stress",
+    "bone_stress_highrisk",
+    "heat",
+    "eah",
+    "pregnancy_stop",
+    "reds_escalated",
+    "pain_persistent"
+   ],
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CORROBORATED (stop and refer)",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg4 impl. 7",
+   "default_text": "flag.pause_kinds minus illness"
+  },
+  {
+   "id": "flag.recur_window_days",
+   "type": "int",
+   "unit": "days",
+   "default": 60,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "30–90",
+   "presets": "—",
+   "source": "10 SAF-010",
+   "default_text": "60"
+  },
+  {
+   "id": "fuel.band.by_duration",
+   "type": "list",
+   "unit": "g/h",
+   "default": [
+    {
+     "max_min": 45,
+     "g_h": [
+      0,
+      0
+     ]
+    },
+    {
+     "max_min": 75,
+     "g_h": [
+      0,
+      30
+     ],
+     "optional": true
+    },
+    {
+     "max_min": 150,
+     "g_h": [
+      30,
+      60
+     ]
+    },
+    {
+     "max_min": null,
+     "g_h": [
+      60,
+      90
+     ]
+    }
+   ],
+   "limit_direction": "upper",
+   "owner": "11",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg5 §3",
+   "default_text": "< 45 min 0; 45–75 optional; 1–2.5 h 30–60; > 2.5 h 60–90"
+  },
+  {
+   "id": "fuel.dual_source_above_g_h",
+   "type": "int",
+   "unit": "g/h",
+   "default": 60,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg5 §3",
+   "default_text": "60"
+  },
+  {
+   "id": "fuel.exit_runs",
+   "type": "int",
+   "unit": "runs",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "1–2 / 2–3",
+   "presets": "—",
+   "source": "wg5 §5, impl. 3",
+   "default_text": "2 / 2"
+  },
+  {
+   "id": "fuel.gi_pass_max",
+   "type": "int",
+   "unit": "/10",
+   "default": 2,
+   "limit_direction": "upper",
+   "owner": "11",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "1–3",
+   "presets": "—",
+   "source": "wg5 impl. 3",
+   "default_text": "2"
+  },
+  {
+   "id": "fuel.gi_stepdown_min",
+   "type": "int",
+   "unit": "/10",
+   "default": 5,
+   "limit_direction": "lower",
+   "owner": "11",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "4–6",
+   "presets": "—",
+   "source": "11",
+   "default_text": "5"
+  },
+  {
+   "id": "fuel.l3_level",
+   "type": "int",
+   "unit": "FUEL level that needs race-effort practice runs",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "N/A (engineering: 02 §2)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "11 NUT-013",
+   "default_text": "3"
+  },
+  {
+   "id": "fuel.l4_min_race_h",
+   "type": "number",
+   "unit": "h",
+   "default": 2.5,
+   "limit_direction": "lower",
+   "owner": "11",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg5 §3",
+   "default_text": "2.5"
+  },
+  {
+   "id": "fuel.level_band",
+   "type": "map",
+   "unit": "g/h (lower edge proves the level, NUT-013)",
+   "default": {
+    "1": [
+     30,
+     30
+    ],
+    "2": [
+     45,
+     60
+    ],
+    "3": [
+     60,
+     90
+    ],
+    "4": [
+     90,
+     null
+    ]
+   },
+   "keys": "level",
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CORROBORATED (bands, wg5 §3) / use as level proof dd",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "02 §2; 11 §3",
+   "default_text": "L1 30; L2 45–60; L3 60–90; L4 > 90"
+  },
+  {
+   "id": "fuel.max_default_g_h",
+   "type": "int",
+   "unit": "g/h",
+   "default": 90,
+   "limit_direction": "upper",
+   "owner": "11",
+   "grade": "CORROBORATED (> 90 benefit UNKNOWN)",
+   "basis": "ev",
+   "range": "60–90",
+   "presets": "—",
+   "source": "wg5 §3",
+   "default_text": "90"
+  },
+  {
+   "id": "fuel.practice_min_duration_min",
+   "type": "int",
+   "unit": "min",
+   "default": 60,
+   "limit_direction": "upper",
+   "owner": "11",
+   "grade": "CORROBORATED (bands start at 1 h)",
+   "basis": "dd",
+   "range": "60–75",
+   "presets": "—",
+   "source": "wg5 §3",
+   "default_text": "60"
+  },
+  {
+   "id": "fuel.reach_tol_g_h",
+   "type": "int",
+   "unit": "g/h below the step that still counts as reaching it",
+   "default": 5,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "UNKNOWN (a gel is about 20–25 g)",
+   "basis": "dd",
+   "range": "0–10",
+   "presets": "—",
+   "source": "gap/prose-rules.md NUT-011",
+   "default_text": "5"
+  },
+  {
+   "id": "fuel.required_above_min",
+   "type": "int",
+   "unit": "min race duration",
+   "default": 90,
+   "limit_direction": "lower",
+   "owner": "11",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "75–90",
+   "presets": "—",
+   "source": "wg5 impl. 3",
+   "default_text": "90"
+  },
+  {
+   "id": "fuel.required_level_long",
+   "type": "int",
+   "unit": "FUEL level required for races > 90 min / > 2.5 h (time goals only for L3; owner Q6)",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "CORROBORATED (bands, wg5 impl. 3) / finish-goal limit dd",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "02 CMP-008; owner Q6",
+   "default_text": "2 / 3"
+  },
+  {
+   "id": "fuel.required_level_mid",
+   "type": "int",
+   "unit": "FUEL level required for races > 90 min / > 2.5 h (time goals only for L3; owner Q6)",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "CORROBORATED (bands, wg5 impl. 3) / finish-goal limit dd",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "02 CMP-008; owner Q6",
+   "default_text": "2 / 3"
+  },
+  {
+   "id": "fuel.start_g_h",
+   "type": "int",
+   "unit": "g/h",
+   "default": 30,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "20–40 / 10–15",
+   "presets": "—",
+   "source": "wg5 §5",
+   "default_text": "30 / 15 (v5.2: one value, owner Q5; was 10–15)"
+  },
+  {
+   "id": "fuel.step_g_h",
+   "type": "int",
+   "unit": "g/h",
+   "default": 15,
+   "limit_direction": "none",
+   "owner": "11",
+   "note": "v5.2: one value (was 10–15), owner question 5",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "20–40 / 10–15",
+   "presets": "—",
+   "source": "wg5 §5",
+   "default_text": "30 / 15 (v5.2: one value, owner Q5; was 10–15)"
+  },
+  {
+   "id": "fuel.step_runs",
+   "type": "int",
+   "unit": "runs",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "1–2 / 2–3",
+   "presets": "—",
+   "source": "wg5 §5, impl. 3",
+   "default_text": "2 / 2"
+  },
+  {
+   "id": "gap.long_factor.15_29",
+   "type": "number",
+   "unit": "× L30_eff",
+   "default": 0.6,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.6–0.9 / 0.4–0.8",
+   "presets": "—",
+   "source": "factdesk1 §4",
+   "default_text": "0.80 / 0.60"
+  },
+  {
+   "id": "gap.long_factor.8_14",
+   "type": "number",
+   "unit": "× L30_eff",
+   "default": 0.8,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.6–0.9 / 0.4–0.8",
+   "presets": "—",
+   "source": "factdesk1 §4",
+   "default_text": "0.80 / 0.60"
+  },
+  {
+   "id": "gap.reduce_trigger_days",
+   "type": "int",
+   "unit": "days",
+   "default": 8,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "ALLEGED (Daniels \"< 5 d → 100%\")",
+   "basis": "dd",
+   "range": "6–10",
+   "presets": "—",
+   "source": "factdesk1 §4",
+   "default_text": "8"
+  },
+  {
+   "id": "gap.rtr_trigger_days",
+   "type": "int",
+   "unit": "days",
+   "default": 30,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN (Frandsen window; gap handling unknown)",
+   "basis": "dd",
+   "range": "21–30",
+   "presets": "—",
+   "source": "factdesk2 §1; wg3 §3",
+   "default_text": "30"
+  },
+  {
+   "id": "gap.vol_factor.15_29",
+   "type": "number",
+   "unit": "× prior V7",
+   "default": 0.5,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.5–0.9 / 0.3–0.7",
+   "presets": "—",
+   "source": "factdesk1 §4; wg1 impl. 8",
+   "default_text": "0.75 / 0.50"
+  },
+  {
+   "id": "gap.vol_factor.8_14",
+   "type": "number",
+   "unit": "× prior V7",
+   "default": 0.75,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.5–0.9 / 0.3–0.7",
+   "presets": "—",
+   "source": "factdesk1 §4; wg1 impl. 8",
+   "default_text": "0.75 / 0.50"
+  },
+  {
+   "id": "goal.date_search_max_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 52,
+   "limit_direction": "upper",
+   "owner": "07",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "26–104",
+   "presets": "—",
+   "source": "07 §6.2",
+   "default_text": "52"
+  },
+  {
+   "id": "goal.edit_fail_limit",
+   "type": "int",
+   "unit": "count / days / weeks",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "07",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "2–5 / 3–14 / 1–2",
+   "presets": "—",
+   "source": "opening-contrarian",
+   "default_text": "3 / 7 / 1"
+  },
+  {
+   "id": "goal.edit_margin_pct",
+   "type": "int",
+   "unit": "% of target time",
+   "default": 1,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0–3",
+   "presets": "—",
+   "source": "opening-contrarian §2",
+   "default_text": "1"
+  },
+  {
+   "id": "goal.edit_margin_weeks",
+   "type": "int",
+   "unit": "count / days / weeks",
+   "default": 1,
+   "limit_direction": "none",
+   "owner": "07",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "2–5 / 3–14 / 1–2",
+   "presets": "—",
+   "source": "opening-contrarian",
+   "default_text": "3 / 7 / 1"
+  },
+  {
+   "id": "goal.edit_window_days",
+   "type": "int",
+   "unit": "count / days / weeks",
+   "default": 7,
+   "limit_direction": "none",
+   "owner": "07",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "2–5 / 3–14 / 1–2",
+   "presets": "—",
+   "source": "opening-contrarian",
+   "default_text": "3 / 7 / 1"
+  },
+  {
+   "id": "heat.acclim_days",
+   "type": "int",
+   "unit": "exposure days",
+   "default": 10,
+   "limit_direction": "none",
+   "owner": "11",
+   "note": "v5.2: one value (was 7–14), owner question 8",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "7–14",
+   "presets": "—",
+   "source": "wg5 §4",
+   "default_text": "10 (v5.2: one value, owner Q8; was 7–14)"
+  },
+  {
+   "id": "heat.acclim_window_days",
+   "type": "int",
+   "unit": "days before race",
+   "default": 21,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "UNKNOWN (window)",
+   "basis": "dd",
+   "range": "14–28",
+   "presets": "—",
+   "source": "wg5 §4",
+   "default_text": "21"
+  },
+  {
+   "id": "heat.exposure_max_min",
+   "type": "int",
+   "unit": "min per heat-exposure easy run (SES-M-022)",
+   "default": 60,
+   "limit_direction": "upper",
+   "owner": "11",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "30–60",
+   "presets": "—",
+   "source": "gap/prose-rules.md DST-004; owner Q8",
+   "default_text": "60"
+  },
+  {
+   "id": "hyd.abs_cap_ml_h",
+   "type": "int",
+   "unit": "mL/h",
+   "default": 1000,
+   "limit_direction": "upper",
+   "owner": "11",
+   "grade": "CORROBORATED (> 1.5 L/h a risk factor); value dd",
+   "basis": "dd",
+   "range": "800–1200",
+   "presets": "—",
+   "source": "wg5 §4",
+   "default_text": "1000"
+  },
+  {
+   "id": "hyd.no_test_cap_ml_h",
+   "type": "int",
+   "unit": "mL/h",
+   "default": 800,
+   "limit_direction": "upper",
+   "owner": "11",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "600–800",
+   "presets": "—",
+   "source": "wg5 impl. 4",
+   "default_text": "800"
+  },
+  {
+   "id": "hyd.sweat_test_min_min",
+   "type": "int",
+   "unit": "min",
+   "default": 60,
+   "limit_direction": "lower",
+   "owner": "11",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "45–90",
+   "presets": "—",
+   "source": "wg5 §4",
+   "default_text": "60"
+  },
+  {
+   "id": "illness.above_neck_dur_ratio",
+   "type": "number",
+   "unit": "× planned",
+   "default": 0.75,
+   "limit_direction": "upper",
+   "owner": "10 (used by 08)",
+   "grade": "CREDIBLE (convention, never trialled)",
+   "basis": "dd",
+   "range": "0.5–1.0",
+   "presets": "—",
+   "source": "hearing-1 §3",
+   "default_text": "0.75"
+  },
+  {
+   "id": "illness.rest_days_min",
+   "type": "int",
+   "unit": "days",
+   "default": 10,
+   "limit_direction": "lower",
+   "owner": "08",
+   "grade": "CORROBORATED (post-COVID; extrapolated)",
+   "basis": "ev",
+   "range": "7–14 / 5–10",
+   "presets": "—",
+   "source": "wg4 §5 Elliott",
+   "default_text": "10 / 7"
+  },
+  {
+   "id": "illness.stage1_min",
+   "type": "int",
+   "unit": "min",
+   "default": 15,
+   "limit_direction": "lower",
+   "owner": "08",
+   "grade": "CORROBORATED (Elliott stage 1)",
+   "basis": "ev",
+   "range": "10–20",
+   "presets": "—",
+   "source": "wg4 §5",
+   "default_text": "15"
+  },
+  {
+   "id": "illness.symptom_free_days",
+   "type": "int",
+   "unit": "days",
+   "default": 7,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "CORROBORATED (post-COVID; extrapolated)",
+   "basis": "ev",
+   "range": "7–14 / 5–10",
+   "presets": "—",
+   "source": "wg4 §5 Elliott",
+   "default_text": "10 / 7"
+  },
+  {
+   "id": "inp.default_days",
+   "type": "set",
+   "unit": "weekdays",
+   "default": [
+    "Tue",
+    "Thu",
+    "Sat"
+   ],
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "any 2–4 days",
+   "presets": "—",
+   "source": "01 INP-007",
+   "default_text": "Tue, Thu, Sat"
+  },
+  {
+   "id": "inp.default_runs",
+   "type": "int",
+   "unit": "runs/week",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–4",
+   "presets": "—",
+   "source": "wg3 §6",
+   "default_text": "3"
+  },
+  {
+   "id": "inp.default_session_min",
+   "type": "int",
+   "unit": "min",
+   "default": 30,
+   "limit_direction": "lower",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "20–45",
+   "presets": "—",
+   "source": "01 INP-007",
+   "default_text": "30"
+  },
+  {
+   "id": "inp.no_unknown_fields",
+   "type": "set",
+   "unit": "field list",
+   "default": [
+    "screen.answers",
+    "screen.followup_answers",
+    "event.C1",
+    "event.C2",
+    "event.C3",
+    "event.C4",
+    "event.B1",
+    "event.B2",
+    "event.B3",
+    "event.B4",
+    "event.B5",
+    "event.H1",
+    "event.H2",
+    "event.E1",
+    "event.P1",
+    "event.P2",
+    "event.I1",
+    "event.I2",
+    "event.I3",
+    "profile.special_status",
+    "profile.birth_month",
+    "profile.birth_year",
+    "screen.guardian_attested_on"
+   ],
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "may only grow",
+   "presets": "—",
+   "source": "p2-C R1 (case 1, A1)",
+   "default_text": "PAR-Q+ items and follow-ups; symptom items C, B, H, E, P, I; special_status; birth_month; birth_year; guardian_attestation"
+  },
+  {
+   "id": "knopp.range",
+   "type": "map",
+   "unit": "—",
+   "default": {
+    "weekly_mean_km": [
+     43,
+     59,
+     108
+    ],
+    "longest_km": [
+     31,
+     35
+    ],
+    "z45_share": 0.06
+   },
+   "limit_direction": "none",
+   "owner": "14 (values); INV-23 defined in 07",
+   "grade": "CORROBORATED as description",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg2 §2",
+   "default_text": "weekly mean 43 / 59 / 108 km by tier; longest 31–35 km; Z4–5 ≈ 6%"
+  },
+  {
+   "id": "knopp.range.ultra",
+   "type": "map",
+   "unit": "km/week peak by goal tier",
+   "default": {
+    "finish": [
+     45,
+     50
+    ],
+    "bronze": [
+     50,
+     65
+    ],
+    "tier3": [
+     60,
+     70
+    ],
+    "tier4": [
+     75,
+     80
+    ],
+    "silver": [
+     100,
+     120
+    ]
+   },
+   "limit_direction": "none",
+   "owner": "14",
+   "grade": "CORROBORATED (description)",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg2 §4; Room C R6",
+   "default_text": "**100K only**: finish 45–50; Bronze 50–65; 60–70; 75–80; Silver 100–120 (50K: no source → silent)"
+  },
+  {
+   "id": "ladder.est_pace_s_per_km",
+   "type": "int",
+   "unit": "s/km, run-walk at S5+",
+   "default": 660,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN (run-walk practice, wg2 §1, CORROBORATED, gives no speed)",
+   "basis": "dd",
+   "range": "600–720",
+   "presets": "—",
+   "source": "p2-C R10 (FEA-043b)",
+   "default_text": "660"
+  },
+  {
+   "id": "ladder.runwalk_race_min_rung",
+   "type": "int",
+   "unit": "rung index",
+   "default": 5,
+   "limit_direction": "lower",
+   "owner": "03",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "4–6",
+   "presets": "—",
+   "source": "03 FEA-043b",
+   "default_text": "5 (S5)"
+  },
+  {
+   "id": "load.round_down_m",
+   "type": "int",
+   "unit": "s / m",
+   "default": 100,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "30–300 / 100–500",
+   "presets": "—",
+   "source": "05",
+   "default_text": "60 / 100"
+  },
+  {
+   "id": "load.round_down_s",
+   "type": "int",
+   "unit": "s / m",
+   "default": 60,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "30–300 / 100–500",
+   "presets": "—",
+   "source": "05",
+   "default_text": "60 / 100"
+  },
+  {
+   "id": "lod.min_run_s",
+   "type": "int",
+   "unit": "s",
+   "default": 900,
+   "limit_direction": "lower",
+   "owner": "05",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "600–1200",
+   "presets": "galloway 600",
+   "source": "05 LOD-013",
+   "default_text": "900"
+  },
+  {
+   "id": "log.bulk_backfill_max",
+   "type": "int",
+   "unit": "entries/day",
+   "default": 5,
+   "limit_direction": "upper",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "3–10",
+   "presets": "—",
+   "source": "07 §3",
+   "default_text": "5"
+  },
+  {
+   "id": "log.confirm_ratio",
+   "type": "number",
+   "unit": "× L30_eff",
+   "default": 2.0,
+   "limit_direction": "upper",
+   "owner": "01",
+   "grade": "UNKNOWN (aligned with spike.block_ratio)",
+   "basis": "dd",
+   "range": "1.5–2.0",
+   "presets": "—",
+   "source": "wg4 §1",
+   "default_text": "2.00"
+  },
+  {
+   "id": "log.contemporaneous_window_h",
+   "type": "int",
+   "unit": "h",
+   "default": 48,
+   "limit_direction": "upper",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "24–72",
+   "presets": "—",
+   "source": "owner decision; factdesk2 §6",
+   "default_text": "48"
+  },
+  {
+   "id": "log.min_entries_30d",
+   "type": "int",
+   "unit": "runs",
+   "default": 3,
+   "limit_direction": "lower",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–6",
+   "presets": "—",
+   "source": "07 §3",
+   "default_text": "3"
+  },
+  {
+   "id": "log.pace_max_s_per_km.run",
+   "type": "int",
+   "unit": "s/km",
+   "default": 900,
+   "limit_direction": "upper",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "720–1080 / 900–1500",
+   "presets": "—",
+   "source": "07 GEN-020",
+   "default_text": "900 / 1200"
+  },
+  {
+   "id": "log.pace_max_s_per_km.run_walk",
+   "type": "int",
+   "unit": "s/km",
+   "default": 1200,
+   "limit_direction": "upper",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "720–1080 / 900–1500",
+   "presets": "—",
+   "source": "07 GEN-020",
+   "default_text": "900 / 1200"
+  },
+  {
+   "id": "log.pace_min_s_per_km",
+   "type": "int",
+   "unit": "s/km",
+   "default": 165,
+   "limit_direction": "lower",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "150–180",
+   "presets": "—",
+   "source": "07 GEN-020",
+   "default_text": "165"
+  },
+  {
+   "id": "log.probation_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "2–4",
+   "presets": "—",
+   "source": "opening-contrarian §1.4",
+   "default_text": "3"
+  },
+  {
+   "id": "log.week_confirm_ratio",
+   "type": "number",
+   "unit": "× max prior 4 weeks",
+   "default": 1.5,
+   "limit_direction": "upper",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1.3–2.0",
+   "presets": "—",
+   "source": "07 GEN-020",
+   "default_text": "1.50"
+  },
+  {
+   "id": "lr.abs_cap_km.<preset>",
+   "type": "map",
+   "unit": "km",
+   "default": {
+    "method_default": 32,
+    "hansons": 26,
+    "pfitzinger_classic": 35,
+    "higdon_novice": 32
+   },
+   "keys": "preset",
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CORROBORATED/CREDIBLE",
+   "basis": "conv",
+   "range": "—",
+   "presets": "per preset",
+   "source": "wg2 §1; Room B R1",
+   "default_text": "method_default M 32; hansons 26; pfitzinger_classic 35; higdon_novice 32; others none"
+  },
+  {
+   "id": "lr.floor_time_max_min.<distance>",
+   "type": "map",
+   "unit": "min (time on feet incl. walks)",
+   "default": {
+    "M": 240,
+    "HM": 150,
+    "50K": 240,
+    "100K": 330,
+    "5K": 150,
+    "10K": 150
+   },
+   "keys": "distance",
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "coaching convention / design default; duration–injury UNKNOWN",
+   "basis": "dd",
+   "range": "M 210–270",
+   "presets": "—",
+   "source": "d2-B R2; p1-A R7",
+   "default_text": "M 240; HM 150 (= cap); 50K 240 and 100K 330 (= ultra time caps; v4 one formula); short = cap"
+  },
+  {
+   "id": "lr.long_guard_min",
+   "type": "int",
+   "unit": "min",
+   "default": 180,
+   "limit_direction": "lower",
+   "owner": "05",
+   "grade": "UNKNOWN (no study of runs > 3 h; coaching practice 150–180 min, hearing-2 coach-field, CORROBORATED as practice)",
+   "basis": "dd",
+   "range": "150–180",
+   "presets": "—",
+   "source": "hearing-2 med; p1-B R3; p2-B R4 (replaces the literal 10800)",
+   "default_text": "180"
+  },
+  {
+   "id": "lr.long_guard_tol_level",
+   "type": "int",
+   "unit": "TOL level",
+   "default": 4,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "4–5",
+   "presets": "—",
+   "source": "LOD-017, INV-28",
+   "default_text": "4"
+  },
+  {
+   "id": "lr.m_ext_km",
+   "type": "int",
+   "unit": "km / runs / days",
+   "default": 29,
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "18 mi from the Toresdahl cohort, CREDIBLE (one cohort; several summaries) for the association (continuous OR 0.87 CREDIBLE); counts and spacing dd",
+   "basis": "dd",
+   "range": "26–32 / 1–3 / 14–28",
+   "presets": "method_default M only",
+   "source": "factdesk3 §5; factdesk4 §2; d2-B R3",
+   "default_text": "29 / 3 / 21"
+  },
+  {
+   "id": "lr.m_ext_max_runs",
+   "type": "int",
+   "unit": "km / runs / days",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "18 mi from the Toresdahl cohort, CREDIBLE (one cohort; several summaries) for the association (continuous OR 0.87 CREDIBLE); counts and spacing dd",
+   "basis": "dd",
+   "range": "26–32 / 1–3 / 14–28",
+   "presets": "method_default M only",
+   "source": "factdesk3 §5; factdesk4 §2; d2-B R3",
+   "default_text": "29 / 3 / 21"
+  },
+  {
+   "id": "lr.m_ext_min_gap_days",
+   "type": "int",
+   "unit": "km / runs / days",
+   "default": 21,
+   "limit_direction": "lower",
+   "owner": "09",
+   "grade": "18 mi from the Toresdahl cohort, CREDIBLE (one cohort; several summaries) for the association (continuous OR 0.87 CREDIBLE); counts and spacing dd",
+   "basis": "dd",
+   "range": "26–32 / 1–3 / 14–28",
+   "presets": "method_default M only",
+   "source": "factdesk3 §5; factdesk4 §2; d2-B R3",
+   "default_text": "29 / 3 / 21"
+  },
+  {
+   "id": "lr.over180_min_gap_days",
+   "type": "int",
+   "unit": "days between runs expected > 180 min (all families; a back-to-back pair counts once)",
+   "default": 14,
+   "limit_direction": "lower",
+   "owner": "05",
+   "grade": "CORROBORATED as practice (Galloway alternate weeks); CREDIBLE (Koop 2–3-week peaks); count/spacing–injury UNKNOWN",
+   "basis": "conv",
+   "range": "14–21",
+   "presets": "DST-019 extension runs keep 21",
+   "source": "factdesk4 §4; wg2 §4; p1-B R5",
+   "default_text": "14"
+  },
+  {
+   "id": "lr.over_cap_pct.road_classic",
+   "type": "number",
+   "unit": "× weekly time, for road long runs above the time cap (floor and extension runs)",
+   "default": 0.6,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "UNKNOWN (matches the ultra peak-week cap)",
+   "basis": "dd",
+   "range": "0.55–0.65",
+   "presets": "—",
+   "source": "d2-B R2",
+   "default_text": "0.60"
+  },
+  {
+   "id": "lr.pct_cap.<preset>.<family>",
+   "type": "map",
+   "unit": "× weekly **time**",
+   "default": {
+    "method_default": {
+     "short": {
+      "2": 0.6,
+      "3": 0.45,
+      "4": 0.4,
+      "5+": 0.3
+     },
+     "base": {
+      "2": 0.6,
+      "3": 0.45,
+      "4": 0.4,
+      "5+": 0.3
+     },
+     "road_classic": 0.5,
+     "ultra": "lr.ultra_pct_cap"
+    },
+    "daniels": 0.25,
+    "higdon_novice": 0.5,
+    "hansons": null,
+    "pfitzinger_classic": null,
+    "galloway": null
+   },
+   "keys": "preset, family, runs",
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "0.50 CORROBORATED as description of novice plans; C25K longest run 33–40% of the week CREDIBLE [factdesk4 §5]; Daniels 25% CORROBORATED; injury link UNKNOWN",
+   "basis": "conv / dd",
+   "range": "0.20–0.60",
+   "presets": "per preset × family (05 §4, INV-26)",
+   "source": "wg2 §1–2; factdesk3 §4, §7; d2-A R3",
+   "default_text": "method_default: short **and base** (v4) by run count **0.60 (2 runs, v4)** / 0.45 (3) / 0.40 (4) / 0.30 (≥ 5), road_classic **0.50**, ultra → lr.ultra_pct_cap; daniels 0.25; higdon_novice 0.50; hansons, pfitzinger_classic, galloway: none"
+  },
+  {
+   "id": "lr.pct_floor_s",
+   "type": "int",
+   "unit": "s",
+   "default": 3600,
+   "limit_direction": "lower",
+   "owner": "05",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2700–4500",
+   "presets": "—",
+   "source": "wg2 §1",
+   "default_text": "3600"
+  },
+  {
+   "id": "lr.pct_monotone",
+   "type": "bool",
+   "unit": "bool",
+   "default": true,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "wg2 §1",
+   "default_text": "true"
+  },
+  {
+   "id": "lr.time_cap_min.<preset>.<distance>",
+   "type": "map",
+   "unit": "min",
+   "default": {
+    "method_default": {
+     "5K": 150,
+     "10K": 150,
+     "HM": 150,
+     "M": 180
+    },
+    "daniels": 150,
+    "galloway": 240
+   },
+   "keys": "preset, distance",
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "**coaching convention**: no evidence links single-run duration to injury (UNKNOWN); field practice 2.5–3 h CORROBORATED as practice; Galloway's long runs reach 26 mi, CORROBORATED [factdesk4 §4]",
+   "basis": "conv / dd (180)",
+   "range": "120–240",
+   "presets": "per preset × distance",
+   "source": "hearing-2 med-acad, med-crit, coach-field; factdesk3 §4; factdesk4 §4",
+   "default_text": "method_default: short 150, HM 150, **M 180**; daniels 150; galloway **240** (time on feet incl. walks, v3)"
+  },
+  {
+   "id": "lr.ultra_pct_cap",
+   "type": "number",
+   "unit": "× weekly time",
+   "default": 0.6,
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "CREDIBLE as a practice range (hearing-2); value UNKNOWN",
+   "basis": "dd",
+   "range": "0.50–0.70",
+   "presets": "all presets when Goal.family = ultra",
+   "source": "Room C R1; hearing-2 coach-field; wg2 §1, §4",
+   "default_text": "0.60, **peak long-run weeks only** — DECIDED round 1"
+  },
+  {
+   "id": "lr.ultra_peak_every_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "2–3",
+   "presets": "koop_ultra",
+   "source": "wg2 §4",
+   "default_text": "2"
+  },
+  {
+   "id": "lr.ultra_time_cap_min.<distance>",
+   "type": "map",
+   "unit": "min",
+   "default": {
+    "50K": 240,
+    "100K": 330
+   },
+   "keys": "distance",
+   "limit_direction": "upper",
+   "owner": "09",
+   "grade": "coaching convention: 50K plans peak ~3:15 h (CORROBORATED range), 100K 5–6 h (CORROBORATED as practice); duration–injury UNKNOWN",
+   "basis": "conv",
+   "range": "50K 210–270; 100K 240–360",
+   "presets": "all presets when family = ultra",
+   "source": "factdesk3 §8; hearing-2 coach-field; d2-C R3",
+   "default_text": "**50K 240; 100K 330** (v3); when it binds above the distance floor → LONG_RUN_TIME_CAPPED (stretch for time goals, information for finish goals, FEA-003 v4), below → infeasible (FEA-003); runs > 180 min need TOL L4 measured"
+  },
+  {
+   "id": "maint.max_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 15,
+   "limit_direction": "upper",
+   "owner": "04",
+   "grade": "CORROBORATED (VO2max only)",
+   "basis": "ev",
+   "range": "8–15",
+   "presets": "—",
+   "source": "wg1 §5",
+   "default_text": "15"
+  },
+  {
+   "id": "maint.sessions_min",
+   "type": "int",
+   "unit": "runs/week",
+   "default": 2,
+   "limit_direction": "lower",
+   "owner": "04",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "2–3",
+   "presets": "—",
+   "source": "wg1 §5 Spiering",
+   "default_text": "2"
+  },
+  {
+   "id": "maint.volume_cut_max",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.5,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CORROBORATED (general population)",
+   "basis": "ev",
+   "range": "0.33–0.66",
+   "presets": "—",
+   "source": "wg1 §5",
+   "default_text": "0.50"
+  },
+  {
+   "id": "masters.cv_advice_age",
+   "type": "int",
+   "unit": "years",
+   "default": 35,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "35–40",
+   "presets": "—",
+   "source": "wg4 §3",
+   "default_text": "35"
+  },
+  {
+   "id": "masters.vigorous_assessment_age",
+   "type": "int",
+   "unit": "years",
+   "default": 65,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CORROBORATED (low evidence base)",
+   "basis": "ev",
+   "range": "60–65",
+   "presets": "—",
+   "source": "wg4 §3 ESC 2020",
+   "default_text": "65"
+  },
+  {
+   "id": "minor.adult_age",
+   "type": "int",
+   "unit": "years",
+   "default": 18,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CORROBORATED norm",
+   "basis": "conv",
+   "range": "—",
+   "presets": "—",
+   "source": "wg3 §2",
+   "default_text": "18"
+  },
+  {
+   "id": "minor.lr_cap_ratio",
+   "type": "number",
+   "unit": "× race cap",
+   "default": 1.0,
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.8–1.0",
+   "presets": "—",
+   "source": "10 SAF-044",
+   "default_text": "1.0"
+  },
+  {
+   "id": "minor.marathon_min_age",
+   "type": "int",
+   "unit": "years",
+   "default": 18,
+   "limit_direction": "lower",
+   "owner": "10",
+   "grade": "CORROBORATED norm",
+   "basis": "conv",
+   "range": "—",
+   "presets": "—",
+   "source": "wg3 §2; wg4 §6",
+   "default_text": "18 / 18"
+  },
+  {
+   "id": "minor.max_race_km.hard",
+   "type": "map",
+   "unit": "km",
+   "default": {
+    "14": 8,
+    "15": 12,
+    "16": 15,
+    "17": 25
+   },
+   "keys": "age_low",
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "CORROBORATED norm; sources differ at 16 (15 vs 16 km) → lower; age 14 has no source value → recommended 8 km",
+   "basis": "conv / dd (14, 16)",
+   "range": "—",
+   "presets": "—",
+   "source": "wg3 §2; wg4 §6",
+   "default_text": "14: 8; 15: 12; 16: 15; 17: 25"
+  },
+  {
+   "id": "minor.max_race_km.recommended",
+   "type": "map",
+   "unit": "km",
+   "default": {
+    "14": 8,
+    "15": 8,
+    "16": 12,
+    "17": 14
+   },
+   "keys": "age_low",
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "CORROBORATED norm",
+   "basis": "conv",
+   "range": "—",
+   "presets": "—",
+   "source": "wg4 §6",
+   "default_text": "14–15: 8; 16: 12; 17: 14"
+  },
+  {
+   "id": "minor.min_age",
+   "type": "int",
+   "unit": "years",
+   "default": 14,
+   "limit_direction": "lower",
+   "owner": "10",
+   "grade": "UNKNOWN (wg4 §6 norms do not fix a minimum)",
+   "basis": "dd",
+   "range": "14–16",
+   "presets": "—",
+   "source": "wg4 impl. 11",
+   "default_text": "14"
+  },
+  {
+   "id": "minor.refer_below_age",
+   "type": "int",
+   "unit": "years",
+   "default": 16,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CORROBORATED (opinion-based)",
+   "basis": "conv",
+   "range": "15–16",
+   "presets": "—",
+   "source": "wg4 impl. 11",
+   "default_text": "16"
+  },
+  {
+   "id": "minor.ultra_min_age",
+   "type": "int",
+   "unit": "years",
+   "default": 18,
+   "limit_direction": "lower",
+   "owner": "10",
+   "grade": "CORROBORATED norm",
+   "basis": "conv",
+   "range": "—",
+   "presets": "—",
+   "source": "wg3 §2; wg4 §6",
+   "default_text": "18 / 18"
+  },
+  {
+   "id": "miss.fit_check_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "hearing-1 §2",
+   "default_text": "2"
+  },
+  {
+   "id": "miss.partial_ratio",
+   "type": "number",
+   "unit": "× planned",
+   "default": 0.75,
+   "limit_direction": "upper",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.5–0.9",
+   "presets": "—",
+   "source": "08",
+   "default_text": "0.75"
+  },
+  {
+   "id": "miss.refeas_hold_weeks",
+   "type": "int",
+   "unit": "consecutive ADP-022 weeks before feasibility re-runs",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "08 ADP-023",
+   "default_text": "2"
+  },
+  {
+   "id": "miss.repeat_week_ratio",
+   "type": "number",
+   "unit": "× planned week",
+   "default": 0.6,
+   "limit_direction": "upper",
+   "owner": "08",
+   "grade": "UNKNOWN (repeat-week practice CORROBORATED)",
+   "basis": "dd",
+   "range": "0.5–0.8",
+   "presets": "—",
+   "source": "wg3 impl. 4",
+   "default_text": "0.60"
+  },
+  {
+   "id": "pace.deadband_pct",
+   "type": "number",
+   "unit": "% change of the 10K-equivalent below which a new result is treated as noise (v5.1: a change above it but ≤ the minimum detectable change moves paces only when confirmed, ADP-067)",
+   "default": 3.5,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "**CREDIBLE** (v5.1: recreational retest CV 5K 3.44%, 10K 2.43%, Machado 2015 — a single study, so CREDIBLE however many records repeat it; v5 had CORROBORATED); trained 1–1.5% CORROBORATED",
+   "basis": "dd",
+   "range": "2–5",
+   "presets": "—",
+   "source": "factdesk3 §3; factdesk4 §6; hearing-2 sys",
+   "default_text": "3.5"
+  },
+  {
+   "id": "pace.e1_high",
+   "type": "number",
+   "unit": "× M-equivalent speed",
+   "default": 0.92,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "ALLEGED (inferred from Daniels' easy vs marathon intensities); talk test governs",
+   "basis": "dd",
+   "range": "0.65–0.95",
+   "presets": "—",
+   "source": "factdesk1 §3",
+   "default_text": "0.72 / 0.92"
+  },
+  {
+   "id": "pace.e1_low",
+   "type": "number",
+   "unit": "× M-equivalent speed",
+   "default": 0.72,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "ALLEGED (inferred from Daniels' easy vs marathon intensities); talk test governs",
+   "basis": "dd",
+   "range": "0.65–0.95",
+   "presets": "—",
+   "source": "factdesk1 §3",
+   "default_text": "0.72 / 0.92"
+  },
+  {
+   "id": "pace.e3_high",
+   "type": "number",
+   "unit": "× CS speed",
+   "default": 0.97,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "CORROBORATED direction (threshold below CS) / values dd",
+   "basis": "dd",
+   "range": "0.90–0.98",
+   "presets": "—",
+   "source": "factdesk1 §3",
+   "default_text": "0.92 / 0.97"
+  },
+  {
+   "id": "pace.e3_low",
+   "type": "number",
+   "unit": "× CS speed",
+   "default": 0.92,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "CORROBORATED direction (threshold below CS) / values dd",
+   "basis": "dd",
+   "range": "0.90–0.98",
+   "presets": "—",
+   "source": "factdesk1 §3",
+   "default_text": "0.92 / 0.97"
+  },
+  {
+   "id": "pace.mdc_mult",
+   "type": "number",
+   "unit": "× pace.test_te_pct = minimum detectable change of one test (2.8 × 3.4 ≈ 9.5%)",
+   "default": 2.8,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "CREDIBLE as to the typical error it multiplies (single study); 2.8 ≈ 1.96 × √2, the usual 95% minimum-detectable-change formula, stated from memory (ALLEGED)",
+   "basis": "dd",
+   "range": "2.0–2.8",
+   "presets": "—",
+   "source": "external review v5 item 3",
+   "default_text": "2.8"
+  },
+  {
+   "id": "pace.round_s",
+   "type": "int",
+   "unit": "s/km",
+   "default": 5,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "1–10",
+   "presets": "—",
+   "source": "03 §3b",
+   "default_text": "5"
+  },
+  {
+   "id": "pace.test_te_pct",
+   "type": "number",
+   "unit": "% typical error of one recreational 5K/10K test (as CV)",
+   "default": 3.4,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "CREDIBLE (Machado 2015, single study, n = 31: 5K CV 3.44%, 10K 2.43%); trained runners 1–1.5% CORROBORATED",
+   "basis": "dd",
+   "range": "2.4–3.5",
+   "presets": "—",
+   "source": "factdesk3 §3; factdesk4 §6; external review v5 item 3",
+   "default_text": "3.4"
+  },
+  {
+   "id": "pain.answered_min_ratio",
+   "type": "number",
+   "unit": "share of the last 14 days' sessions with an answered pain prompt",
+   "default": 0.7,
+   "limit_direction": "lower",
+   "owner": "05",
+   "grade": "CORROBORATED for the anchor (pooled EMA compliance 75%, CI 72–78%, factdesk6 §3); the value itself UNKNOWN",
+   "basis": "dd",
+   "range": "0.6–0.8",
+   "presets": "—",
+   "source": "p2-C R3 (room proposed 0.8; see RESOLUTIONS Plenary 2)",
+   "default_text": "0.7"
+  },
+  {
+   "id": "pain.clear_sessions",
+   "type": "int",
+   "unit": "sessions",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3 / 1–3",
+   "presets": "—",
+   "source": "factdesk1 §1",
+   "default_text": "2 / 2"
+  },
+  {
+   "id": "pain.during_max",
+   "type": "int",
+   "unit": "/10",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "08",
+   "grade": "CONTRADICTED thresholds → conservative",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "factdesk1 §2",
+   "default_text": "3"
+  },
+  {
+   "id": "pain.hold_step_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–2",
+   "presets": "—",
+   "source": "08 ADP-051 (\"this week and next\")",
+   "default_text": "2"
+  },
+  {
+   "id": "pain.next_morning_rule",
+   "type": "bool",
+   "unit": "bool",
+   "default": true,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "true",
+   "presets": "—",
+   "source": "factdesk1 §2",
+   "default_text": "true"
+  },
+  {
+   "id": "pain.persist_sessions",
+   "type": "int",
+   "unit": "sessions",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3 / 1–3",
+   "presets": "—",
+   "source": "factdesk1 §1",
+   "default_text": "2 / 2"
+  },
+  {
+   "id": "pain.recur_count",
+   "type": "int",
+   "unit": "ADP-052 events / days",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "count threshold UNKNOWN (no academic or field count rule); Yamato 2015 definition (≥ 7 days or 3 consecutive sessions) CORROBORATED; non-consecutive versions ALLEGED",
+   "basis": "dd",
+   "range": "2–4 / 28–56",
+   "presets": "—",
+   "source": "hearing-3 med-acad, med-field; p1-B R6",
+   "default_text": "3 / 42"
+  },
+  {
+   "id": "pain.recur_window_days",
+   "type": "int",
+   "unit": "ADP-052 events / days",
+   "default": 42,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "count threshold UNKNOWN (no academic or field count rule); Yamato 2015 definition (≥ 7 days or 3 consecutive sessions) CORROBORATED; non-consecutive versions ALLEGED",
+   "basis": "dd",
+   "range": "2–4 / 28–56",
+   "presets": "—",
+   "source": "hearing-3 med-acad, med-field; p1-B R6",
+   "default_text": "3 / 42"
+  },
+  {
+   "id": "pain.severe_min",
+   "type": "int",
+   "unit": "/10",
+   "default": 7,
+   "limit_direction": "lower",
+   "owner": "08",
+   "grade": "CREDIBLE",
+   "basis": "dd",
+   "range": "5–7",
+   "presets": "—",
+   "source": "hearing-1 §3",
+   "default_text": "7"
+  },
+  {
+   "id": "perf.agegrade_bands",
+   "type": "list",
+   "unit": "WMA %",
+   "default": [
+    60,
+    70,
+    80,
+    90
+   ],
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CORROBORATED",
+   "basis": "conv",
+   "range": "—",
+   "presets": "—",
+   "source": "wg3 §1",
+   "default_text": "60 / 70 / 80 / 90"
+  },
+  {
+   "id": "perf.competitive_min_pct",
+   "type": "int",
+   "unit": "WMA %",
+   "default": 70,
+   "limit_direction": "lower",
+   "owner": "01",
+   "grade": "CORROBORATED (polarized benefit in trained athletes) / cut-off dd",
+   "basis": "dd",
+   "range": "60–80",
+   "presets": "—",
+   "source": "wg1 §2",
+   "default_text": "70"
+  },
+  {
+   "id": "phs.build_max",
+   "type": "int",
+   "unit": "weeks",
+   "default": 8,
+   "limit_direction": "upper",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0–2 / 6–12",
+   "presets": "—",
+   "source": "04 §3",
+   "default_text": "1 / 8"
+  },
+  {
+   "id": "phs.build_min",
+   "type": "int",
+   "unit": "weeks",
+   "default": 1,
+   "limit_direction": "lower",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0–2 / 6–12",
+   "presets": "—",
+   "source": "04 §3",
+   "default_text": "1 / 8"
+  },
+  {
+   "id": "phs.final_season_min_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 12,
+   "limit_direction": "lower",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "8–16",
+   "presets": "—",
+   "source": "04 §3",
+   "default_text": "12"
+  },
+  {
+   "id": "phs.onboard_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–4",
+   "presets": "—",
+   "source": "opening-outsider §2",
+   "default_text": "2"
+  },
+  {
+   "id": "phs.season_max_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 24,
+   "limit_direction": "upper",
+   "owner": "04",
+   "grade": "CORROBORATED (published plans 12–24 wk, description)",
+   "basis": "dd",
+   "range": "16–30",
+   "presets": "—",
+   "source": "wg2 §1–2",
+   "default_text": "24"
+  },
+  {
+   "id": "phs.sharpen_max_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 4,
+   "limit_direction": "upper",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "3–5",
+   "presets": "—",
+   "source": "04 PHS-010/011",
+   "default_text": "4"
+  },
+  {
+   "id": "phs.specific_min",
+   "type": "map",
+   "unit": "weeks",
+   "default": {
+    "5K": 2,
+    "10K": 2,
+    "HM": 3,
+    "M": 4,
+    "50K": 4,
+    "100K": 4
+   },
+   "keys": "distance",
+   "limit_direction": "lower",
+   "owner": "04",
+   "grade": "CREDIBLE (convention)",
+   "basis": "dd",
+   "range": "1–6",
+   "presets": "—",
+   "source": "wg2 §1",
+   "default_text": "5K/10K 2; HM 3; M 4; ultra 4"
+  },
+  {
+   "id": "phs.specific_target",
+   "type": "map",
+   "unit": "weeks",
+   "default": {
+    "5K": 4,
+    "10K": 4,
+    "HM": 6,
+    "M": 8,
+    "50K": 8,
+    "100K": 10
+   },
+   "keys": "distance",
+   "limit_direction": "none",
+   "owner": "04",
+   "grade": "CREDIBLE",
+   "basis": "dd",
+   "range": "2–12",
+   "presets": "09 may override",
+   "source": "wg2 §1–2",
+   "default_text": "5K 4; 10K 4; HM 6; M 8; 50K 8; 100K 10"
+  },
+  {
+   "id": "phs.transition_weeks",
+   "type": "map",
+   "unit": "weeks",
+   "default": {
+    "5K": 1,
+    "10K": 1,
+    "HM": 1,
+    "M": 2,
+    "50K": 2,
+    "100K": 2
+   },
+   "keys": "distance",
+   "limit_direction": "none",
+   "owner": "04",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "1–4",
+   "presets": "—",
+   "source": "hearing-1 §2",
+   "default_text": "5K/10K/HM 1; M 2; ultra 2"
+  },
+  {
+   "id": "pp.due_ask_days",
+   "type": "int",
+   "unit": "days before due_date",
+   "default": 14,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "UNKNOWN (timing); the need to re-enter after birth: Goom 2019, factdesk5 §7, CORROBORATED",
+   "basis": "dd",
+   "range": "7–21",
+   "presets": "—",
+   "source": "p2-C R4",
+   "default_text": "14"
+  },
+  {
+   "id": "pp.min_weeks",
+   "type": "int",
+   "unit": "weeks postpartum",
+   "default": 12,
+   "limit_direction": "lower",
+   "owner": "10",
+   "grade": "CORROBORATED (expert)",
+   "basis": "ev",
+   "range": "12–16",
+   "presets": "—",
+   "source": "wg4 §5 Goom",
+   "default_text": "12"
+  },
+  {
+   "id": "pred.band_min_pct",
+   "type": "int",
+   "unit": "± %",
+   "default": 7,
+   "limit_direction": "lower",
+   "owner": "03",
+   "grade": "CORROBORATED (5.9–8% errors)",
+   "basis": "ev",
+   "range": "6–8",
+   "presets": "—",
+   "source": "wg1 §7",
+   "default_text": "7"
+  },
+  {
+   "id": "pred.band_same_distance_pct",
+   "type": "int",
+   "unit": "% fast half-width / days",
+   "default": 4,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "CREDIBLE (retest CV 2.4–3.4% recreational, Machado 2015, single study; v5.1)",
+   "basis": "dd",
+   "range": "3–5 / 28–84",
+   "presets": "—",
+   "source": "factdesk4 §6; d2-A R6",
+   "default_text": "4 / 56"
+  },
+  {
+   "id": "pred.band_widen_estimated",
+   "type": "number",
+   "unit": "× band",
+   "default": 1.5,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN (self-reported race-time accuracy)",
+   "basis": "dd",
+   "range": "1.2–2.0",
+   "presets": "—",
+   "source": "factdesk2 §6",
+   "default_text": "1.5"
+  },
+  {
+   "id": "pred.checkpoint_weeks",
+   "type": "int",
+   "unit": "weeks between field tests for an ambitious long-horizon target",
+   "default": 6,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "4–8",
+   "presets": "—",
+   "source": "Room A R8",
+   "default_text": "6"
+  },
+  {
+   "id": "pred.low_volume_km_week",
+   "type": "int",
+   "unit": "km/week",
+   "default": 48,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "ALLEGED thresholds / CORROBORATED direction",
+   "basis": "dd",
+   "range": "32–48",
+   "presets": "—",
+   "source": "wg3 §4; factdesk1 §7",
+   "default_text": "48"
+  },
+  {
+   "id": "pred.low_volume_widen",
+   "type": "number",
+   "unit": "× slow half-band",
+   "default": 1.5,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1.0–2.0",
+   "presets": "—",
+   "source": "wg1 §7",
+   "default_text": "1.5"
+  },
+  {
+   "id": "pred.marathon_from_half",
+   "type": "number",
+   "unit": "× half time",
+   "default": 2.19,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "2.10–2.20",
+   "presets": "—",
+   "source": "wg1 §7",
+   "default_text": "2.19"
+  },
+  {
+   "id": "pred.max_extrapolation_ratio",
+   "type": "number",
+   "unit": "target ÷ anchor distance",
+   "default": 4.5,
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–8",
+   "presets": "—",
+   "source": "wg1 §7",
+   "default_text": "4.5"
+  },
+  {
+   "id": "pred.riegel_exp_min",
+   "type": "number",
+   "unit": "exponent",
+   "default": 1.06,
+   "limit_direction": "lower",
+   "owner": "03",
+   "grade": "CORROBORATED (Riegel too fast for M)",
+   "basis": "ev",
+   "range": "1.06–1.15",
+   "presets": "—",
+   "source": "wg1 §7; wg3 §4",
+   "default_text": "1.06"
+  },
+  {
+   "id": "pred.round_s",
+   "type": "int",
+   "unit": "s",
+   "default": 60,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "30–300",
+   "presets": "—",
+   "source": "03",
+   "default_text": "60"
+  },
+  {
+   "id": "pred.same_distance_max_age_days",
+   "type": "int",
+   "unit": "% fast half-width / days",
+   "default": 56,
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "CREDIBLE (retest CV 2.4–3.4% recreational, Machado 2015, single study; v5.1)",
+   "basis": "dd",
+   "range": "3–5 / 28–84",
+   "presets": "—",
+   "source": "factdesk4 §6; d2-A R6",
+   "default_text": "4 / 56"
+  },
+  {
+   "id": "pred.taper_gain_pct",
+   "type": "int",
+   "unit": "%",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "CREDIBLE (one origin)",
+   "basis": "dd",
+   "range": "0–3",
+   "presets": "—",
+   "source": "wg1 §5",
+   "default_text": "2"
+  },
+  {
+   "id": "pred.ultra_exp_high",
+   "type": "number",
+   "unit": "exponent",
+   "default": 1.3,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "low edge: Riegel 1.06 CORROBORATED (only grounded value; Comrades fit 1.05 ALLEGED); high edge UNKNOWN; no published marathon→ultra exponent [factdesk5 §3, UNKNOWN]",
+   "basis": "conv (low) / dd (high)",
+   "range": "1.05–1.10 / 1.20–1.40",
+   "presets": "—",
+   "source": "wg1 §7; factdesk4 §10; factdesk5 §3; p1-A R8",
+   "default_text": "**1.06** / 1.30 (v4)"
+  },
+  {
+   "id": "pred.ultra_exp_low",
+   "type": "number",
+   "unit": "exponent",
+   "default": 1.06,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "low edge: Riegel 1.06 CORROBORATED (only grounded value; Comrades fit 1.05 ALLEGED); high edge UNKNOWN; no published marathon→ultra exponent [factdesk5 §3, UNKNOWN]",
+   "basis": "conv (low) / dd (high)",
+   "range": "1.05–1.10 / 1.20–1.40",
+   "presets": "—",
+   "source": "wg1 §7; factdesk4 §10; factdesk5 §3; p1-A R8",
+   "default_text": "**1.06** / 1.30 (v4)"
+  },
+  {
+   "id": "pred.ultra_mode",
+   "type": "text",
+   "unit": "—",
+   "default": "range only, low confidence",
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN formula",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "wg1 §7",
+   "default_text": "range only, low confidence"
+  },
+  {
+   "id": "pregnancy.max_effort",
+   "type": "enum",
+   "unit": "effort",
+   "default": "E2",
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "CORROBORATED (norm/expert, wg4 §5)",
+   "basis": "conv",
+   "range": "E2–E3 (E3 if clinician agrees)",
+   "presets": "—",
+   "source": "wg4 §5",
+   "default_text": "E2"
+  },
+  {
+   "id": "pregnancy.mode",
+   "type": "text",
+   "unit": "—",
+   "default": "maintenance only, prior runners, clinician agreement",
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg4 §5 ACOG [society] 804",
+   "default_text": "maintenance only, prior runners, clinician agreement"
+  },
+  {
+   "id": "pregnancy.reattest_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 12,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "8–13",
+   "presets": "—",
+   "source": "10 SAF-051",
+   "default_text": "12"
+  },
+  {
+   "id": "pregnancy.vol_cap_ratio",
+   "type": "number",
+   "unit": "× V28 at start",
+   "default": 1.0,
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0.7–1.0",
+   "presets": "—",
+   "source": "wg3 impl. 6",
+   "default_text": "1.0"
+  },
+  {
+   "id": "preset.compat.<id>",
+   "type": "map",
+   "unit": "days, min/week",
+   "default": "09 §7 table",
+   "keys": "preset",
+   "limit_direction": "none",
+   "owner": "09",
+   "grade": "CREDIBLE (description of the published plans, wg2 §1)",
+   "basis": "conv",
+   "range": "—",
+   "presets": "per preset",
+   "source": "wg2 §1; opening-statusquo",
+   "default_text": "09 §7 table"
+  },
+  {
+   "id": "prog.baseline_max_age_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 2,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "wg3 §3",
+   "default_text": "2"
+  },
+  {
+   "id": "prog.est.confirm_ratio",
+   "type": "number",
+   "unit": "× planned weekly time, logged from measured entries, for a week to count (LOD-008)",
+   "default": 0.8,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "UNKNOWN; manual weekly logs fairly reliable (factdesk2 §6, CREDIBLE)",
+   "basis": "dd",
+   "range": "0.70–0.90",
+   "presets": "—",
+   "source": "external review v5 item 4",
+   "default_text": "0.80"
+  },
+  {
+   "id": "prog.est.confirm_weeks",
+   "type": "int",
+   "unit": "consecutive logged weeks that confirm the baseline (LOD-008)",
+   "default": 6,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "4–8",
+   "presets": "—",
+   "source": "external review v5 item 4",
+   "default_text": "6"
+  },
+  {
+   "id": "prog.est.week_max",
+   "type": "number",
+   "unit": "fraction above week.est_base_s (best logged week of the window), while the baseline is unconfirmed (LOD-007, v5.1)",
+   "default": 0.1,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "UNKNOWN as a safety limit: the weekly 10% rule did not lower injuries in its RCT (GRONORUN 20.8% vs 20.3%, wg4 §1, CORROBORATED) and week-to-week change showed no injury association (Frandsen 2025, CREDIBLE, one cohort); kept as a conservative convention for unverified starting volume",
+   "basis": "dd",
+   "range": "0.05–0.10",
+   "presets": "—",
+   "source": "wg4 §1; external review v5 item 4",
+   "default_text": "0.10"
+  },
+  {
+   "id": "prog.est.window_weeks",
+   "type": "int",
+   "unit": "completed weeks looked back for week.est_base_s",
+   "default": 4,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "UNKNOWN (matches the 4-week claim window of 01 §1.2)",
+   "basis": "dd",
+   "range": "3–6",
+   "presets": "—",
+   "source": "external review v5 item 4",
+   "default_text": "4"
+  },
+  {
+   "id": "prog.slow.2wk_max",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.2,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CORROBORATED that 10% is convention only",
+   "basis": "conv",
+   "range": "0.05–0.10 / 0.10–0.20",
+   "presets": "—",
+   "source": "wg4 §1 Buist",
+   "default_text": "0.10 / 0.20"
+  },
+  {
+   "id": "prog.slow.week_max",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.1,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CORROBORATED that 10% is convention only",
+   "basis": "conv",
+   "range": "0.05–0.10 / 0.10–0.20",
+   "presets": "—",
+   "source": "wg4 §1 Buist",
+   "default_text": "0.10 / 0.20"
+  },
+  {
+   "id": "prog.standard.2wk_max",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.3,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CORROBORATED figures, weak (non-significant)",
+   "basis": "dd",
+   "range": "0.10–0.20 / 0.20–0.30",
+   "presets": "—",
+   "source": "wg4 §1, impl. 3",
+   "default_text": "0.15 / 0.30"
+  },
+  {
+   "id": "prog.standard.week_max",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.15,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CORROBORATED figures, weak (non-significant)",
+   "basis": "dd",
+   "range": "0.10–0.20 / 0.20–0.30",
+   "presets": "—",
+   "source": "wg4 §1, impl. 3",
+   "default_text": "0.15 / 0.30"
+  },
+  {
+   "id": "protein.daily_band",
+   "type": "list",
+   "unit": "g/kg/day",
+   "default": [
+    1.2,
+    2.0
+   ],
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg5 §1",
+   "default_text": "1.2–2.0"
+  },
+  {
+   "id": "quality.counts_long",
+   "type": "map",
+   "unit": "bool per preset",
+   "default": {
+    "method_default": false,
+    "hansons": true,
+    "first": true,
+    "pfitzinger_classic": "SES-M-005"
+   },
+   "keys": "preset",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "CORROBORATED (structure)",
+   "basis": "conv",
+   "range": "—",
+   "presets": "hansons, first: true; pfitzinger_classic: medium-long run only",
+   "source": "wg2 §1; wg3 §3",
+   "default_text": "false"
+  },
+  {
+   "id": "quality.key_modules.<preset>.<phase>",
+   "type": "map",
+   "unit": "module lists",
+   "default": {
+    "method_default": {
+     "BASE": [
+      "SES-M-006",
+      "SES-M-007",
+      "SES-M-008",
+      "SES-M-012"
+     ],
+     "BUILD": [
+      "SES-M-008",
+      "SES-M-010",
+      "SES-M-012"
+     ],
+     "SPECIFIC": [
+      "SES-M-011",
+      "SES-M-009"
+     ]
+    }
+   },
+   "keys": "preset, phase",
+   "limit_direction": "none",
+   "owner": "06",
+   "note": "BASE: SES-M-008/012 only in late BASE (allowed phases); SPECIFIC falls back to the BUILD list for levels still missing (07 §2b)",
+   "grade": "CORROBORATED core structure (hearing-1 §2) / lists dd",
+   "basis": "dd",
+   "range": "—",
+   "presets": "per 06 §5",
+   "source": "06 §5",
+   "default_text": "method_default: BASE SES-M-006, 007, 008, 012; BUILD SES-M-008, 010, 012; SPECIFIC SES-M-011, 009 (then the BUILD list for levels still missing)"
+  },
+  {
+   "id": "quality.low_tol_level",
+   "type": "int",
+   "unit": "TOL level at or below which at most 1 key session is planned",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "N/A (engineering: restates SES-007's \"TOL ≤ L2\")",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "06 SES-007",
+   "default_text": "2"
+  },
+  {
+   "id": "quality.method_default",
+   "type": "map",
+   "unit": "sessions",
+   "default": {
+    "ONBOARD": 0,
+    "RTR": 0,
+    "TRANSITION": 0,
+    "BASE": 1,
+    "BUILD": 2,
+    "SPECIFIC": 2
+   },
+   "keys": "phase",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "CORROBORATED (school range)",
+   "basis": "dd",
+   "range": "0–2",
+   "presets": "—",
+   "source": "wg2 impl. 7",
+   "default_text": "ONBOARD/RTR/TRANSITION 0; BASE ≤ 1; BUILD/SPECIFIC 2"
+  },
+  {
+   "id": "quality.method_default_max",
+   "type": "int",
+   "unit": "key sessions per week (BUILD, SPECIFIC)",
+   "default": 2,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "CORROBORATED (school range 0–2, wg2 impl. 7) / value dd",
+   "basis": "dd",
+   "range": "1–2",
+   "presets": "—",
+   "source": "06 SES-007",
+   "default_text": "2"
+  },
+  {
+   "id": "quality.min_hab_level",
+   "type": "int",
+   "unit": "HAB level below which no key session is planned",
+   "default": 2,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "N/A (engineering: restates SES-007's \"HAB < L2\")",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "06 SES-007",
+   "default_text": "2"
+  },
+  {
+   "id": "quality.non_key_runs_min",
+   "type": "int",
+   "unit": "runs a week that are not key sessions (the long run and at least one easy run; owner Q2)",
+   "default": 2,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "ALLEGED (common novice and intermediate practice, from memory)",
+   "basis": "dd",
+   "range": "1–3",
+   "presets": "—",
+   "source": "gap/prose-rules.md SES-006",
+   "default_text": "2"
+  },
+  {
+   "id": "quality.per_week",
+   "type": "map",
+   "unit": "sessions",
+   "default": {
+    "method_default": "quality.method_default",
+    "daniels": 2,
+    "hansons": 3,
+    "pfitzinger_classic": 3,
+    "higdon_novice": 0,
+    "first": 3,
+    "norwegian_elite": 5
+   },
+   "keys": "preset",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "CORROBORATED (first three)",
+   "basis": "conv",
+   "range": "0–5",
+   "presets": "daniels 2; hansons 3; pfitzinger_classic 2–3; higdon_novice 0; first 3; norwegian_elite 4–5 (gated)",
+   "source": "wg2 impl. 7",
+   "default_text": "method_default by phase (quality.method_default)"
+  },
+  {
+   "id": "race.5k_finish_lr_min",
+   "type": "int",
+   "unit": "min (continuous or run-walk)",
+   "default": 30,
+   "limit_direction": "lower",
+   "owner": "03",
+   "grade": "CREDIBLE (Couch-to-5K exit: 30 min continuous, then a 5K)",
+   "basis": "conv",
+   "range": "25–35",
+   "presets": "—",
+   "source": "factdesk4 §1; d2-A R2",
+   "default_text": "30"
+  },
+  {
+   "id": "race.longest_floor_ratio.<distance>.<preset>",
+   "type": "map",
+   "unit": "race ÷ minimum peak long run (distance)",
+   "default": {
+    "M": 2.0,
+    "HM": 1.6,
+    "50K": 2.0,
+    "100K": 3.0,
+    "5K": 1.3,
+    "10K": 1.25
+   },
+   "keys": "distance",
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "CREDIBLE (one cohort; several summaries) for the direction (NYC first-timers); ultra floors below practice 30–42 km (ALLEGED/CORROBORATED as practice); values dd",
+   "basis": "dd",
+   "range": "M 1.8–2.2; 100K 2.5–3.5",
+   "presets": "declared per preset (INV-26)",
+   "source": "Room B R1; factdesk3 §5; d2-B R7; d2-C R1",
+   "default_text": "**all active presets:** M 2.00 (21.1 km); HM 1.60 (13.2 km); **50K 2.00 (25 km); 100K 3.00 (33.3 km)**; short = longest_ratio_max"
+  },
+  {
+   "id": "race.longest_ratio_max.100K",
+   "type": "number",
+   "unit": "ratio",
+   "default": 2.5,
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "ALLEGED (100 km plans longest 30–42 km)",
+   "basis": "dd",
+   "range": "2.2–3.0",
+   "presets": "—",
+   "source": "wg2 §4",
+   "default_text": "2.50"
+  },
+  {
+   "id": "race.longest_ratio_max.10K",
+   "type": "number",
+   "unit": "race ÷ peak long run",
+   "default": 1.25,
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "5K: CREDIBLE (Couch-to-5K reaches 30 min continuous, then a 5K, F-18); 10K/HM UNKNOWN (HM: long run > 21 km associated with faster HM)",
+   "basis": "dd",
+   "range": "1.0–1.5",
+   "presets": "—",
+   "source": "factdesk3 §2; factdesk1 §7",
+   "default_text": "1.30 / 1.25 / 1.30"
+  },
+  {
+   "id": "race.longest_ratio_max.50K",
+   "type": "number",
+   "unit": "ratio",
+   "default": 1.6,
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "CREDIBLE (Comrades 50–56 km about 5 weeks out)",
+   "basis": "dd",
+   "range": "1.4–1.8",
+   "presets": "—",
+   "source": "wg2 §4",
+   "default_text": "1.60"
+  },
+  {
+   "id": "race.longest_ratio_max.5K",
+   "type": "number",
+   "unit": "race ÷ peak long run",
+   "default": 1.3,
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "5K: CREDIBLE (Couch-to-5K reaches 30 min continuous, then a 5K, F-18); 10K/HM UNKNOWN (HM: long run > 21 km associated with faster HM)",
+   "basis": "dd",
+   "range": "1.0–1.5",
+   "presets": "—",
+   "source": "factdesk3 §2; factdesk1 §7",
+   "default_text": "1.30 / 1.25 / 1.30"
+  },
+  {
+   "id": "race.longest_ratio_max.HM",
+   "type": "number",
+   "unit": "race ÷ peak long run",
+   "default": 1.3,
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "5K: CREDIBLE (Couch-to-5K reaches 30 min continuous, then a 5K, F-18); 10K/HM UNKNOWN (HM: long run > 21 km associated with faster HM)",
+   "basis": "dd",
+   "range": "1.0–1.5",
+   "presets": "—",
+   "source": "factdesk3 §2; factdesk1 §7",
+   "default_text": "1.30 / 1.25 / 1.30"
+  },
+  {
+   "id": "race.longest_ratio_max.M",
+   "type": "map",
+   "unit": "ratio (time demand capped by lr.time_cap_min)",
+   "default": {
+    "method_default": 1.4,
+    "daniels": 2.0,
+    "hansons": 1.65,
+    "pfitzinger_classic": 1.3,
+    "higdon_novice": 1.32,
+    "galloway": 1.6
+   },
+   "keys": "preset",
+   "limit_direction": "upper",
+   "owner": "03",
+   "grade": "Hansons 16 mi CORROBORATED; others UNKNOWN; longer longest run → fewer race-day injuries CORROBORATED (association)",
+   "basis": "dd",
+   "range": "1.3–2.6",
+   "presets": "per preset",
+   "source": "Room B R1–R2; factdesk3 §5",
+   "default_text": "method_default **1.40** (30.1 km); daniels 2.00; hansons 1.65; pfitzinger_classic 1.30; higdon_novice **1.32**; galloway 1.60 — DECIDED round 1"
+  },
+  {
+   "id": "race.recovery_days",
+   "type": "map",
+   "unit": "days between goal races",
+   "default": {
+    "5K": 7,
+    "10K": 10,
+    "HM": 14,
+    "M": 28,
+    "50K": 42,
+    "100K": 42
+   },
+   "keys": "distance",
+   "limit_direction": "upper",
+   "owner": "07",
+   "grade": "CORROBORATED as convention for road (≈ 1 easy day per mile: 3/6/13/26 days, factdesk6 §1); ultras CONTRADICTED (conventions differ ×10); no marker minimum for 5K/10K (UNKNOWN). Defaults sit at or above the convention",
+   "basis": "dd",
+   "range": "5K 3–7; 10K 6–10; HM 13–21; M 26–42; ultra 21–60",
+   "presets": "—",
+   "source": "p2-C R8 (case 8), INV-31",
+   "default_text": "5K 7; 10K 10; HM 14; M 28; 50K 42; 100K 42"
+  },
+  {
+   "id": "reds.rescreen_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 10,
+   "limit_direction": "none",
+   "owner": "11",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "8–12",
+   "presets": "—",
+   "source": "wg5 impl. 6",
+   "default_text": "10"
+  },
+  {
+   "id": "repair.max_options",
+   "type": "int",
+   "unit": "count",
+   "default": 4,
+   "limit_direction": "upper",
+   "owner": "07",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "1–5 / 3–5",
+   "presets": "—",
+   "source": "opening-systemsarchitect §3",
+   "default_text": "3 / 4"
+  },
+  {
+   "id": "repair.max_passes",
+   "type": "int",
+   "unit": "count",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "07",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "1–5 / 3–5",
+   "presets": "—",
+   "source": "opening-systemsarchitect §3",
+   "default_text": "3 / 4"
+  },
+  {
+   "id": "replan.published_days",
+   "type": "int",
+   "unit": "days",
+   "default": 7,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "CORROBORATED general practice (frozen horizon); 7-day lock ALLEGED (one vendor)",
+   "basis": "dd",
+   "range": "3–14",
+   "presets": "—",
+   "source": "hearing-2 sys-acad, sys-field",
+   "default_text": "7"
+  },
+  {
+   "id": "result.confirm_window_days",
+   "type": "int",
+   "unit": "days",
+   "default": 42,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "28–84",
+   "presets": "—",
+   "source": "08",
+   "default_text": "42"
+  },
+  {
+   "id": "result.exclusion_days",
+   "type": "int",
+   "unit": "days",
+   "default": 7,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "7–14",
+   "presets": "—",
+   "source": "08",
+   "default_text": "7"
+  },
+  {
+   "id": "result.max_upgrade_pct",
+   "type": "int",
+   "unit": "% pace",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–5",
+   "presets": "—",
+   "source": "hearing-1 §5",
+   "default_text": "3"
+  },
+  {
+   "id": "result.pattern_sessions",
+   "type": "int",
+   "unit": "sessions",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "CORROBORATED principle; count UNKNOWN",
+   "basis": "dd",
+   "range": "3–4",
+   "presets": "—",
+   "source": "hearing-1 §5",
+   "default_text": "3"
+  },
+  {
+   "id": "result.rpe_high",
+   "type": "int",
+   "unit": "RPE 0–10",
+   "default": 8,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "7–9",
+   "presets": "—",
+   "source": "p2-C R6 (ADP-066)",
+   "default_text": "8"
+  },
+  {
+   "id": "result.rpe_high_sessions",
+   "type": "int",
+   "unit": "consecutive sessions ≥ E3",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "p2-C R6 (ADP-066)",
+   "default_text": "2"
+  },
+  {
+   "id": "rpe.expected_by_effort",
+   "type": "map",
+   "unit": "CR-10",
+   "default": {
+    "E0": [
+     0,
+     2
+    ],
+    "E1": [
+     0,
+     3
+    ],
+    "E2": [
+     4,
+     5
+    ],
+    "E3": [
+     6,
+     7
+    ],
+    "E4": [
+     8,
+     10
+    ]
+   },
+   "limit_direction": "none",
+   "owner": "08",
+   "grade": "CORROBORATED anchors (VT1/VT2); mapping UNKNOWN",
+   "basis": "dd",
+   "range": "±1",
+   "presets": "—",
+   "source": "factdesk1 §3; factdesk2 §5",
+   "default_text": "E0 ≤ 2; E1 ≤ 3; E2 4–5; E3 6–7; E4 ≥ 8"
+  },
+  {
+   "id": "rtr.bone_pain_max",
+   "type": "int",
+   "unit": "/10",
+   "default": 0,
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "0–2",
+   "presets": "—",
+   "source": "factdesk1 §2",
+   "default_text": "0"
+  },
+  {
+   "id": "rtr.illness_r0_min",
+   "type": "int",
+   "unit": "min",
+   "default": 15,
+   "limit_direction": "lower",
+   "owner": "10",
+   "grade": "CORROBORATED (Elliott stage 1)",
+   "basis": "ev",
+   "range": "10–20",
+   "presets": "—",
+   "source": "wg4 §5",
+   "default_text": "15"
+  },
+  {
+   "id": "rtr.ladder",
+   "type": "list",
+   "unit": "rungs",
+   "default": [
+    "R0",
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5"
+   ],
+   "limit_direction": "none",
+   "owner": "10",
+   "note": "sessions per 10 §4 table",
+   "grade": "CORROBORATED (structure) / UNKNOWN (durations)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "factdesk1 §1; wg4 §5",
+   "default_text": "rungs R0–R5 (10 §4 table)"
+  },
+  {
+   "id": "rtr.long_gap_days",
+   "type": "int",
+   "unit": "days",
+   "default": 90,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "60–120",
+   "presets": "—",
+   "source": "wg3 §3",
+   "default_text": "90"
+  },
+  {
+   "id": "rtr.max_runs_per_week",
+   "type": "int",
+   "unit": "runs",
+   "default": 4,
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "3–4",
+   "presets": "—",
+   "source": "10",
+   "default_text": "4"
+  },
+  {
+   "id": "rtr.max_weeks_per_rung",
+   "type": "int",
+   "unit": "weeks",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–4",
+   "presets": "—",
+   "source": "10",
+   "default_text": "3"
+  },
+  {
+   "id": "rtr.rest_days_between",
+   "type": "int",
+   "unit": "days",
+   "default": 1,
+   "limit_direction": "upper",
+   "owner": "10",
+   "grade": "CORROBORATED (structure)",
+   "basis": "conv",
+   "range": "1–2",
+   "presets": "—",
+   "source": "factdesk1 §1",
+   "default_text": "1"
+  },
+  {
+   "id": "rtr.session_min",
+   "type": "map",
+   "unit": "min",
+   "default": {
+    "0": 30,
+    "1": 30,
+    "2": 30,
+    "3": 45,
+    "4": 45,
+    "5": 45
+   },
+   "keys": "prior_tol_tier",
+   "limit_direction": "lower",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "20–60",
+   "presets": "—",
+   "source": "hearing-1 §3",
+   "default_text": "prior tol 0–2: 30; ≥ 3: 45"
+  },
+  {
+   "id": "rtr.sessions_per_rung",
+   "type": "int",
+   "unit": "sessions",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–4",
+   "presets": "—",
+   "source": "factdesk1 §1",
+   "default_text": "3"
+  },
+  {
+   "id": "rtr.start_ladder",
+   "type": "list",
+   "unit": "rungs",
+   "default": [
+    {
+     "rung": "S1",
+     "run_min": [
+      8
+     ]
+    },
+    {
+     "rung": "S2",
+     "run_min": [
+      9
+     ]
+    },
+    {
+     "rung": "S3",
+     "run_min": [
+      9
+     ]
+    },
+    {
+     "rung": "S4",
+     "run_min": [
+      16
+     ]
+    },
+    {
+     "rung": "S5",
+     "run_min": [
+      15,
+      16,
+      20
+     ]
+    },
+    {
+     "rung": "S6",
+     "run_min": [
+      18,
+      20,
+      25
+     ]
+    },
+    {
+     "rung": "S7",
+     "run_min": [
+      25
+     ]
+    },
+    {
+     "rung": "S8",
+     "run_min": [
+      28
+     ]
+    },
+    {
+     "rung": "S9",
+     "run_min": [
+      30
+     ]
+    }
+   ],
+   "limit_direction": "none",
+   "owner": "10",
+   "grade": "CORROBORATED (weeks 1–5, 7, 9, wk 6 session 3); CREDIBLE (wk 6 sessions 1–2; wk 8 = 28, one variant 30); tested programmes 8–13 weeks (GRONORUN, CORROBORATED)",
+   "basis": "conv",
+   "range": "—",
+   "presets": "—",
+   "source": "factdesk4 §1; d2-A R1",
+   "default_text": "S1–S9 = NHS [state] Couch-to-5K weeks 1–9 (10 §4b): running minutes 8, ~9, 9, 16, 15/16/20, 18/20/25, 25, 28, 30; 3 clean sessions per rung, no skipping"
+  },
+  {
+   "id": "screen.active_runs_min",
+   "type": "int",
+   "unit": "sessions/week",
+   "default": 3,
+   "limit_direction": "lower",
+   "owner": "01",
+   "grade": "CORROBORATED (factor) / threshold UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "wg4 §3",
+   "default_text": "3"
+  },
+  {
+   "id": "screen.health_check_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 12,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "8–26",
+   "presets": "—",
+   "source": "01 SCR-008",
+   "default_text": "12"
+  },
+  {
+   "id": "screen.instrument",
+   "type": "text",
+   "unit": "—",
+   "default": "PAR-Q+ 2023",
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "—",
+   "presets": "—",
+   "source": "wg4 §3; factdesk2 §2",
+   "default_text": "PAR-Q+ 2023, fixed text"
+  },
+  {
+   "id": "screen.valid_days",
+   "type": "int",
+   "unit": "days",
+   "default": 365,
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "180–365",
+   "presets": "—",
+   "source": "wg4 §3",
+   "default_text": "365"
+  },
+  {
+   "id": "ses.cooldown_s",
+   "type": "int",
+   "unit": "s",
+   "default": 300,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "conv",
+   "range": "300–900 / 0–600",
+   "presets": "—",
+   "source": "practice",
+   "default_text": "600 / 300"
+  },
+  {
+   "id": "ses.dose.<SES-M-id>",
+   "type": "map",
+   "unit": "segments",
+   "default": "see ses.dose.<SES-M-id>.steps (v5.2)",
+   "keys": "module",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice)",
+   "basis": "dd",
+   "range": "±50%",
+   "presets": "per 06 §5",
+   "source": "hearing-1 §2",
+   "default_text": "06 §2 \"Dose\" column"
+  },
+  {
+   "id": "ses.dose.<SES-M-id>.steps",
+   "type": "segments",
+   "unit": "ordered dose steps",
+   "default": "one concrete entry per module below",
+   "keys": "module",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-002.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "total_s": 1200
+    },
+    {
+     "total_s": 1500
+    },
+    {
+     "total_s": 1800
+    },
+    {
+     "total_s": 2100
+    },
+    {
+     "total_s": 2400
+    },
+    {
+     "total_s": 2700
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-003.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "from": "05 long-run curve"
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-004.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "from": "05 long-run curve",
+     "intake": "NUT-010"
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-005.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "from": "05 long-run curve",
+     "segment": "DST-006"
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-006.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E5",
+     "reps": 4,
+     "rep_s": 20,
+     "rec_s": 60,
+     "rec_effort": "E0"
+    },
+    {
+     "effort": "E5",
+     "reps": 6,
+     "rep_s": 20,
+     "rec_s": 60,
+     "rec_effort": "E0"
+    },
+    {
+     "effort": "E5",
+     "reps": 8,
+     "rep_s": 20,
+     "rec_s": 60,
+     "rec_effort": "E0"
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-008.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E3",
+     "reps": 3,
+     "rep_s": 300,
+     "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 3,
+     "rep_s": 360,
+     "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 3,
+     "rep_s": 420,
+     "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 3,
+     "rep_s": 480,
+     "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 4,
+     "rep_s": 480,
+     "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 5,
+     "rep_s": 480,
+     "rec_s": 120
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-009.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E3",
+     "reps": 1,
+     "rep_s": 900
+    },
+    {
+     "effort": "E3",
+     "reps": 1,
+     "rep_s": 1200
+    },
+    {
+     "effort": "E3",
+     "reps": 1,
+     "rep_s": 1500
+    },
+    {
+     "effort": "E3",
+     "reps": 1,
+     "rep_s": 1800
+    },
+    {
+     "effort": "E3",
+     "reps": 1,
+     "rep_s": 2100
+    },
+    {
+     "effort": "E3",
+     "reps": 1,
+     "rep_s": 2400
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-010.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E4",
+     "reps": 5,
+     "rep_s": 120,
+     "rec_s": 120
+    },
+    {
+     "effort": "E4",
+     "reps": 6,
+     "rep_s": 120,
+     "rec_s": 120
+    },
+    {
+     "effort": "E4",
+     "reps": 5,
+     "rep_s": 180,
+     "rec_s": 180
+    },
+    {
+     "effort": "E4",
+     "reps": 6,
+     "rep_s": 180,
+     "rec_s": 180
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-011.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "race",
+     "share": 0.1,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 0.15,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 0.2,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 0.25,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 0.3,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 0.4,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 0.5,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": "L3",
+     "rec_s": 120
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-012.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "total_s": 2400,
+     "shares": {
+      "E1": 0.7,
+      "E2": 0.15,
+      "E3": 0.15
+     }
+    },
+    {
+     "total_s": 3000,
+     "shares": {
+      "E1": 0.7,
+      "E2": 0.15,
+      "E3": 0.15
+     }
+    },
+    {
+     "total_s": 3600,
+     "shares": {
+      "E1": 0.7,
+      "E2": 0.15,
+      "E3": 0.15
+     }
+    },
+    {
+     "total_s": 4200,
+     "shares": {
+      "E1": 0.7,
+      "E2": 0.15,
+      "E3": 0.15
+     }
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-013.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E2",
+     "reps": 1,
+     "rep_s": 1800
+    },
+    {
+     "effort": "E2",
+     "reps": 1,
+     "rep_s": 2400
+    },
+    {
+     "effort": "E2",
+     "reps": 1,
+     "rep_s": 3000
+    },
+    {
+     "effort": "E2",
+     "reps": 1,
+     "rep_s": 3600
+    },
+    {
+     "effort": "E2",
+     "reps": 1,
+     "rep_s": 4500
+    },
+    {
+     "effort": "E2",
+     "reps": 1,
+     "rep_s": 5400
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-018.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E1",
+     "reps": 1,
+     "rep_s": 1800
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-019.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E4",
+     "distance_m": 3000
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-020.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E4",
+     "distance_m": 2000,
+     "then_rec_s": 900,
+     "then": {
+      "effort": "E5",
+      "distance_m": 400
+     }
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-021.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "from": "last logged dose (SES-018)"
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-022.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E1",
+     "total_s": 1800
+    },
+    {
+     "effort": "E1",
+     "total_s": 2400
+    },
+    {
+     "effort": "E1",
+     "total_s": 3000
+    },
+    {
+     "effort": "E1",
+     "total_s": 3600
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-024.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E3",
+     "reps": 2,
+     "rep_s": 300,
+     "rec_s": 120
+    },
+    {
+     "effort": "E4",
+     "reps": 4,
+     "rep_s": 60,
+     "rec_s": 60
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.drift_rpe_max",
+   "type": "int",
+   "unit": "min / RPE",
+   "default": 2,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "UNKNOWN (no durability field test)",
+   "basis": "dd",
+   "range": "10–30 / 1–3",
+   "presets": "—",
+   "source": "wg1 §1",
+   "default_text": "20 / 2"
+  },
+  {
+   "id": "ses.drift_window_min",
+   "type": "int",
+   "unit": "min / RPE",
+   "default": 20,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "UNKNOWN (no durability field test)",
+   "basis": "dd",
+   "range": "10–30 / 1–3",
+   "presets": "—",
+   "source": "wg1 §1",
+   "default_text": "20 / 2"
+  },
+  {
+   "id": "ses.easy_min_min",
+   "type": "int",
+   "unit": "min",
+   "default": 20,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "15–30",
+   "presets": "—",
+   "source": "opening-contextrealist",
+   "default_text": "20"
+  },
+  {
+   "id": "ses.exit.DUR3_min",
+   "type": "int",
+   "unit": "min",
+   "default": 135,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "120–150",
+   "presets": "—",
+   "source": "02 §2",
+   "default_text": "135"
+  },
+  {
+   "id": "ses.exit.ECO_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 6,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "4–8",
+   "presets": "—",
+   "source": "06",
+   "default_text": "6"
+  },
+  {
+   "id": "ses.exit.THR2_min",
+   "type": "int",
+   "unit": "min at E3",
+   "default": 25,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "20–30 / 45–60",
+   "presets": "—",
+   "source": "02 §2",
+   "default_text": "25 / 45"
+  },
+  {
+   "id": "ses.exit.THR4_min",
+   "type": "int",
+   "unit": "min at E3",
+   "default": 45,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "20–30 / 45–60",
+   "presets": "—",
+   "source": "02 §2",
+   "default_text": "25 / 45"
+  },
+  {
+   "id": "ses.exit.VO2_3_min",
+   "type": "int",
+   "unit": "min at E4",
+   "default": 18,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "16–20",
+   "presets": "—",
+   "source": "02 §2",
+   "default_text": "18"
+  },
+  {
+   "id": "ses.exit_ready_sessions",
+   "type": "int",
+   "unit": "instances",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–3",
+   "presets": "—",
+   "source": "02 CMP-002",
+   "default_text": "2"
+  },
+  {
+   "id": "ses.exit_retest_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 3,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–6",
+   "presets": "—",
+   "source": "06",
+   "default_text": "3"
+  },
+  {
+   "id": "ses.exit_test.<node>.<level>",
+   "type": "map",
+   "unit": "test session",
+   "default": {
+    "HAB": {
+     "2": {
+      "module": "SES-M-018",
+      "segments": [
+       {
+        "effort": "E1",
+        "duration_s": 1800,
+        "repeats": 1
+       }
+      ]
+     }
+    },
+    "THR": {
+     "1": {
+      "module": "SES-M-008",
+      "segments": [
+       {
+        "effort": "E3",
+        "duration_s": 480,
+        "repeats": 2,
+        "recovery_s": 120
+       }
+      ]
+     },
+     "2": {
+      "module": "SES-M-008",
+      "segments": [
+       {
+        "effort": "E3",
+        "duration_s": 300,
+        "repeats": 5,
+        "recovery_s": 120
+       }
+      ]
+     },
+     "3": {
+      "module": "SES-M-009",
+      "segments": [
+       {
+        "effort": "E3",
+        "duration_s": 1800,
+        "repeats": 1
+       }
+      ]
+     },
+     "4": {
+      "module": "SES-M-009",
+      "segments": [
+       {
+        "effort": "E3",
+        "duration_s": 900,
+        "repeats": 3,
+        "recovery_s": 180
+       }
+      ]
+     }
+    },
+    "VO2": {
+     "2": {
+      "module": "SES-M-010",
+      "segments": [
+       {
+        "effort": "E4",
+        "duration_s": 180,
+        "repeats": 5,
+        "recovery_s": 180
+       }
+      ]
+     },
+     "3": {
+      "module": "SES-M-010",
+      "segments": [
+       {
+        "effort": "E4",
+        "duration_s": 180,
+        "repeats": 6,
+        "recovery_s": 180
+       }
+      ]
+     }
+    },
+    "MSP": {
+     "1": {
+      "module": "SES-M-011",
+      "share_level": 1
+     },
+     "2": {
+      "module": "SES-M-011",
+      "share_level": 2
+     },
+     "3": {
+      "module": "SES-M-011",
+      "share_level": 3
+     }
+    },
+    "DUR": {
+     "1": {
+      "module": "SES-M-003",
+      "long_run_min": 60
+     },
+     "2": {
+      "module": "SES-M-003",
+      "long_run_min": 90
+     },
+     "3": {
+      "module": "SES-M-003",
+      "long_run_min": "ses.exit.DUR3_min"
+     },
+     "4": {
+      "module": "SES-M-004",
+      "long_run_min": 180
+     }
+    }
+   },
+   "keys": "node, level",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (02 §2 levels)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §3b",
+   "default_text": "06 §3b table (THR1 2 × 8 min; THR2 5 × 5 min; THR3 30 min; THR4 3 × 15 min; VO2_2 5 × 3 min; VO2_3 6 × 3 min; MSP share; DUR 60/90/135/180 min; HAB2 FT-0)"
+  },
+  {
+   "id": "ses.ft0_min",
+   "type": "int",
+   "unit": "min",
+   "default": 30,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "N/A (engineering: = HAB L2)",
+   "basis": "eng",
+   "range": "20–30",
+   "presets": "—",
+   "source": "02 §2",
+   "default_text": "30"
+  },
+  {
+   "id": "ses.ft1_dist_m",
+   "type": "int",
+   "unit": "m",
+   "default": 3000,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "UNKNOWN (test choice)",
+   "basis": "dd",
+   "range": "2000–5000",
+   "presets": "—",
+   "source": "factdesk1 §3",
+   "default_text": "3000"
+  },
+  {
+   "id": "ses.ft2_dists_m",
+   "type": "list",
+   "unit": "m",
+   "default": [
+    400,
+    2000
+   ],
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "CORROBORATED (n = 34)",
+   "basis": "ev",
+   "range": "or 2–3 recent races",
+   "presets": "—",
+   "source": "factdesk1 §3",
+   "default_text": "400 + 2000"
+  },
+  {
+   "id": "ses.medlong_ratio",
+   "type": "number",
+   "unit": "× current long run",
+   "default": 0.65,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "CREDIBLE",
+   "basis": "conv",
+   "range": "0.55–0.75",
+   "presets": "pfitzinger_classic",
+   "source": "wg2 §1",
+   "default_text": "0.65"
+  },
+  {
+   "id": "ses.msp_rep_max_min",
+   "type": "map",
+   "unit": "min per race-effort repeat (SES-M-011)",
+   "default": {
+    "5K": 10,
+    "10K": 10,
+    "HM": 15,
+    "M": 20
+   },
+   "keys": "distance",
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "5–20",
+   "presets": "—",
+   "source": "06 §2c",
+   "default_text": "5K 10; 10K 10; HM 15; M 20"
+  },
+  {
+   "id": "ses.progress_rpe_margin",
+   "type": "int",
+   "unit": "RPE points",
+   "default": 1,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "0–2",
+   "presets": "—",
+   "source": "wg1 §3",
+   "default_text": "1"
+  },
+  {
+   "id": "ses.race_effort",
+   "type": "map",
+   "unit": "effort",
+   "default": {
+    "5K": "E4",
+    "10K": "E3",
+    "HM": "E3",
+    "M": "E2",
+    "50K": "E1",
+    "100K": "E1"
+   },
+   "keys": "distance",
+   "limit_direction": "none",
+   "owner": "06",
+   "note": "10K is the E3/E4 boundary; 50K E1/E2 (prose 06 §6)",
+   "grade": "CORROBORATED anchors / mapping dd",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "factdesk1 §3; wg1 §1",
+   "default_text": "5K E4; 10K E3/E4; HM E3; M E2; 50K E1/E2; 100K E1"
+  },
+  {
+   "id": "ses.retest_lead_days",
+   "type": "int",
+   "unit": "days",
+   "default": 14,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "7–28",
+   "presets": "—",
+   "source": "07 §3",
+   "default_text": "14"
+  },
+  {
+   "id": "ses.runwalk.entry_rung",
+   "type": "map",
+   "unit": "index into ses.runwalk.ladder",
+   "default": {
+    "preference": 2,
+    "hab_low": 1
+   },
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (Galloway 2:1 beginner ratio, wg2 §1 CORROBORATED for the ratio; entry rule dd)",
+   "basis": "dd",
+   "range": "0–3",
+   "presets": "galloway by pace",
+   "source": "gap/prose-rules.md SES-010",
+   "default_text": "preference only: 2 (2:1); HAB < L2: 1 (1:1)"
+  },
+  {
+   "id": "ses.runwalk.ladder",
+   "type": "list",
+   "unit": "min run : min walk",
+   "default": [
+    [
+     1,
+     2
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     8,
+     1
+    ],
+    "continuous"
+   ],
+   "limit_direction": "none",
+   "owner": "06",
+   "note": "[run min, walk min]",
+   "grade": "CORROBORATED (2:1 beginner) / ALLEGED (ladder)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "galloway ratios by pace",
+   "source": "wg2 §1",
+   "default_text": "1:2, 1:1, 2:1, 3:1, 5:1, 8:1, continuous"
+  },
+  {
+   "id": "ses.runwalk.rpe_max",
+   "type": "int",
+   "unit": "sessions / CR-10",
+   "default": 4,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "2–4 / 3–5",
+   "presets": "—",
+   "source": "factdesk1 §1",
+   "default_text": "2 / 4"
+  },
+  {
+   "id": "ses.runwalk.sessions_per_rung",
+   "type": "int",
+   "unit": "sessions / CR-10",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "2–4 / 3–5",
+   "presets": "—",
+   "source": "factdesk1 §1",
+   "default_text": "2 / 4"
+  },
+  {
+   "id": "ses.strength_per_week",
+   "type": "int",
+   "unit": "sessions / min",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "CORROBORATED (economy); injury effect UNKNOWN",
+   "basis": "conv",
+   "range": "1–3 / 15–40",
+   "presets": "—",
+   "source": "wg1 §6",
+   "default_text": "2 / 20"
+  },
+  {
+   "id": "ses.strength_session_min",
+   "type": "int",
+   "unit": "sessions / min",
+   "default": 20,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "CORROBORATED (economy); injury effect UNKNOWN",
+   "basis": "conv",
+   "range": "1–3 / 15–40",
+   "presets": "—",
+   "source": "wg1 §6",
+   "default_text": "2 / 20"
+  },
+  {
+   "id": "ses.strides_per_week",
+   "type": "int",
+   "unit": "sessions",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "conv",
+   "range": "1–3",
+   "presets": "—",
+   "source": "02 ECO L1",
+   "default_text": "2"
+  },
+  {
+   "id": "ses.taper_touch",
+   "type": "map",
+   "unit": "segments",
+   "default": {
+    "E3": {
+     "reps": 2,
+     "rep_s": 300,
+     "rec_s": 120
+    },
+    "E4": {
+     "reps": 4,
+     "rep_s": 60,
+     "rec_s": 60
+    }
+   },
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "CORROBORATED (keep intensity) / dose ALLEGED",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "wg1 §5",
+   "default_text": "4 × 1 min E4 or 2 × 5 min E3 inside an easy run"
+  },
+  {
+   "id": "ses.target_rpe",
+   "type": "map",
+   "unit": "session RPE 0–10 (whole session)",
+   "default": {
+    "E1": 3,
+    "E2": 5,
+    "E3": 6,
+    "E4": 7
+   },
+   "keys": "effort",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (session-RPE method, Foster, from memory)",
+   "basis": "dd",
+   "range": "±1",
+   "presets": "—",
+   "source": "gap/prose-rules.md SES-011",
+   "default_text": "E1 3; E2 5; E3 6; E4 7"
+  },
+  {
+   "id": "ses.warmup_s",
+   "type": "int",
+   "unit": "s",
+   "default": 600,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED",
+   "basis": "conv",
+   "range": "300–900 / 0–600",
+   "presets": "—",
+   "source": "practice",
+   "default_text": "600 / 300"
+  },
+  {
+   "id": "spike.apply_duration",
+   "type": "bool",
+   "unit": "bool",
+   "default": true,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "UNKNOWN (duration transfer)",
+   "basis": "dd",
+   "range": "true",
+   "presets": "—",
+   "source": "factdesk2 §1",
+   "default_text": "true"
+  },
+  {
+   "id": "spike.block_ratio",
+   "type": "number",
+   "unit": "× L30_eff",
+   "default": 2.0,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CREDIBLE (> 100% increase HRR 2.28, one cohort; several summaries)",
+   "basis": "dd",
+   "range": "1.30–2.00",
+   "presets": "—",
+   "source": "wg4 §1",
+   "default_text": "2.00"
+  },
+  {
+   "id": "spike.warn_ratio",
+   "type": "number",
+   "unit": "× L30_eff",
+   "default": 1.1,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CREDIBLE (one observational, distance-only cohort; several summaries); cut-point ALLEGED",
+   "basis": "dd",
+   "range": "1.00–1.10",
+   "presets": "—",
+   "source": "wg4 §1; factdesk2 §1",
+   "default_text": "1.10"
+  },
+  {
+   "id": "taper.cut_profile",
+   "type": "map",
+   "unit": "× taper.volume_cut per week",
+   "default": {
+    "1": [
+     1.0
+    ],
+    "2": [
+     0.6,
+     1.0
+    ],
+    "3": [
+     0.4,
+     0.7,
+     1.0
+    ]
+   },
+   "keys": "T",
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "CREDIBLE (progressive) / fractions UNKNOWN",
+   "basis": "dd",
+   "range": "—",
+   "presets": "hansons [0.3, 1.0]",
+   "source": "wg1 §5; hearing-1 §1",
+   "default_text": "T1 [1.0]; T2 [0.6, 1.0]; T3 [0.4, 0.7, 1.0]"
+  },
+  {
+   "id": "taper.freq_min_ratio",
+   "type": "number",
+   "unit": "× pre-taper runs/week",
+   "default": 1.0,
+   "limit_direction": "lower",
+   "owner": "05",
+   "grade": "CORROBORATED (frequency kept)",
+   "basis": "ev",
+   "range": "0.8–1.0",
+   "presets": "—",
+   "source": "wg1 §5",
+   "default_text": "1.0 (race week excepted)"
+  },
+  {
+   "id": "taper.shape",
+   "type": "enum",
+   "unit": "enum",
+   "default": "progressive",
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "progressive / step",
+   "presets": "—",
+   "source": "wg1 impl. 6",
+   "default_text": "progressive"
+  },
+  {
+   "id": "taper.volume_cut",
+   "type": "number",
+   "unit": "fraction",
+   "default": 0.5,
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "CORROBORATED",
+   "basis": "ev",
+   "range": "0.41–0.60",
+   "presets": "—",
+   "source": "wg1 §5",
+   "default_text": "0.50"
+  },
+  {
+   "id": "taper.weeks",
+   "type": "map",
+   "unit": "weeks",
+   "default": {
+    "5K": 2,
+    "10K": 2,
+    "HM": 2,
+    "M": 3,
+    "50K": 3,
+    "100K": 3
+   },
+   "keys": "distance",
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "CORROBORATED (Bosquet ~2; Smyth M ≤ 3)",
+   "basis": "ev",
+   "range": "1–3",
+   "presets": "hansons M 2 with cut_profile [0.3, 1.0] (≈ 10-day taper)",
+   "source": "wg1 §5; wg2 §3",
+   "default_text": "5K/10K/HM 2; M 3; 50K/100K 3"
+  },
+  {
+   "id": "taper.weeks.short_finish",
+   "type": "int",
+   "unit": "weeks",
+   "default": 1,
+   "limit_direction": "none",
+   "owner": "04",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–2",
+   "presets": "—",
+   "source": "Room A R4",
+   "default_text": "1"
+  },
+  {
+   "id": "taper.weeks_short",
+   "type": "map",
+   "unit": "weeks",
+   "default": {
+    "5K": 1,
+    "10K": 1,
+    "HM": 1,
+    "M": 2,
+    "50K": 2,
+    "100K": 2
+   },
+   "keys": "distance",
+   "limit_direction": "none",
+   "owner": "04",
+   "note": "M/ultra 1 if W < 3",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–2",
+   "presets": "—",
+   "source": "04 PHS-010",
+   "default_text": "≤ HM 1; M/ultra 2 (1 if W < 3)"
+  },
+  {
+   "id": "tid.e2_share_max",
+   "type": "number",
+   "unit": "fraction of time E2",
+   "default": 0.2,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "CORROBORATED as description",
+   "basis": "conv",
+   "range": "0.05–0.25",
+   "presets": "polarized 0.05",
+   "source": "wg2 §2",
+   "default_text": "0.20"
+  },
+  {
+   "id": "tid.easy_share_min",
+   "type": "number",
+   "unit": "fraction of time E0–E1",
+   "default": 0.75,
+   "limit_direction": "lower",
+   "owner": "05",
+   "grade": "CORROBORATED (~80% easy)",
+   "basis": "conv",
+   "range": "0.70–0.85",
+   "presets": "polarized 0.80",
+   "source": "wg1 impl. 2; wg2 §2",
+   "default_text": "0.75"
+  },
+  {
+   "id": "tid.hard_share_max.<family>",
+   "type": "map",
+   "unit": "fraction of weekly time at E3–E4",
+   "default": {
+    "short": 0.2,
+    "road_classic": 0.1,
+    "ultra": 0.1
+   },
+   "keys": "family",
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "short: top of tested doses (10–20% zone 3, CREDIBLE); counting all of E3 is conservative; practice share UNKNOWN; road: CORROBORATED as description (Knopp ~6%)",
+   "basis": "conv / dd",
+   "range": "short 0.15–0.25",
+   "presets": "polarized: road/ultra 0.12, **short 0.20**; preset fixtures may declare their own",
+   "source": "hearing-2 coach-acad; factdesk3 §1; wg2 §2; d2-A R5",
+   "default_text": "short **0.20 (final, v3)**; road_classic 0.10; ultra 0.10"
+  },
+  {
+   "id": "tid.hard_share_max.HM",
+   "type": "number",
+   "unit": "fraction of weekly time at E3–E4 for the half marathon (owner Q10)",
+   "default": 0.15,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "ALLEGED (HM plans hold more threshold work than marathon plans; from memory); trial doses 10–20% zone 3 CREDIBLE (hearing-2 coach-acad)",
+   "basis": "dd",
+   "range": "0.10–0.20",
+   "presets": "polarized 0.15",
+   "source": "gap/prose-rules.md §4.6",
+   "default_text": "0.15"
+  },
+  {
+   "id": "tid.model",
+   "type": "enum",
+   "unit": "enum",
+   "default": "pyramidal",
+   "limit_direction": "none",
+   "owner": "05",
+   "grade": "CORROBORATED (small effects)",
+   "basis": "ev",
+   "range": "pyramidal / polarized",
+   "presets": "norwegian_elite polarized; opt-in LOD-032",
+   "source": "wg1 §2",
+   "default_text": "pyramidal"
+  },
+  {
+   "id": "trainlow.min_aer_level",
+   "type": "int",
+   "unit": "level",
+   "default": 3,
+   "limit_direction": "lower",
+   "owner": "11",
+   "grade": "UNKNOWN (\"advanced only\" CREDIBLE)",
+   "basis": "dd",
+   "range": "3–4",
+   "presets": "—",
+   "source": "wg5 impl. 7",
+   "default_text": "3"
+  },
+  {
+   "id": "transition.vol_max_ratio",
+   "type": "number",
+   "unit": "× pre-taper V_ref",
+   "default": 0.5,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "0.3–0.6",
+   "presets": "—",
+   "source": "04 §1",
+   "default_text": "0.50"
+  },
+  {
+   "id": "two_day.adjacent_ratio",
+   "type": "number",
+   "unit": "× LR(w) (day before/after the long run)",
+   "default": 0.5,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "ALLEGED",
+   "basis": "dd",
+   "range": "0.40–0.60",
+   "presets": "—",
+   "source": "F-05",
+   "default_text": "0.50"
+  },
+  {
+   "id": "two_day.cap_ratio",
+   "type": "number",
+   "unit": "× L30_eff (two consecutive days)",
+   "default": 1.6,
+   "limit_direction": "upper",
+   "owner": "05",
+   "grade": "ALLEGED; v1 1.30 collapsed weekly volume (F-05)",
+   "basis": "dd",
+   "range": "1.30–1.80",
+   "presets": "—",
+   "source": "opening-contrarian I2; F-05",
+   "default_text": "1.60"
+  },
+  {
+   "id": "val.comprehension_n",
+   "type": "int",
+   "unit": "runners / %",
+   "default": 8,
+   "limit_direction": "none",
+   "owner": "14",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "5–8 / 70–90",
+   "presets": "—",
+   "source": "opening-outsider §3",
+   "default_text": "8 / 80"
+  },
+  {
+   "id": "val.comprehension_pass_pct",
+   "type": "int",
+   "unit": "runners / %",
+   "default": 80,
+   "limit_direction": "none",
+   "owner": "14",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "5–8 / 70–90",
+   "presets": "—",
+   "source": "opening-outsider §3",
+   "default_text": "8 / 80"
+  },
+  {
+   "id": "val.conformance_tol_pct",
+   "type": "int",
+   "unit": "%",
+   "default": 10,
+   "limit_direction": "none",
+   "owner": "14",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "5–15",
+   "presets": "—",
+   "source": "opening-statusquo §3",
+   "default_text": "10"
+  },
+  {
+   "id": "val.injury_days_lost",
+   "type": "int",
+   "unit": "days",
+   "default": 7,
+   "limit_direction": "none",
+   "owner": "14",
+   "grade": "UNKNOWN (definitions vary)",
+   "basis": "dd",
+   "range": "1–14",
+   "presets": "—",
+   "source": "wg4 §2",
+   "default_text": "7"
+  },
+  {
+   "id": "val.long_run_review_ratio",
+   "type": "number",
+   "unit": "injury rate ratio, weeks with a long run > 150 min vs other weeks",
+   "default": 1.5,
+   "limit_direction": "upper",
+   "owner": "14",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1.2–2.0",
+   "presets": "—",
+   "source": "Room B R6",
+   "default_text": "1.5"
+  },
+  {
+   "id": "val.pilot_min_hours",
+   "type": "int",
+   "unit": "h",
+   "default": 2000,
+   "limit_direction": "lower",
+   "owner": "14",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1000–5000",
+   "presets": "—",
+   "source": "14",
+   "default_text": "2000"
+  },
+  {
+   "id": "val.pilot_n",
+   "type": "int",
+   "unit": "runners",
+   "default": 60,
+   "limit_direction": "none",
+   "owner": "14",
+   "grade": "UNKNOWN (no power basis: no effect claimed)",
+   "basis": "dd",
+   "range": "40–150",
+   "presets": "—",
+   "source": "14",
+   "default_text": "60"
+  },
+  {
+   "id": "val.property_cases_min",
+   "type": "int",
+   "unit": "cases",
+   "default": 100000,
+   "limit_direction": "lower",
+   "owner": "14",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "≥ 10000",
+   "presets": "—",
+   "source": "14",
+   "default_text": "100000"
+  },
+  {
+   "id": "val.removal_material_pct",
+   "type": "int",
+   "unit": "%",
+   "default": 5,
+   "limit_direction": "none",
+   "owner": "14",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–10",
+   "presets": "—",
+   "source": "opening-firstprinciples §2",
+   "default_text": "5"
+  }
+ ]
+}

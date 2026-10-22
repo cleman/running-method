@@ -1,15 +1,15 @@
 {
  "grammar": "RuleExpr: CEL subset with CEL's four-valued evaluation (true, false, error, unknown); unknown only for declared attributes; absent undeclared values are errors (12 §3.2)",
- "version": "v5.1",
+ "version": "v5.2",
  "source": "module texts 01-11 (RULE lines + rulexpr blocks); built by design/v5/tools/build_rules.py",
  "counts": {
-  "rules": 293,
-  "formal": 210,
-  "procedure": 12,
-  "static": 6,
-  "text_only": 65,
+  "rules": 301,
+  "formal": 248,
+  "procedure": 14,
+  "static": 7,
+  "text_only": 32,
   "invariants": 31,
-  "mvp_rules": 255
+  "mvp_rules": 269
  },
  "records": [
   {
@@ -31,6 +31,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "!has(input.value) && !(input.field in p('inp.no_unknown_fields'))",
    "on_unknown": "skip",
    "action": {
@@ -78,6 +80,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "has(profile.birth_month) && has(profile.birth_year)",
    "on_unknown": "ask",
    "action": {
@@ -123,6 +127,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "input.source in ['onboarding_claim', 'recall', 'backfill']",
    "on_unknown": "fire",
    "action": {
@@ -159,6 +165,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "!has(claim.last_run_date)",
    "on_unknown": "fire",
    "action": {
@@ -196,6 +204,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_entry",
+   "scope": "global",
    "condition": "event.type == 'anchor_saved'",
    "on_unknown": "skip",
    "action": {
@@ -233,6 +243,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "input.field in ['hrmax', 'lthr'] && !(input.source in ['hrmax_measured', 'lthr_measured'] && has(input.test_date))",
    "on_unknown": "fire",
    "action": {
@@ -269,6 +281,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "!has(profile.available_days) || !has(profile.max_runs_per_week) || !has(profile.available_minutes_per_week)",
    "on_unknown": "fire",
    "action": {
@@ -312,6 +326,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "!has(profile.long_run_day) || !has(profile.run_walk_preference) || !has(profile.preset_preference)",
    "on_unknown": "skip",
    "action": {
@@ -360,6 +376,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_entry",
+   "scope": "per_entry",
    "condition": "event.type == 'activity_saved'",
    "on_unknown": "skip",
    "action": {
@@ -396,6 +414,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "count(log.entries_created_today, e, e.date < today) > p('log.bulk_backfill_max')",
    "on_unknown": "fire",
    "action": {
@@ -432,6 +452,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_entry",
+   "scope": "per_session",
    "condition": "event.type == 'tick_done_as_planned'",
    "on_unknown": "skip",
    "action": {
@@ -491,6 +513,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_entry",
    "condition": "(has(entry.pain_0_10) && entry.pain_0_10 > 0) || entry.pain_any == true || event.type == 'something_felt_wrong'",
    "on_unknown": "fire",
    "action": {
@@ -528,6 +552,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "per_entry",
    "condition": "entry.plausibility == 'flagged' && !has(entry.resolution)",
    "on_unknown": "fire",
    "action": {
@@ -576,6 +602,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "has(state.prev_anchor_10k_s) && anchor.equiv_10k_s < state.prev_anchor_10k_s * (1 - p('anchor.jump_confirm_mult') * p('pace.deadband_pct') / unit.pct)",
    "on_unknown": "fire",
    "action": {
@@ -624,6 +652,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "!screen.complete || today > screen.valid_until",
    "on_unknown": "fire",
    "action": {
@@ -661,6 +691,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "static",
+   "scope": "global",
    "condition": "event.type == 'render_screen'",
    "on_unknown": "fire",
    "action": {
@@ -697,6 +729,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "screen.complete && all(screen.items, q, screen.answers[q] == false) && !state.current_symptom",
    "on_unknown": "skip",
    "action": {
@@ -732,6 +766,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.scr_symptom",
    "on_unknown": "fire",
    "action": {
@@ -768,6 +804,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "screen.complete && exists(screen.items, q, screen.answers[q] == true) && !state.scr_symptom && !state.scr_disease_inactive",
    "on_unknown": "fire",
    "action": {
@@ -805,6 +843,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.scr_disease_inactive",
    "on_unknown": "fire",
    "action": {
@@ -841,6 +881,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "has(screen.clearance_attested_on) && screen.clearance_attested_on >= date_add(screen.completed_on, p('flag.clearance_min_delay_days'))",
    "on_unknown": "skip",
    "action": {
@@ -876,6 +918,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "today >= screen.valid_until || event.health_changed == true || event.special_status_changed == true || (age_high(today) >= p('masters.vigorous_assessment_age') && !screen.masters_checked) || event.type == 'cardiac_flag_cleared'",
    "on_unknown": "fire",
    "action": {
@@ -911,6 +955,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
    "condition": "event.type == 'compute_tol'",
    "on_unknown": "fire",
    "action": {
@@ -947,6 +993,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S0",
+   "scope": "global",
    "condition": "true",
    "on_unknown": "fire",
    "action": {
@@ -1015,6 +1063,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.training_age_years < p('ctx.novice_training_age_years') || claim.runs_per_week == 0",
    "on_unknown": "fire",
    "action": {
@@ -1062,6 +1112,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.other_sport_background in ['cycling', 'swimming', 'triathlon'] && profile.training_age_years < p('ctx.novice_training_age_years')",
    "on_unknown": "fire",
    "action": {
@@ -1110,6 +1162,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.injury_last_12m == true",
    "on_unknown": "fire",
    "action": {
@@ -1158,6 +1212,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_week",
    "condition": "age_high(today) >= p('ctx.masters_age')",
    "on_unknown": "fire",
    "action": {
@@ -1206,6 +1262,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_session",
    "condition": "date_add(session.date, -1) in profile.night_shift_dates || event.type == 'night_shift_tap'",
    "on_unknown": "fire",
    "action": {
@@ -1243,6 +1301,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.max_runs_per_week < p('ctx.lowfreq_runs')",
    "on_unknown": "fire",
    "action": {
@@ -1289,6 +1349,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.log_status != 'rich'",
    "on_unknown": "fire",
    "action": {
@@ -1331,6 +1393,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "exists(state.runner_tags, t, !(t in rule_ctx.envelope))",
    "on_unknown": "fire",
    "action": {
@@ -1367,6 +1431,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_node",
    "condition": "threshold_level(node.id) > state.levels[node.id]",
    "on_unknown": "skip",
    "action": {
@@ -1410,16 +1476,18 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": "event.type == 'exit_test_passed' && level_prereqs_hold(node.id, event.level, today)",
+   "stage": "S2",
+   "scope": "per_entry",
+   "condition": "entry.test_result == 'passed' && level_prereqs_hold(entry.test_node, entry.test_level, entry.date)",
    "on_unknown": "skip",
    "action": {
     "op": "set",
-    "target": "state.levels[node.id]",
-    "expr": "max(state.levels[node.id], event.level)",
+    "target": "state.levels[entry.test_node]",
+    "expr": "max(state.levels[entry.test_node], entry.test_level)",
     "then": [
      {
       "op": "set",
-      "target": "state.level_confidence[node.id]",
+      "target": "state.level_confidence[entry.test_node]",
       "expr": "'measured'"
      }
     ]
@@ -1454,14 +1522,16 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_node",
    "condition": "weeks_between(state.last_exercised[node.id], today) >= p('cmp.decay_weeks') && !(node.id in ['TOL', 'AER', 'HAB'])",
    "on_unknown": "fire",
    "action": {
     "op": "set",
     "target": "state.levels[node.id]",
-    "expr": "max(0, state.levels[node.id] - 1)"
+    "expr": "decay(state.levels, weeks_between(state.last_exercised[node.id], today), p('cmp.decay_weeks'))[node.id]"
    },
-   "expression_status": "formal",
+   "expression_status": "procedure",
    "explain": {
     "runner": "MSG-WHY-CMP",
     "coach": "because: fitness is lost with inactivity; size unknown for recreational runners"
@@ -1491,6 +1561,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_node",
    "condition": "state.level_rests_on_self_report[node.id]",
    "on_unknown": "fire",
    "action": {
@@ -1535,6 +1607,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.injury_last_12m || (profile.other_sport_background != 'none' && profile.training_age_years < p('ctx.novice_training_age_years')) || profile.training_age_years < p('ctx.novice_training_age_years')",
    "on_unknown": "fire",
    "action": {
@@ -1571,6 +1645,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_candidate",
    "condition": "exists(m.prereqs, q, state.levels[q.node] < q.level)",
    "on_unknown": "fire",
    "action": {
@@ -1599,18 +1675,25 @@
    "then_text": "pick the eligible node maximising weight(distance, N) × gap(N); ties broken by the fixed node order DUR, THR, AER, MSP, VO2, ECO, FUEL; when every weighted gap is 0, or the winner is AER or DUR, then in BUILD and SPECIFIC fill the slot from the active preset's 06 §5 module list for the phase, rotating by week index (never an easy run or a second long run); in BASE, or for a finish goal whose levels are all held, the slot becomes strides on an easy run (SES-M-006), shown as such",
    "because": "sessions should close the largest weighted gap; a zero-gap or volume-node winner must not turn a key slot into easy running (F-09)",
    "evidence": {
-    "text": "opening-firstprinciples §3; opening-systemsarchitect R1; F-09, UNKNOWN (design default)",
+    "text": "opening-firstprinciples §3; opening-systemsarchitect R1; F-09, UNKNOWN (design default); v5.2 slot choices (second slot a different ability, rotation, strides fallback): ALLEGED (common coaching practice, e.g. Daniels '2Q' weeks, from memory)",
     "grades": [
+     "ALLEGED",
      "UNKNOWN"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.3",
+   "scope": "per_week",
+   "condition": "event.type == 'choose_keys'",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "week.key_slots",
+    "expr": "choose_key_modules(week, week.quality_max)"
+   },
+   "expression_status": "procedure",
    "explain": {
     "runner": "MSG-WHY-CMP",
     "coach": "because: sessions should close the largest weighted gap; a zero-gap or volume-node winner must not turn a key slot into easy running (F-09)"
@@ -1628,21 +1711,28 @@
    "priority": 111,
    "hit_policy": "PRIORITY",
    "when_text": "the goal race is expected to last > fuel.required_above_min (90 min)",
-   "then_text": "FUEL L2 is a required level; FUEL L3 only when the expected duration > fuel.l4_min_race_h (2.5 h)",
+   "then_text": "FUEL L2 is a required level; FUEL L3 only when the expected duration > fuel.l4_min_race_h (2.5 h) **and the goal is a time goal** (v5.2, owner Q6: a finish goal stops at FUEL L2, so a slow finisher is not pulled into race-pace and threshold work through the FUEL L3 → MSP L1 → THR L1 prerequisites; the race-day plan still never exceeds the tolerated intake, NUT-020)",
    "because": "fuelling is needed above ~90 min, and 60–90 g/h applies only beyond 2.5 h (F-10)",
    "evidence": {
-    "text": "wg5 impl. 3, §3, CORROBORATED",
+    "text": "wg5 impl. 3, §3, CORROBORATED; v5.2 finish goals stop at FUEL L2: design choice, UNKNOWN",
     "grades": [
-     "CORROBORATED"
+     "CORROBORATED",
+     "UNKNOWN"
     ],
-    "basis": "evidence"
+    "basis": "design_default"
    },
-   "default": false,
+   "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S2",
+   "scope": "global",
+   "condition": "goal.expected_duration_s > unit.min_s * p('fuel.required_above_min')",
+   "on_unknown": "fire",
+   "action": {
+    "op": "floor",
+    "target": "demand.required_levels.FUEL",
+    "expr": "(goal.goal_type == 'time' && goal.expected_duration_s > unit.h_s * p('fuel.l4_min_race_h')) ? p('fuel.required_level_long') : p('fuel.required_level_mid')"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-CMP",
     "coach": "because: fuelling is needed above ~90 min, and 60–90 g/h applies only beyond 2.5 h (F-10)"
@@ -1671,6 +1761,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.goal_type in ['finish', 'time']",
    "on_unknown": "skip",
    "action": {
@@ -1707,6 +1799,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "per_session",
    "condition": "true",
    "on_unknown": "fire",
    "action": {
@@ -1743,6 +1837,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "demand.floor_dist_m / state.s_slow > unit.min_s * p('lr.floor_time_max_min.' + goal.distance) || demand.floor_dist_m > unit.km_m * p('lr.abs_cap_km.' + preset.id)",
    "on_unknown": "fire",
    "action": {
@@ -1787,6 +1883,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "has(goal.cutoff_h) && unit.h_s * goal.cutoff_h < feas.slow_edge_s",
    "on_unknown": "fire",
    "action": {
@@ -1827,6 +1925,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.expected_conditions == 'hot'",
    "on_unknown": "skip",
    "action": {
@@ -1864,6 +1964,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "per_session",
    "condition": "effort_rank(session.effort_target) >= effort_rank('E1') && effort_rank(session.effort_target) <= effort_rank('E4') && anchor.confidence == 'measured' && days_between(anchor.date, session.date) <= p('anchor.max_age_days')",
    "on_unknown": "skip",
    "action": {
@@ -1900,6 +2002,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.goal_type == 'time' && has(anchor.time_s)",
    "on_unknown": "skip",
    "action": {
@@ -1936,6 +2040,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.distance == 'M' && state.V28_dist_m < unit.km_m * p('pred.low_volume_km_week')",
    "on_unknown": "fire",
    "action": {
@@ -2016,6 +2122,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.goal_type == 'time' && !has(anchor.time_s)",
    "on_unknown": "fire",
    "action": {
@@ -2023,7 +2131,7 @@
     "code": "ANCHOR_UNKNOWN",
     "then": [
      {
-      "op": "cap",
+      "op": "floor",
       "target": "feas.verdict_rank",
       "expr": "verdict_rank('stretch')"
      },
@@ -2063,6 +2171,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.goal_type in ['finish', 'time']",
    "on_unknown": "skip",
    "action": {
@@ -2099,6 +2209,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "feas.k_key > feas.weeks_available - feas.weeks_needed.taper - feas.p0 || feas.k_all > feas.weeks_available - feas.weeks_needed.taper",
    "on_unknown": "fire",
    "action": {
@@ -2134,6 +2246,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "feas.slack < 0",
    "on_unknown": "fire",
    "action": {
@@ -2169,7 +2283,9 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": "feas.horizon == 'H1' && !((anchor_l30_ok(state, goal)) && state.V28_time_s >= demand.V_req_time_s * (1 - p('val.conformance_tol_pct')))",
+   "stage": "S3",
+   "scope": "global",
+   "condition": "feas.horizon == 'H1' && !((anchor_l30_ok(state, goal)) && state.V28_time_s >= demand.V_req_time_s * (1 - p('val.conformance_tol_pct') / unit.pct))",
    "on_unknown": "fire",
    "action": {
     "op": "add_reason",
@@ -2267,11 +2383,19 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
+   "condition": "event.type == 'compute_weeks_needed' && exists(demand.required_tests, x, x.hard_time_s > p('tid.hard_share_max.' + goal.family_tid) * feas.v_peak_s)",
+   "on_unknown": "fire",
+   "action": {
+    "op": "add_reason",
+    "code": "LEVELS_UNREACHABLE",
+    "args": {
+     "skill": "first(demand.required_tests, x, x.hard_time_s > p('tid.hard_share_max.' + goal.family_tid) * feas.v_peak_s).name"
+    }
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-FEA",
     "coach": "because: an exit test that never fits the week makes the level unreachable without notice"
@@ -2301,6 +2425,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "demand.V_req_time_s > unit.min_s * profile.available_minutes_per_week",
    "on_unknown": "fire",
    "action": {
@@ -2339,6 +2465,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "demand.runs_req > min(profile.max_runs_per_week, size(profile.available_days)) || feas.fill_capacity_s < demand.V_req_time_s",
    "on_unknown": "fire",
    "action": {
@@ -2375,6 +2503,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.goal_type == 'time' && feas.horizon in ['H1', 'H2'] && goal.target_time_s < feas.P_race_s * (1 - feas.B_fast)",
    "on_unknown": "fire",
    "action": {
@@ -2410,6 +2540,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.goal_type == 'time' && feas.P_race_s * (1 - feas.B_fast) <= goal.target_time_s && goal.target_time_s < feas.P_race_s",
    "on_unknown": "fire",
    "action": {
@@ -2445,6 +2577,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "feas.slack >= 0 && feas.slack < p('feas.stretch_margin_weeks')",
    "on_unknown": "fire",
    "action": {
@@ -2481,6 +2615,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.goal_type == 'time' && feas.horizon in ['H3', 'H4', 'H5'] && goal.target_time_s < feas.P_race_s * (1 - feas.B_fast)",
    "on_unknown": "fire",
    "action": {
@@ -2533,6 +2669,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "exists(feas.inputs_used, i, i.confidence != 'measured')",
    "on_unknown": "fire",
    "action": {
@@ -2569,6 +2707,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "event.type == 'reasons_collected'",
    "on_unknown": "skip",
    "action": {
@@ -2604,6 +2744,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "goal.goal_type == 'maintain' && size(profile.available_days) < p('maint.sessions_min')",
    "on_unknown": "fire",
    "action": {
@@ -2639,6 +2781,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "feas.verdict == 'infeasible'",
    "on_unknown": "fire",
    "action": {
@@ -2684,6 +2828,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "per_option",
    "condition": "exists(option.reasons, x, reason_class(x) == 'infeasible') || !option.plan_valid",
    "on_unknown": "fire",
    "action": {
@@ -2719,6 +2865,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "plan.is_regeneration && feas.verdict == 'infeasible'",
    "on_unknown": "fire",
    "action": {
@@ -2770,6 +2918,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "event.type == 'regeneration' && all(feas.reasons, x, x in ['PHASES_DO_NOT_FIT', 'AVAILABILITY_TIME', 'LEVELS_UNREACHABLE']) && ((demand.long_run_met || demand.credited) && feas.weeks_left >= feas.weeks_needed.taper || (goal.distance == '5K' && goal.goal_type in ['finish', 'time'] && state.on_start_ladder && state.ladder_rung_index >= p('ladder.runwalk_race_min_rung') && goal.distance_km * p('ladder.est_pace_s_per_km') + p('ses.warmup_s') <= p('spike.block_ratio') * state.longest_ladder_session_s && state.last3_ladder_clean))",
    "on_unknown": "fire",
    "action": {
@@ -2827,6 +2977,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "has(state.last_goal_race_date) && days_between(state.last_goal_race_date, goal.race_date) < p('race.recovery_days')[state.last_goal_race_distance]",
    "on_unknown": "fire",
    "action": {
@@ -2871,6 +3023,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "count(goal.edits, e, e.verdict == 'infeasible' && days_between(e.submitted_at, today) <= p('goal.edit_window_days')) >= p('goal.edit_fail_limit') && (feas.slack < p('goal.edit_margin_weeks') + p('feas.stretch_margin_weeks') || (goal.goal_type == 'time' && goal.target_time_s < feas.P_race_s * (1 - feas.B_fast) * (1 + p('goal.edit_margin_pct') / unit.pct)))",
    "on_unknown": "fire",
    "action": {
@@ -2906,6 +3060,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "event.claims_raised && state.last_verdict == 'infeasible'",
    "on_unknown": "fire",
    "action": {
@@ -2954,6 +3110,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "event.type == 'result' && anchor.confidence == 'measured'",
    "on_unknown": "skip",
    "action": {
@@ -3002,6 +3160,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S4",
+   "scope": "global",
    "condition": "plan.W >= p('deload.min_plan_weeks')",
    "on_unknown": "skip",
    "action": {
@@ -3038,6 +3198,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S4",
+   "scope": "per_week",
    "condition": "week.is_deload && (week.phase == 'TAPER' || weeks_between(week.start, plan.taper_start) < p('deload.exclusion_before_taper'))",
    "on_unknown": "fire",
    "action": {
@@ -3073,6 +3235,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S4",
+   "scope": "global",
    "condition": "plan.W < p('deload.min_plan_weeks')",
    "on_unknown": "fire",
    "action": {
@@ -3109,6 +3273,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S4",
+   "scope": "per_week",
    "condition": "week.is_deload && week.weeks_to_phase_boundary <= 1",
    "on_unknown": "fire",
    "action": {
@@ -3146,6 +3312,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.deload_every_ctx_set == true",
    "on_unknown": "fire",
    "action": {
@@ -3182,6 +3350,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S4",
+   "scope": "per_week",
    "condition": "week.is_deload && week.loading_weeks_since_recovery < p('deload.min_gap_weeks')",
    "on_unknown": "fire",
    "action": {
@@ -3218,6 +3388,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S4",
+   "scope": "per_week",
    "condition": "plan.W <= p('phs.sharpen_max_weeks')",
    "on_unknown": "skip",
    "action": {
@@ -3261,6 +3433,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S4",
+   "scope": "global",
    "condition": "plan.W <= p('phs.sharpen_max_weeks') && !demand.met_by_current_state",
    "on_unknown": "fire",
    "action": {
@@ -3359,7 +3533,7 @@
    "tier": "T5",
    "priority": 214,
    "hit_policy": "PRIORITY",
-   "when_text": "a goal race is completed (or abandoned)",
+   "when_text": "a goal race is completed (or abandoned), or nothing is logged within log.contemporaneous_window_h after the race date (v5.2: treated as run)",
    "then_text": "insert TRANSITION of phs.transition_weeks[distance] before any new BASE",
    "because": "recovery after racing is universal practice",
    "evidence": {
@@ -3371,10 +3545,17 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "on_event",
+   "scope": "global",
+   "condition": "event.type == 'goal_race_closed'",
+   "on_unknown": "fire",
+   "action": {
+    "op": "insert_phase",
+    "phase": "TRANSITION",
+    "rung_expr": "null",
+    "weeks_expr": "p('phs.transition_weeks')[goal.distance]"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-PHS",
     "coach": "because: recovery after racing is universal practice"
@@ -3392,10 +3573,10 @@
    "priority": 215,
    "hit_policy": "PRIORITY",
    "when_text": "MAINTAIN has run maint.max_weeks",
-   "then_text": "schedule a field test and warn that long-race durability is not preserved",
+   "then_text": "schedule a field test (SES-014's choice of test) in that week, warn that long-race durability is not preserved (MSG-PHS-MAINT-LIMIT) and start a new MAINTAIN block unless the runner sets a goal; it never switches to BASE by itself (v5.2, owner Q9)",
    "because": "maintenance evidence covers VO2max ≤ ~15 weeks in general populations only",
    "evidence": {
-    "text": "wg1 §5 Spiering, CORROBORATED / UNKNOWN for long races",
+    "text": "wg1 §5 Spiering, CORROBORATED / UNKNOWN for long races; v5.2 new block after the test, no automatic BASE: design choice, UNKNOWN",
     "grades": [
      "CORROBORATED",
      "UNKNOWN"
@@ -3404,12 +3585,30 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S4",
+   "scope": "per_week",
+   "condition": "week.phase == 'MAINTAIN' && week.weeks_in_phase == p('maint.max_weeks')",
+   "on_unknown": "skip",
+   "action": {
+    "op": "schedule_session",
+    "module_expr": "(state.levels.VO2 >= 1 && state.levels.THR >= 1) ? 'SES-M-020' : (prereqs_hold(module('SES-M-019'), week.start) ? 'SES-M-019' : 'SES-M-018')",
+    "week_expr": "week.start",
+    "then": [
+     {
+      "op": "emit_message",
+      "msg": "MSG-PHS-MAINT-LIMIT"
+     },
+     {
+      "op": "insert_phase",
+      "phase": "MAINTAIN",
+      "rung_expr": "null",
+      "weeks_expr": "p('maint.max_weeks')"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
-    "runner": "MSG-WHY-PHS",
+    "runner": "MSG-PHS-MAINT-LIMIT",
     "coach": "because: maintenance evidence covers VO2max ≤ ~15 weeks in general populations only"
    },
    "tests": {
@@ -3435,7 +3634,7 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "MVP",
+   "release": "spec",
    "condition": null,
    "on_unknown": null,
    "action": null,
@@ -3469,6 +3668,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "static",
+   "scope": "global",
    "condition": "event.type == 'load_quantity_requested'",
    "on_unknown": "skip",
    "action": {
@@ -3505,6 +3706,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
    "condition": "event.type == 'resolve_profile'",
    "on_unknown": "skip",
    "action": {
@@ -3541,6 +3744,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "!week.is_deload && week.phase != 'TAPER'",
    "on_unknown": "fire",
    "action": {
@@ -3577,6 +3782,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "global",
    "condition": "weeks_between(state.last_non_deload_week_end, today) > p('prog.baseline_max_age_weeks')",
    "on_unknown": "fire",
    "action": {
@@ -3614,6 +3821,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "!week.is_deload && !(week.phase in ['TAPER', 'TRANSITION', 'RTR'])",
    "on_unknown": "fire",
    "action": {
@@ -3657,6 +3866,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_week",
    "condition": "week.is_step_up || event.type == 'level_unlock'",
    "on_unknown": "fire",
    "action": {
@@ -3695,6 +3906,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "!state.baseline_confirmed && !week.is_deload && !(week.phase in ['TAPER', 'TRANSITION', 'RTR', 'START_LADDER'])",
    "on_unknown": "fire",
    "action": {
@@ -3739,6 +3952,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "global",
    "condition": "!state.baseline_confirmed && state.est_confirm_weeks >= p('prog.est.confirm_weeks')",
    "on_unknown": "skip",
    "action": {
@@ -3778,6 +3993,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_session",
    "condition": "!session.is_goal_race && (session.planned_distance_m > p('spike.warn_ratio') * l30_dist(session.date) || session.planned_duration_s > p('spike.warn_ratio') * l30_time(session.date))",
    "on_unknown": "fire",
    "action": {
@@ -3822,6 +4039,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "event.type == 'compute_l30_future'",
    "on_unknown": "fire",
    "action": {
@@ -3858,6 +4077,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_entry",
+   "scope": "per_entry",
    "condition": "entry.is_race && event.type == 'activity_saved'",
    "on_unknown": "fire",
    "action": {
@@ -3894,6 +4115,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_session",
    "condition": "session.adjacent_to_long_run && session.planned_duration_s > min(p('two_day.adjacent_ratio') * week.lr_s, p('two_day.cap_ratio') * l30_time(session.date) - week.lr_s)",
    "on_unknown": "fire",
    "action": {
@@ -3938,6 +4161,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.template_lr_s > p('spike.warn_ratio') * l30_time(week.long_run_date)",
    "on_unknown": "fire",
    "action": {
@@ -3984,6 +4209,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_session",
    "condition": "session.kind in ['run_walk', 'time_prescribed']",
    "on_unknown": "fire",
    "action": {
@@ -4022,6 +4249,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.planned_time_s < max(demand.V_req_time_s, state.V_hold_s) && week.all_easy_at_cap",
    "on_unknown": "skip",
    "action": {
@@ -4060,6 +4289,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_session",
    "condition": "session.expected_duration_s > unit.min_s * p('lr.long_guard_min') && !(state.tol_level >= p('lr.long_guard_tol_level') && state.tol_confidence == 'measured' && (age_high(session.date) < p('masters.vigorous_assessment_age') || has(screen.saf060_attested_on)))",
    "on_unknown": "fire",
    "action": {
@@ -4111,6 +4342,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_session",
    "condition": "session.expected_duration_s > unit.min_s * p('lr.long_guard_min') && exists(plan.sessions, o, o.id != session.id && o.expected_duration_s > unit.min_s * p('lr.long_guard_min') && !same_pair(o, session) && abs(days_between(o.date, session.date)) < p('lr.over180_min_gap_days') && (!session.is_peak_long_run || (o.is_peak_long_run && o.date < session.date)))",
    "on_unknown": "fire",
    "action": {
@@ -4155,6 +4388,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "event.type == 'compute_lr_cap'",
    "on_unknown": "skip",
    "action": {
@@ -4223,6 +4458,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "event.type == 'build_week'",
    "on_unknown": "fire",
    "action": {
@@ -4271,6 +4508,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7.6",
+   "scope": "per_week",
    "condition": "event.type == 'distribute_week'",
    "on_unknown": "skip",
    "action": {
@@ -4328,7 +4567,7 @@
    "priority": 257,
    "hit_policy": "PRIORITY",
    "when_text": "a week's sessions are set",
-   "then_text": "E0–E1 time ≥ tid.easy_share_min × V(w), E3+E4 time ≤ tid.hard_share_max[family] × V(w), E2 time ≤ tid.e2_share_max × V(w); race-effort segments inside long runs count as quality and are converted to E1 (never shortening the run); other quality work segments are shortened; a preset whose fixture declares its own shares uses them, and a preset that would be gutted is incompatible (DST-016)",
+   "then_text": "E0–E1 time ≥ tid.easy_share_min × V(w), E3+E4 time ≤ tid.hard_share_max[family] × V(w) (v5.2: the half marathon uses its own tid.hard_share_max.HM, owner Q10), E2 time ≤ tid.e2_share_max × V(w), all three counted from **segment** times (warm-ups, cool-downs, recoveries and strides count as E1; v5.2 fixes the v5 record, which counted whole sessions); race-effort segments inside long runs count as quality and are converted to E1 (never shortening the run); other quality work segments are shortened; a preset whose fixture declares its own shares uses them, and a preset that would be gutted is incompatible (DST-016)",
    "because": "about 80% easy is the shared core, but the v1 cap came from marathon plans and starved short-race exit tests",
    "evidence": {
     "text": "wg1 impl. 2, wg2 §2, CORROBORATED (description); factdesk3 §1, UNKNOWN (measured short-race shares); hearing-2 coach-acad, CREDIBLE (10–20% zone 3 in trials); Room A R2, R9; Room B R5",
@@ -4341,11 +4580,13 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7.5",
+   "scope": "per_week",
    "condition": "event.type == 'sessions_set'",
    "on_unknown": "fire",
    "action": {
     "op": "constraint",
-    "check": "sum(week.sessions, s, effort_rank(s.effort_target) <= effort_rank('E1') ? s.planned_duration_s : 0) >= p('tid.easy_share_min') * week.planned_time_s && sum(week.sessions, s, effort_rank(s.effort_target) >= effort_rank('E3') ? s.planned_duration_s : 0) <= p('tid.hard_share_max.' + goal.family) * week.planned_time_s && sum(week.sessions, s, s.effort_target == 'E2' ? s.planned_duration_s : 0) <= p('tid.e2_share_max') * week.planned_time_s",
+    "check": "week.easy_time_s >= p('tid.easy_share_min') * week.planned_time_s && week.hard_time_s <= p('tid.hard_share_max.' + goal.family_tid) * week.planned_time_s && week.e2_time_s <= p('tid.e2_share_max') * week.planned_time_s",
     "repair": "shorten_quality_segments"
    },
    "expression_status": "formal",
@@ -4377,6 +4618,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.phase in ['ONBOARD', 'RTR', 'TRANSITION'] || state.gate == 'proceed_restricted'",
    "on_unknown": "fire",
    "action": {
@@ -4421,6 +4664,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.is_deload",
    "on_unknown": "fire",
    "action": {
@@ -4469,6 +4714,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.phase == 'TAPER'",
    "on_unknown": "fire",
    "action": {
@@ -4512,6 +4759,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.phase == 'TAPER' && !week.is_race_week",
    "on_unknown": "fire",
    "action": {
@@ -4555,6 +4804,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.phase == 'TAPER' && (week.planned_time_s > week.prev_planned_time_s || week.lr_s > week.prev_lr_s)",
    "on_unknown": "fire",
    "action": {
@@ -4630,6 +4881,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.phase == 'TRANSITION'",
    "on_unknown": "fire",
    "action": {
@@ -4673,6 +4926,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "week.phase == 'MAINTAIN'",
    "on_unknown": "fire",
    "action": {
@@ -4721,6 +4976,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_week",
    "condition": "feas.horizon == 'H1'",
    "on_unknown": "fire",
    "action": {
@@ -4769,6 +5026,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S6",
+   "scope": "per_session",
    "condition": "session.is_b2b_pair && (session.day2_s > p('b2b.day2_ratio') * session.day1_s || session.pair_s > p('b2b.pair_cap_ratio') * l30_time(session.date) || session.pair_s > p('b2b.pair_week_share_max') * week.planned_time_s || week.is_deload || week.phase in ['TAPER', 'RTR'])",
    "on_unknown": "fire",
    "action": {
@@ -4845,6 +5104,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "event.type == 'ladder_complete'",
    "on_unknown": "skip",
    "action": {
@@ -4898,6 +5159,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S7.3",
+   "scope": "per_candidate",
    "condition": "event.type == 'candidate_list'",
    "on_unknown": "skip",
    "action": {
@@ -4934,6 +5197,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_candidate",
    "condition": "state.gate == 'proceed_restricted' || profile.special_status == 'pregnant'",
    "on_unknown": "fire",
    "action": {
@@ -4978,6 +5243,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7.1",
+   "scope": "per_week",
    "condition": "event.type == 'fill_week_skeleton'",
    "on_unknown": "skip",
    "action": {
@@ -5003,21 +5270,27 @@
    "priority": 302,
    "hit_policy": "PRIORITY",
    "when_text": "placing key sessions",
-   "then_text": "a \"hard day\" is any session with a segment ≥ E3, or the long run if quality.counts_long; no two hard days are consecutive unless the preset declares consecutive_hard_allowed; among valid placements choose the one maximising the smallest gap between hard days, ties to the earlier day",
+   "then_text": "a \"hard day\" is any session with a segment at E3 or E4 (strides excluded, SES-021), or the long run (v5.2, owner Q2: the long run counts as a hard day for spacing, whatever quality.counts_long says for the quality count); no two hard days are consecutive, inside the week or across its start, unless the preset declares consecutive_hard_allowed; among valid placements choose the one maximising the smallest gap between hard days of the Monday–Sunday week, ties to the earlier days (12 §2b.4 place_in_order)",
    "because": "spacing hard days is common practice (INV-17)",
    "evidence": {
-    "text": "hearing-1 §2, CREDIBLE practice",
+    "text": "hearing-1 §2, CREDIBLE practice; v5.2 long run counted as a hard day for spacing: ALLEGED (common plan practice, from memory)",
     "grades": [
+     "ALLEGED",
      "CREDIBLE"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.4",
+   "scope": "per_session",
+   "condition": "event.type == 'place_session'",
+   "on_unknown": "fire",
+   "action": {
+    "op": "constraint",
+    "check": "!session.is_hard || !session.next_day_is_hard || preset.consecutive_hard_allowed"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: spacing hard days is common practice (INV-17)"
@@ -5046,11 +5319,13 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S7.4",
+   "scope": "per_session",
    "condition": "event.type == 'place_session'",
    "on_unknown": "fire",
    "action": {
     "op": "constraint",
-    "check": "session.date in profile.available_days && !(session.date in profile.blocked_dates) && week.runs <= profile.max_runs_per_week",
+    "check": "weekday(session.date) in profile.available_days && !(session.date in profile.blocked_dates) && week.runs <= profile.max_runs_per_week",
     "place_long_run": "profile.long_run_day in week.free_days ? profile.long_run_day : last(week.free_days)"
    },
    "expression_status": "formal",
@@ -5071,21 +5346,28 @@
    "priority": 303,
    "hit_policy": "PRIORITY",
    "when_text": "setting the week's key-session count",
-   "then_text": "count = MIN(quality.per_week[preset], quality.method_default[state] if preset = method_default, the largest count placeable under SES-004 and SES-005), where the long run counts toward the total only if quality.counts_long[preset]",
+   "then_text": "count = MIN(quality.per_week[preset], quality.method_default[state] if preset = method_default, week runs − quality.non_key_runs_min (v5.2, owner Q2: at least the long run and one easy run besides the key sessions), the largest count placeable under SES-004 and SES-005 (try k, then k − 1, 07 §2b S7.4), the largest count whose start doses fit the week's TID budgets (v5.2: drop the last-ranked slot rather than trim it, S7.5)), where the long run counts toward the total only if quality.counts_long[preset]",
    "because": "a school's quality count only works in its own week",
    "evidence": {
-    "text": "wg2 impl. 7, CORROBORATED; opening-statusquo R2",
+    "text": "wg2 impl. 7, CORROBORATED; opening-statusquo R2; v5.2 run-count and budget terms: ALLEGED (common novice and intermediate practice, from memory)",
     "grades": [
+     "ALLEGED",
      "CORROBORATED"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.1",
+   "scope": "per_week",
+   "condition": "event.type == 'count_keys'",
+   "on_unknown": "fire",
+   "action": {
+    "op": "cap",
+    "target": "week.quality_max",
+    "expr": "max(0, min(preset.id == 'method_default' ? week.method_default_count : p('quality.per_week')[preset.id], week.runs - p('quality.non_key_runs_min')))"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: a school's quality count only works in its own week"
@@ -5103,21 +5385,28 @@
    "priority": 304,
    "hit_policy": "PRIORITY",
    "when_text": "preset = method_default",
-   "then_text": "quality.method_default = 0 in ONBOARD, RTR, TRANSITION or while level(HAB) < L2; at most 1 in BASE or while level(TOL) ≤ L2; otherwise 2 in BUILD and SPECIFIC",
+   "then_text": "quality.method_default = 0 in START_LADDER, RTR, ONBOARD, TRANSITION and RACE weeks or while level(HAB) < L2; 1 in BASE, TAPER and MAINTAIN or while level(TOL) ≤ L2; in SHARPEN the count of the last completed non-deload week, at most 2; otherwise 2 in BUILD and SPECIFIC (v5.2: tests in this order; owner Q2)",
    "because": "novice plans use 0–1 key sessions, Daniels 2",
    "evidence": {
-    "text": "wg2 §1, impl. 7, CORROBORATED; hearing-1 §2, CORROBORATED",
+    "text": "wg2 §1, impl. 7, CORROBORATED; hearing-1 §2, CORROBORATED; v5.2 counts for TAPER, RACE, MAINTAIN, SHARPEN: design choice, UNKNOWN",
     "grades": [
-     "CORROBORATED"
+     "CORROBORATED",
+     "UNKNOWN"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.1",
+   "scope": "per_week",
+   "condition": "preset.id == 'method_default' && event.type == 'count_keys'",
+   "on_unknown": "fire",
+   "action": {
+    "op": "set",
+    "target": "week.method_default_count",
+    "expr": "(week.phase in ['START_LADDER', 'RTR', 'ONBOARD', 'TRANSITION', 'RACE'] || week.is_race_week || state.levels.HAB < p('quality.min_hab_level')) ? 0 : (week.phase == 'SHARPEN' ? min(p('quality.method_default_max'), state.last_week_key_count) : ((week.phase in ['BASE', 'TAPER', 'MAINTAIN'] || state.levels.TOL <= p('quality.low_tol_level')) ? 1 : p('quality.method_default_max')))"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: novice plans use 0–1 key sessions, Daniels 2"
@@ -5146,6 +5435,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7",
+   "scope": "per_week",
    "condition": "week.planned_time_s > unit.min_s * profile.available_minutes_per_week",
    "on_unknown": "fire",
    "action": {
@@ -5183,6 +5474,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7",
+   "scope": "per_session",
    "condition": "week.phase == 'RTR' || state.on_start_ladder || !state.hab_continuous || profile.run_walk_preference_explicit || session.expected_duration_s > unit.min_s * p('lr.long_guard_min')",
    "on_unknown": "fire",
    "action": {
@@ -5206,22 +5499,29 @@
    "tier": "T5",
    "priority": 306,
    "hit_policy": "PRIORITY",
-   "when_text": "ses.runwalk.sessions_per_rung run-walk sessions at the current rung are logged with RPE ≤ ses.runwalk.rpe_max and no pain above pain.during_max",
-   "then_text": "move one rung up the ladder at the next session; on a pain report or a missed session hold the rung; never skip a rung",
+   "when_text": "the runner is not on the return or start ladder (those follow SAF-082) and the last ses.runwalk.sessions_per_rung run-walk sessions at the current rung since the last missed run-walk session were each done (≥ miss.partial_ratio), at RPE ≤ ses.runwalk.rpe_max, with pain ≤ pain.during_max and no next-morning pain",
+   "then_text": "move one rung up the ladder at the next session; on a pain report or a missed session hold the rung (a miss restarts the count); never skip a rung; a runner rendered as run-walk by preference starts at ses.runwalk.entry_rung.preference (2:1), one with HAB < L2 at ses.runwalk.entry_rung.hab_low (1:1) (v5.2)",
    "because": "staged walk–run returns advance on symptoms",
    "evidence": {
-    "text": "factdesk1 §1 staged return structure, CORROBORATED (analogy); hearing-1 §3, majority",
+    "text": "factdesk1 §1 staged return structure, CORROBORATED (analogy); hearing-1 §3, majority; v5.2 entry rungs and counting: ALLEGED (Galloway 2:1 beginner ratio, from memory)",
     "grades": [
+     "ALLEGED",
      "CORROBORATED"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S2",
+   "scope": "global",
+   "condition": "state.ladder_kind == 'none' && count(log.runwalk_sessions_at_rung, x, x.clean_runwalk) >= p('ses.runwalk.sessions_per_rung')",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "state.runwalk_rung",
+    "expr": "min(state.runwalk_rung + 1, size(p('ses.runwalk.ladder')) - 1)"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: staged walk–run returns advance on symptoms"
@@ -5238,22 +5538,29 @@
    "tier": "T5",
    "priority": 307,
    "hit_policy": "PRIORITY",
-   "when_text": "the previous instance of a module was logged done with RPE ≤ target RPE + ses.progress_rpe_margin",
-   "then_text": "the next instance steps up by one dose step; otherwise repeat the dose; never exceed the dose max or any numeric cap (MIN)",
+   "when_text": "the previous non-deload instance of a module was logged done with RPE ≤ min(target RPE + ses.progress_rpe_margin, result.rpe_high − 1) (target RPE: ses.target_rpe by effort)",
+   "then_text": "the next instance steps up by one dose step of ses.dose.<id>.steps (06 §2c); otherwise, or when the RPE was not given, repeat the dose; never exceed the dose max, the week's TID budgets (dose_fit) or any numeric cap (MIN); future weeks show one step ahead only (07 §2b projection); after a deload or taper the module resumes at its last completed dose (v5.2, owner Q3)",
    "because": "progression follows tolerated work",
    "evidence": {
-    "text": "wg1 §3 session RPE, CORROBORATED; opening-statusquo R3",
+    "text": "wg1 §3 session RPE, CORROBORATED; opening-statusquo R3; v5.2 dose ladders (lengthen repeats, then add one) and target session RPE: ALLEGED (Daniels-style cruise intervals and Foster session RPE, from memory)",
     "grades": [
+     "ALLEGED",
      "CORROBORATED"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.5",
+   "scope": "per_session",
+   "condition": "session.is_key && !session.is_test && !week.is_deload && week.phase != 'TAPER' && event.type == 'dose_sessions'",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "session.dose_step",
+    "expr": "dose_fit(session.module_id, session.prev_instance_ok ? next_dose(session.module_id, session.prev_step) : (has(session.prev_step) ? session.prev_step : dose_start(session.module_id)), week)"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: progression follows tolerated work"
@@ -5270,11 +5577,11 @@
    "tier": "T5",
    "priority": 308,
    "hit_policy": "PRIORITY",
-   "when_text": "a module has been at its dose max for ses.exit_ready_sessions consecutive logged instances and all prereqs of the next level hold",
-   "then_text": "schedule its exit test (§3) in the next week that is not a deload, TAPER or RACE week, replacing that week's instance",
+   "when_text": "a module has been logged for ses.exit_ready_sessions consecutive instances at a dose whose work is ≥ min(the next level's test work, the module's dose max) and felt as intended (SES-011), and all prereqs of the next level hold",
+   "then_text": "schedule its level test (§3b) in the next week that is not a deload, TAPER, RACE or TRANSITION week and holds no field test, replacing that week's instance (v5.2, owner Q4: v5's \"at its dose max\" asked for 5 × 8 min before a 2 × 8 min test)",
    "because": "levels are proven by tests (CMP-002)",
    "evidence": {
-    "text": "criteria.md C10; 02 CMP-002, UNKNOWN (design default)",
+    "text": "criteria.md C10; 02 CMP-002, UNKNOWN (design default); v5.2 trigger on the test's own size: design choice, UNKNOWN",
     "grades": [
      "UNKNOWN"
     ],
@@ -5282,10 +5589,23 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.3",
+   "scope": "per_session",
+   "condition": "session.is_key && session.exit_ready && week.test_allowed && !profile.level_tests_opt_out && level_prereqs_hold(session.next_test_node, session.next_test_level, session.date)",
+   "on_unknown": "skip",
+   "action": {
+    "op": "replace_module",
+    "target": "session",
+    "expr": "session.next_test_module",
+    "then": [
+     {
+      "op": "set",
+      "target": "session.is_test",
+      "expr": "true"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: levels are proven by tests (CMP-002)"
@@ -5302,8 +5622,8 @@
    "tier": "T5",
    "priority": 309,
    "hit_policy": "PRIORITY",
-   "when_text": "an exit test is failed or not logged",
-   "then_text": "keep the level, continue the module at its dose max and reschedule the test after ses.exit_retest_weeks",
+   "when_text": "an exit test is failed or not logged (SES-024)",
+   "then_text": "keep the level, continue the module at the dose at which the test was triggered (frozen until the retest) and reschedule the test after ses.exit_retest_weeks; show MSG-SES-TEST-AGAIN",
    "because": "a failed test is information; drop-out is the main risk",
    "evidence": {
     "text": "opening-outsider §1 (drop-out risk); wg3 §5, CREDIBLE (27% C25K completion, Relph 2023, single study)",
@@ -5314,12 +5634,33 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S2",
+   "scope": "per_session",
+   "condition": "session.test_result in ['failed', 'unlogged']",
+   "on_unknown": "fire",
+   "action": {
+    "op": "freeze",
+    "target": "state.module_dose",
+    "fields": [
+     "session.module_id"
+    ],
+    "until": "date_add(session.date, unit.week_d * p('ses.exit_retest_weeks'))",
+    "then": [
+     {
+      "op": "schedule_session",
+      "module_expr": "session.module_id",
+      "week_expr": "date_add(session.date, unit.week_d * p('ses.exit_retest_weeks'))",
+      "place": "key_slot"
+     },
+     {
+      "op": "emit_message",
+      "msg": "MSG-SES-TEST-AGAIN"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
-    "runner": "MSG-WHY-SES",
+    "runner": "MSG-SES-TEST-AGAIN",
     "coach": "because: a failed test is information; drop-out is the main risk"
    },
    "tests": {
@@ -5346,6 +5687,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7.3",
+   "scope": "global",
    "condition": "event.type == 'onboard_end' || !exists(state.anchors, a, a.confidence == 'measured' && days_between(a.date, today) <= p('anchor.max_age_days') - p('ses.retest_lead_days'))",
    "on_unknown": "skip",
    "action": {
@@ -5370,21 +5713,37 @@
    "priority": 311,
    "hit_policy": "PRIORITY",
    "when_text": "a non-race TAPER week is filled and the pre-taper block held any session with a segment ≥ E3",
-   "then_text": "keep at least one SES-M-024 in that week and keep the pre-taper run count (taper.freq_min_ratio)",
+   "then_text": "keep at least one SES-M-024 in that week, in its E3 form (2 × 5 min) after threshold, progression or race-effort key sessions and its E4 form (4 × 1 min) after VO2 sessions, at the fixed ses.taper_touch dose, and keep the pre-taper run count (taper.freq_min_ratio) (v5.2)",
    "because": "the taper keeps intensity and frequency",
    "evidence": {
-    "text": "wg1 §5, wg2 §3, CORROBORATED",
+    "text": "wg1 §5, wg2 §3, CORROBORATED; v5.2 sharpener form by the last key session: ALLEGED (practice, from memory)",
     "grades": [
+     "ALLEGED",
      "CORROBORATED"
     ],
     "basis": "evidence"
    },
    "default": false,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.3",
+   "scope": "per_week",
+   "condition": "week.phase == 'TAPER' && !week.is_race_week && plan.pre_taper_had_e3",
+   "on_unknown": "fire",
+   "action": {
+    "op": "schedule_session",
+    "module_expr": "'SES-M-024'",
+    "week_expr": "week.start",
+    "place": "key_slot",
+    "dose_expr": "plan.taper_touch_form == 'E4' ? 1 : 0",
+    "then": [
+     {
+      "op": "floor",
+      "target": "week.runs",
+      "expr": "p('taper.freq_min_ratio') * plan.pre_taper_runs"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: the taper keeps intensity and frequency"
@@ -5402,21 +5761,40 @@
    "priority": 312,
    "hit_policy": "PRIORITY",
    "when_text": "Week.is_deload = true",
-   "then_text": "key sessions ≤ deload.quality_max, each at its dose start; strides kept; no exit or field tests",
+   "then_text": "key sessions ≤ deload.quality_max (the slot ranked first by CMP-007), each at its dose start, which governs the key session's size over LOD-040's \"work cut by deload.volume_cut\" (the start dose is the smaller in practice); strides kept; no exit or field tests (v5.2, owner Q3)",
    "because": "a deload is for recovery; dose is convention",
    "evidence": {
-    "text": "wg1 §5 impl. 11, ALLEGED",
+    "text": "wg1 §5 impl. 11, ALLEGED; v5.2 start dose over LOD-040's cut: design choice, UNKNOWN",
     "grades": [
-     "ALLEGED"
+     "ALLEGED",
+     "UNKNOWN"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.1",
+   "scope": "per_week",
+   "condition": "week.is_deload",
+   "on_unknown": "fire",
+   "action": {
+    "op": "cap",
+    "target": "week.quality_max",
+    "expr": "p('deload.quality_max')",
+    "then": [
+     {
+      "op": "set",
+      "target": "week.key_dose_mode",
+      "expr": "'start'"
+     },
+     {
+      "op": "block_sessions",
+      "filter": "s.is_test && s.week_id == week.id",
+      "until": "never"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: a deload is for recovery; dose is convention"
@@ -5445,10 +5823,15 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7",
+   "scope": "global",
+   "condition": "true",
+   "on_unknown": "fire",
+   "action": {
+    "op": "constraint",
+    "check": "lint: every session at E1–E4 is rendered effort word first (MSG-SES-*); pace_range only through FEA-014 when INV-15 allows; hr_zone only from a measured HRReference (INV-09)"
+   },
+   "expression_status": "static",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: effort words are the shared vocabulary and paces need an explicit derivation (F-12)"
@@ -5465,11 +5848,11 @@
    "tier": "T5",
    "priority": 314,
    "hit_policy": "PRIORITY",
-   "when_text": "Phase.type = MAINTAIN",
-   "then_text": "fill the week with SES-M-021: ≥ maint.sessions_min runs including one key session at its last logged dose",
+   "when_text": "Phase.type = MAINTAIN, or a week marked busy (ADP-071)",
+   "then_text": "fill the week with SES-M-021: ≥ maint.sessions_min runs including one key session: the most recently logged key module at its last logged dose; if none was ever logged, SES-M-008 at its start dose when THR L1's prerequisites hold, else strides (SES-M-006) (v5.2)",
    "because": "kept intensity holds VO2max for weeks",
    "evidence": {
-    "text": "wg1 §5 Spiering, CORROBORATED (VO2max) / UNKNOWN (durability)",
+    "text": "wg1 §5 Spiering, CORROBORATED (VO2max) / UNKNOWN (durability); v5.2 choice of the maintenance key session: design choice, UNKNOWN",
     "grades": [
      "CORROBORATED",
      "UNKNOWN"
@@ -5478,10 +5861,28 @@
    },
    "default": false,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.3",
+   "scope": "per_week",
+   "condition": "week.phase == 'MAINTAIN' || week.kind == 'maintenance'",
+   "on_unknown": "fire",
+   "action": {
+    "op": "set",
+    "target": "week.key_slots",
+    "expr": "has(plan.last_key_module) ? [plan.last_key_module] : (level_prereqs_hold('THR', 1, week.start) ? ['SES-M-008'] : ['SES-M-006'])",
+    "then": [
+     {
+      "op": "set",
+      "target": "week.key_dose_mode",
+      "expr": "'last'"
+     },
+     {
+      "op": "floor",
+      "target": "week.runs",
+      "expr": "p('maint.sessions_min')"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: kept intensity holds VO2max for weeks"
@@ -5510,7 +5911,7 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "MVP",
+   "release": "spec",
    "condition": null,
    "on_unknown": null,
    "action": null,
@@ -5544,11 +5945,16 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S7.7",
+   "scope": "per_week",
+   "condition": "event.type == 'extras'",
+   "on_unknown": "skip",
+   "action": {
+    "op": "constraint",
+    "check": "count(week.sessions, s, s.module_id == 'SES-M-014') >= min(p('ses.strength_per_week'), week.strength_days_free) && all(week.sessions, s, s.module_id != 'SES-M-014' || !s.day_before_long_run)"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: strength improves economy; injury effect unknown"
@@ -5576,11 +5982,16 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S7.7",
+   "scope": "per_week",
+   "condition": "event.type == 'extras' && state.levels.HAB >= 1 && week.strides_allowed",
+   "on_unknown": "skip",
+   "action": {
+    "op": "constraint",
+    "check": "count(week.sessions, s, s.has_strides) >= min(p('ses.strides_per_week'), week.easy_runs) && all(week.sessions, s, !s.has_strides || !s.day_before_key)"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: strides are a low-cost L1 stimulus"
@@ -5608,11 +6019,17 @@
     "basis": "eng"
    },
    "default": false,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S7",
+   "scope": "per_candidate",
+   "condition": "slot.module == 'SES-M-007' && profile.hill_access != true",
+   "on_unknown": "fire",
+   "action": {
+    "op": "replace_module",
+    "target": "slot",
+    "expr": "'SES-M-006'"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-SES",
     "coach": "because: terrain is out of scope"
@@ -5656,6 +6073,94 @@
    }
   },
   {
+   "id": "SES-025",
+   "module": "06",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 317,
+   "hit_policy": "PRIORITY",
+   "when_text": "the runner has turned level tests off or skipped the level test, and the module that trains the next level was logged for ses.exit_ready_sessions consecutive instances at a work ≥ the full test's work (or the module's maximum if the test is bigger), each felt as intended (SES-011) with pain ≤ pain.during_max and no next-morning pain, and the next level's prerequisites hold",
+   "then_text": "set that level, confidence measured, source log_threshold, without a test session",
+   "because": "some runners, often experienced ones, do not want test sessions, and two full-size sessions logged as intended show the same ability (v5.2, owner answer to question 4)",
+   "evidence": {
+    "text": "06 §3; the equivalence of two full-size training sessions and one test is a design default, UNKNOWN",
+    "grades": [
+     "UNKNOWN"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S2",
+   "scope": "per_session",
+   "condition": "(profile.level_tests_opt_out || session.test_declined) && session.credit_ready && level_prereqs_hold(session.next_test_node, session.next_test_level, session.date)",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "state.levels[session.next_test_node]",
+    "expr": "max(state.levels[session.next_test_node], session.next_test_level)",
+    "then": [
+     {
+      "op": "set",
+      "target": "state.level_confidence[session.next_test_node]",
+      "expr": "'measured'"
+     },
+     {
+      "op": "emit_message",
+      "msg": "MSG-SES-LEVEL-FROM-TRAINING"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-SES-LEVEL-FROM-TRAINING",
+    "coach": "because: some runners, often experienced ones, do not want test sessions, and two full-size sessions logged as intended show the same ability (v5.2, owner answer to question 4)"
+   },
+   "tests": {
+    "fires": "T-SES-025-fires",
+    "silent": "T-SES-025-silent"
+   }
+  },
+  {
+   "id": "SES-024",
+   "module": "06",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 316,
+   "hit_policy": "PRIORITY",
+   "when_text": "a logged entry is linked to a planned level test (§3b)",
+   "then_text": "the test is passed if the runner answered yes to \"finished every part\" and to \"held the effort to the end without slowing or walking\", pain stayed ≤ pain.during_max (or the pain tap was \"No\"), the next-morning prompt was not \"yes\", the entry is measured (logged within log.contemporaneous_window_h) and the session RPE ≤ the target RPE + ses.drift_rpe_max; failed if an answer is no or a limit is exceeded; unlogged if an answer or the entry is missing; a pass lets CMP-002 set the level",
+   "because": "the log cannot record per-segment effort drift or the talk test, so three one-tap questions stand in for them (v5.2, owner Q4; gap/prose-rules.md §4.4)",
+   "evidence": {
+    "text": "06 §3; factdesk1 §2, CORROBORATED (next-morning rule); questions are a design default, UNKNOWN",
+    "grades": [
+     "CORROBORATED",
+     "UNKNOWN"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S7",
+   "scope": "per_entry",
+   "condition": "entry.is_test",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "entry.test_result",
+    "expr": "(!has(entry.test_completed) || !has(entry.test_held_effort) || !has(entry.rpe_0_10) || !entry.is_measured) ? 'unlogged' : ((entry.test_completed && entry.test_held_effort && !entry.pain_over_limit && !entry.pain_next_morning_yes && entry.rpe_0_10 <= entry.target_rpe + p('ses.drift_rpe_max')) ? 'passed' : 'failed')"
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-SES",
+    "coach": "because: the log cannot record per-segment effort drift or the talk test, so three one-tap questions stand in for them (v5.2, owner Q4; gap/prose-rules.md §4.4)"
+   },
+   "tests": {
+    "fires": "T-SES-024-fires",
+    "silent": "T-SES-024-silent"
+   }
+  },
+  {
    "id": "GEN-001",
    "module": "07",
    "kind": "rule",
@@ -5675,6 +6180,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.gate in ['pause_until_clearance', 'no_plan']",
    "on_unknown": "fire",
    "action": {
@@ -5712,6 +6219,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.gate == 'proceed_restricted'",
    "on_unknown": "fire",
    "action": {
@@ -5748,7 +6257,9 @@
    },
    "default": false,
    "release": "MVP",
-   "condition": "(feas.verdict == 'infeasible' && !plan.is_regeneration) || feas.s4_phases_do_not_fit || plan.s8r_passes > p('repair.max_passes')",
+   "stage": "S9",
+   "scope": "global",
+   "condition": "(feas.verdict == 'infeasible' && !plan.is_regeneration) || feas.s4_phases_do_not_fit || plan.s8r_exhausted",
    "on_unknown": "fire",
    "action": {
     "op": "fail_closed",
@@ -5797,6 +6308,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S10",
+   "scope": "global",
    "condition": "true",
    "on_unknown": "fire",
    "action": {
@@ -5832,6 +6345,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7.3",
+   "scope": "per_candidate",
    "condition": "event.type == 'tie'",
    "on_unknown": "skip",
    "action": {
@@ -5868,6 +6383,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
    "condition": "state.log_status == 'rich'",
    "on_unknown": "skip",
    "action": {
@@ -5911,6 +6428,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
    "condition": "state.log_status == 'sparse'",
    "on_unknown": "fire",
    "action": {
@@ -5963,6 +6482,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
    "condition": "state.log_status == 'none' || state.days_since_last_run >= p('gap.rtr_trigger_days')",
    "on_unknown": "fire",
    "action": {
@@ -6007,6 +6528,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_week",
    "condition": "state.days_since_last_run >= p('gap.reduce_trigger_days') && state.days_since_last_run < p('gap.rtr_trigger_days')",
    "on_unknown": "fire",
    "action": {
@@ -6050,6 +6573,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
    "condition": "state.log_status != 'rich' || exists(state.core_inputs, i, i.confidence != 'measured')",
    "on_unknown": "fire",
    "action": {
@@ -6087,6 +6612,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_entry",
    "condition": "entry.pace_s_per_km < p('log.pace_min_s_per_km') || entry.pace_s_per_km > p('log.pace_max_s_per_km.' + entry.type) || entry.distance_m > p('log.confirm_ratio') * state.L30_eff_dist_m || week.logged_total_s > p('log.week_confirm_ratio') * state.max_prev4_week_s",
    "on_unknown": "fire",
    "action": {
@@ -6135,6 +6662,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_entry",
    "condition": "entry.plausibility == 'confirmed'",
    "on_unknown": "skip",
    "action": {
@@ -6178,6 +6707,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
    "condition": "(claim.L30_distance_m > claim.weekly_distance_m && claim.runs_per_week >= p('claim.l30_check_min_runs')) || claim.agegrade_pct >= p('claim.agegrade_confirm_pct') || claim.time_distance_inconsistent || (profile.training_age_years < p('ctx.novice_training_age_years') && claim.weekly_time_s > state.tol2_band_high_s)",
    "on_unknown": "fire",
    "action": {
@@ -6222,6 +6753,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S2",
+   "scope": "per_entry",
    "condition": "entry.is_measured && !entry.is_goal_race && entry.ladder == 'none' && entry.distance_m > p('spike.warn_ratio') * state.pre_entry_L30_eff_dist_m",
    "on_unknown": "fire",
    "action": {
@@ -6238,6 +6771,313 @@
    "tests": {
     "fires": "T-GEN-023-fires",
     "silent": "T-GEN-023-silent"
+   }
+  },
+  {
+   "id": "REP-001",
+   "module": "07",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 360,
+   "hit_policy": "PRIORITY",
+   "when_text": "a validator violation of INV-01, 02, 03, 13, 15, 18, 28, 29 or 30 is the earliest one",
+   "then_text": "clamp the session to the binding limit: shorten its duration or distance to the limit (rounded down), or remove its pace or effort above the limit",
+   "because": "the smallest change that restores the limit keeps the rest of the plan",
+   "evidence": {
+    "text": "07 §6.1, N/A (engineering: structure or procedure, no physiological claim)",
+    "grades": [
+     "N/A"
+    ],
+    "basis": "eng"
+   },
+   "default": false,
+   "release": "MVP",
+   "stage": "S8r",
+   "scope": "per_violation",
+   "condition": "violation.inv_id in ['INV-01', 'INV-02', 'INV-03', 'INV-13', 'INV-15', 'INV-18', 'INV-28', 'INV-29', 'INV-30']",
+   "on_unknown": "fire",
+   "action": {
+    "op": "repair",
+    "rank": 1,
+    "fixes": [
+     "INV-01",
+     "INV-02",
+     "INV-03",
+     "INV-13",
+     "INV-15",
+     "INV-18",
+     "INV-28",
+     "INV-29",
+     "INV-30"
+    ],
+    "method": "clamp_to_limit",
+    "then": [
+     {
+      "op": "log_deviation"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-GEN",
+    "coach": "because: the smallest change that restores the limit keeps the rest of the plan"
+   },
+   "tests": {
+    "fires": "T-REP-001-fires",
+    "silent": "T-REP-001-silent"
+   }
+  },
+  {
+   "id": "REP-002",
+   "module": "07",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 361,
+   "hit_policy": "PRIORITY",
+   "when_text": "the earliest violation is INV-01, 02 or 16 caused by a step-up",
+   "then_text": "repeat the previous loading step (hold step) and shift the later steps by one week",
+   "because": "a template that rises faster than the caps is held, not squeezed",
+   "evidence": {
+    "text": "07 §7; 05 LOD-014, N/A (engineering: structure or procedure, no physiological claim)",
+    "grades": [
+     "N/A"
+    ],
+    "basis": "eng"
+   },
+   "default": false,
+   "release": "MVP",
+   "stage": "S8r",
+   "scope": "per_violation",
+   "condition": "violation.inv_id in ['INV-01', 'INV-02', 'INV-16'] && violation.week.is_step_up",
+   "on_unknown": "skip",
+   "action": {
+    "op": "repair",
+    "rank": 2,
+    "fixes": [
+     "INV-01",
+     "INV-02",
+     "INV-16"
+    ],
+    "method": "hold_step_and_shift",
+    "then": [
+     {
+      "op": "log_deviation"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-GEN",
+    "coach": "because: a template that rises faster than the caps is held, not squeezed"
+   },
+   "tests": {
+    "fires": "T-REP-002-fires",
+    "silent": "T-REP-002-silent"
+   }
+  },
+  {
+   "id": "REP-003",
+   "module": "07",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 362,
+   "hit_policy": "PRIORITY",
+   "when_text": "the earliest violation is INV-03, 17 or 21",
+   "then_text": "move the session to another available day of the same week that keeps every invariant, the earliest such day first",
+   "because": "a different day often removes the conflict without changing the dose",
+   "evidence": {
+    "text": "07 §6.1, N/A (engineering: structure or procedure, no physiological claim)",
+    "grades": [
+     "N/A"
+    ],
+    "basis": "eng"
+   },
+   "default": false,
+   "release": "MVP",
+   "stage": "S8r",
+   "scope": "per_violation",
+   "condition": "violation.inv_id in ['INV-03', 'INV-17', 'INV-21']",
+   "on_unknown": "skip",
+   "action": {
+    "op": "repair",
+    "rank": 3,
+    "fixes": [
+     "INV-03",
+     "INV-17",
+     "INV-21"
+    ],
+    "method": "move_to_free_day",
+    "then": [
+     {
+      "op": "log_deviation"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-GEN",
+    "coach": "because: a different day often removes the conflict without changing the dose"
+   },
+   "tests": {
+    "fires": "T-REP-003-fires",
+    "silent": "T-REP-003-silent"
+   }
+  },
+  {
+   "id": "REP-004",
+   "module": "07",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 363,
+   "hit_policy": "PRIORITY",
+   "when_text": "the earliest violation is INV-06, 07, 17 or 20 on a key session",
+   "then_text": "replace it with an easy run (SES-M-001) of equal or lower duration",
+   "because": "an easy run is always admissible where a hard one is not",
+   "evidence": {
+    "text": "07 §6.1; 06 SES-002, N/A (engineering: structure or procedure, no physiological claim)",
+    "grades": [
+     "N/A"
+    ],
+    "basis": "eng"
+   },
+   "default": false,
+   "release": "MVP",
+   "stage": "S8r",
+   "scope": "per_violation",
+   "condition": "violation.inv_id in ['INV-06', 'INV-07', 'INV-17', 'INV-20'] && violation.session.is_key",
+   "on_unknown": "fire",
+   "action": {
+    "op": "repair",
+    "rank": 4,
+    "fixes": [
+     "INV-06",
+     "INV-07",
+     "INV-17",
+     "INV-20"
+    ],
+    "method": "replace_with_easy",
+    "then": [
+     {
+      "op": "log_deviation"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-GEN",
+    "coach": "because: an easy run is always admissible where a hard one is not"
+   },
+   "tests": {
+    "fires": "T-REP-004-fires",
+    "silent": "T-REP-004-silent"
+   }
+  },
+  {
+   "id": "REP-005",
+   "module": "07",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 364,
+   "hit_policy": "PRIORITY",
+   "when_text": "the earliest violation is INV-16 or 20 and the phase minimums of 04 allow it",
+   "then_text": "move the BASE/BUILD boundary one week later and re-run S6–S7 from that week",
+   "because": "more base weeks lower the required ramp",
+   "evidence": {
+    "text": "07 §6.1; 04 §3, N/A (engineering: structure or procedure, no physiological claim)",
+    "grades": [
+     "N/A"
+    ],
+    "basis": "eng"
+   },
+   "default": false,
+   "release": "MVP",
+   "stage": "S8r",
+   "scope": "per_violation",
+   "condition": "violation.inv_id in ['INV-16', 'INV-20']",
+   "on_unknown": "skip",
+   "action": {
+    "op": "repair",
+    "rank": 5,
+    "fixes": [
+     "INV-16",
+     "INV-20"
+    ],
+    "method": "move_phase_boundary",
+    "then": [
+     {
+      "op": "log_deviation"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-GEN",
+    "coach": "because: more base weeks lower the required ramp"
+   },
+   "tests": {
+    "fires": "T-REP-005-fires",
+    "silent": "T-REP-005-silent"
+   }
+  },
+  {
+   "id": "REP-006",
+   "module": "07",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 365,
+   "hit_policy": "PRIORITY",
+   "when_text": "a violation remains that no lower rank fixes",
+   "then_text": "lower the plan's peak volume and long-run targets to the highest values that validate and re-run feasibility (S3)",
+   "because": "a plan must never ship with a broken limit; if the goal no longer fits, S9 offers options",
+   "evidence": {
+    "text": "07 §6.1, N/A (engineering: structure or procedure, no physiological claim)",
+    "grades": [
+     "N/A"
+    ],
+    "basis": "eng"
+   },
+   "default": false,
+   "release": "MVP",
+   "stage": "S8r",
+   "scope": "per_violation",
+   "condition": "violation.unfixed",
+   "on_unknown": "fire",
+   "action": {
+    "op": "repair",
+    "rank": 6,
+    "fixes": [
+     "INV-01",
+     "INV-02",
+     "INV-03",
+     "INV-08",
+     "INV-11",
+     "INV-13",
+     "INV-16",
+     "INV-17",
+     "INV-19",
+     "INV-20",
+     "INV-21",
+     "INV-27",
+     "INV-28",
+     "INV-29",
+     "INV-30"
+    ],
+    "method": "lower_peak_targets",
+    "then": [
+     {
+      "op": "regenerate",
+      "from_stage": "S3"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-GEN",
+    "coach": "because: a plan must never ship with a broken limit; if the goal no longer fits, S9 offers options"
+   },
+   "tests": {
+    "fires": "T-REP-006-fires",
+    "silent": "T-REP-006-silent"
    }
   },
   {
@@ -6259,6 +7099,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "event.type == 'goal_edit_submitted'",
    "on_unknown": "fire",
    "action": {
@@ -6300,6 +7142,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "count(goal.edits, e, e.verdict == 'infeasible' && days_between(e.submitted_at, today) <= p('goal.edit_window_days')) >= p('goal.edit_fail_limit')",
    "on_unknown": "fire",
    "action": {
@@ -6347,6 +7191,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "event.claims_raised && state.last_verdict == 'infeasible'",
    "on_unknown": "fire",
    "action": {
@@ -6395,6 +7241,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_session",
    "condition": "session.status == 'planned' && hours_between(session.date_end, now) > p('log.contemporaneous_window_h') && !has(session.linked_entry) && count(week.entries, x, true) >= 1",
    "on_unknown": "skip",
    "action": {
@@ -6437,6 +7285,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_session",
    "condition": "has(session.linked_entry) && session.linked_entry.duration_s < p('miss.partial_ratio') * session.planned_duration_s",
    "on_unknown": "skip",
    "action": {
@@ -6473,6 +7323,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "week.ended && count(week.entries, x, true) == 0 && !week.has_illness_pain_availability_report",
    "on_unknown": "fire",
    "action": {
@@ -6521,6 +7373,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_entry",
+   "scope": "per_entry",
    "condition": "event.type == 'backfill'",
    "on_unknown": "skip",
    "action": {
@@ -6569,6 +7423,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "event.type == 'adaptation_event'",
    "on_unknown": "fire",
    "action": {
@@ -6611,6 +7467,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "exists(plan.future_weeks, w, w.planned_time_s > parent_week(w).planned_time_s || w.lr_s > parent_week(w).lr_s) && !event.goal_changed",
    "on_unknown": "fire",
    "action": {
@@ -6657,11 +7515,13 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": "count(today_events, x, true) > 1",
+   "stage": "on_event",
+   "scope": "global",
+   "condition": "size(event.same_day_events) > 1",
    "on_unknown": "skip",
    "action": {
     "op": "order_events",
-    "expr": "sort_by(today_events, x, [tier_rank(x.tier), kind_rank(x.kind), x.id])"
+    "expr": "sort_by(event.same_day_events, x, [tier_rank(x.tier), kind_rank(x.kind), x.id])"
    },
    "expression_status": "formal",
    "explain": {
@@ -6692,6 +7552,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S10",
+   "scope": "global",
    "condition": "event.type == 'version_emitted'",
    "on_unknown": "skip",
    "action": {
@@ -6728,6 +7590,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_session",
    "condition": "session.in_published_window && !event.is_reduction && !event.t0t2",
    "on_unknown": "fire",
    "action": {
@@ -6770,6 +7634,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_session",
    "condition": "session.status in ['missed', 'partial']",
    "on_unknown": "fire",
    "action": {
@@ -6811,6 +7677,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_session",
    "condition": "session.status == 'missed' && effort_rank(session.effort_target) >= effort_rank('E3') && exists(week.later_easy, x, x.planned_duration_s >= session.planned_duration_s)",
    "on_unknown": "skip",
    "action": {
@@ -6848,6 +7716,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "week.log_state != 'unlogged' && (week.completed_time_s < p('miss.repeat_week_ratio') * week.planned_time_s || week.long_run_status in ['missed', 'partial'])",
    "on_unknown": "fire",
    "action": {
@@ -6884,6 +7754,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "state.adp022_consecutive_weeks >= p('miss.refeas_hold_weeks')",
    "on_unknown": "fire",
    "action": {
@@ -6920,6 +7792,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "count(state.fit_check_weeks, w, w.completed_time_s < p('miss.repeat_week_ratio') * w.planned_time_s) == p('miss.fit_check_weeks')",
    "on_unknown": "skip",
    "action": {
@@ -6957,6 +7831,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "state.on_start_ladder && state.days_since_last_run >= p('gap.reduce_trigger_days')",
    "on_unknown": "fire",
    "action": {
@@ -7000,6 +7876,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "state.days_since_last_run < p('gap.reduce_trigger_days')",
    "on_unknown": "skip",
    "action": {
@@ -7037,6 +7915,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "state.days_since_last_run >= p('gap.reduce_trigger_days') && state.days_since_last_run < p('gap.rtr_trigger_days')",
    "on_unknown": "fire",
    "action": {
@@ -7080,6 +7960,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "state.days_since_last_run >= p('gap.rtr_trigger_days')",
    "on_unknown": "fire",
    "action": {
@@ -7122,6 +8004,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "event.type == 'gap_ended'",
    "on_unknown": "skip",
    "action": {
@@ -7165,6 +8049,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.gap_cause in ['illness', 'pain', 'red_flag']",
    "on_unknown": "fire",
    "action": {
@@ -7201,6 +8087,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "event.type == 'illness_report' && (event.chest_pain || event.fainting || event.palpitations || event.disproportionate_breathlessness)",
    "on_unknown": "hold",
    "action": {
@@ -7237,6 +8125,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "event.type == 'illness_report' && (event.fever || event.below_neck)",
    "on_unknown": "fire",
    "action": {
@@ -7275,6 +8165,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_flag",
    "condition": "flag.status == 'active' && flag.subkind == 'illness'",
    "on_unknown": "fire",
    "action": {
@@ -7311,6 +8203,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_session",
    "condition": "event.above_neck_only == true && event.fever == false",
    "on_unknown": "fire",
    "action": {
@@ -7354,6 +8248,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_flag",
    "condition": "flag.status == 'active' && flag.subkind == 'illness' && today == goal.race_date",
    "on_unknown": "fire",
    "action": {
@@ -7396,6 +8292,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "exists(event.bone_answers, a, a == true)",
    "on_unknown": "hold",
    "action": {
@@ -7432,6 +8330,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_entry",
    "condition": "entry.pain_0_10 <= p('pain.during_max') && entry.pain_settled_24h && entry.pain_next_morning == false",
    "on_unknown": "skip",
    "action": {
@@ -7468,7 +8368,9 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": "entry.pain_0_10 > p('pain.during_max') || entry.pain_next_morning == true",
+   "stage": "S1",
+   "scope": "per_entry",
+   "condition": "entry.pain_0_10 > p('pain.during_max') || entry.pain_next_morning_yes",
    "on_unknown": "fire",
    "action": {
     "op": "block_sessions",
@@ -7519,6 +8421,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_entry",
    "condition": "entry.pain_0_10 >= p('pain.severe_min') || state.adp052_consecutive >= p('pain.persist_sessions') || count(state.adp052_events, x, days_between(x.date, today) <= p('pain.recur_window_days')) >= p('pain.recur_count') || entry.limping == true",
    "on_unknown": "fire",
    "action": {
@@ -7554,6 +8458,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "count(state.fatigue_signals, x, days_between(x.date, today) <= p('fatigue.window_days')) == 1",
    "on_unknown": "skip",
    "action": {
@@ -7589,11 +8495,13 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "count(state.fatigue_signals, x, days_between(x.date, today) <= p('fatigue.window_days')) >= p('fatigue.signals_required')",
    "on_unknown": "skip",
    "action": {
     "op": "replace_module",
-    "target": "next_session_E3",
+    "target": "plan.next_hard_session",
     "expr": "'SES-M-001'",
     "then": [
      {
@@ -7633,6 +8541,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "state.adp055_consecutive_weeks >= p('fatigue.persist_weeks')",
    "on_unknown": "fire",
    "action": {
@@ -7676,11 +8586,13 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.fatigue_weeks_consecutive >= p('fatigue.refer_weeks')",
    "on_unknown": "fire",
    "action": {
     "op": "freeze",
-    "target": "progression",
+    "target": "plan.progression",
     "until": "has(state.professional_contact_attested_on)",
     "msg": "MSG-ADP-REFER"
    },
@@ -7713,6 +8625,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "state.fatigue_hold_active && state.weeks_without_fatigue_signal >= p('fatigue.clear_weeks')",
    "on_unknown": "skip",
    "action": {
@@ -7750,6 +8664,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_entry",
+   "scope": "global",
    "condition": "event.type == 'anchor_entered'",
    "on_unknown": "skip",
    "action": {
@@ -7795,6 +8711,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "anchor.confidence == 'measured' && anchor.equiv_10k_s > state.pace_anchor_10k_equiv_s * (1 + p('pace.mdc_mult') * p('pace.test_te_pct') / unit.pct) && !anchor.excluded",
    "on_unknown": "fire",
    "action": {
@@ -7840,6 +8758,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "anchor.confidence == 'measured' && anchor.equiv_10k_s < state.pace_anchor_10k_equiv_s * (1 - p('pace.mdc_mult') * p('pace.test_te_pct') / unit.pct)",
    "on_unknown": "skip",
    "action": {
@@ -7884,6 +8804,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "count(log.last_quality_sessions, x, x.rpe_0_10 < x.rpe_expected) >= p('result.pattern_sessions') || count(log.last_quality_sessions, x, x.rpe_0_10 > x.rpe_expected) >= p('result.pattern_sessions')",
    "on_unknown": "skip",
    "action": {
@@ -7924,6 +8846,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "anchor.confidence == 'measured' && goal.goal_type == 'time' && goal.target_time_s < feas.P_race_s * (1 - feas.B_fast) && !exists(feas.reasons, x, x in ['AVAILABILITY_TIME', 'LONG_RUN_UNREACHABLE_PRESET', 'CURRENT_STATE_SHORT'])",
    "on_unknown": "skip",
    "action": {
@@ -7968,6 +8892,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "count(log.last_e3_sessions, x, x.rpe_0_10 >= p('result.rpe_high')) >= p('result.rpe_high_sessions') && size(log.last_e3_sessions) >= p('result.rpe_high_sessions') && anchor.confidence == 'measured'",
    "on_unknown": "skip",
    "action": {
@@ -8012,6 +8938,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "anchor.confidence == 'measured' && !anchor.excluded && abs(anchor.equiv_10k_s - state.pace_anchor_10k_equiv_s) > p('pace.deadband_pct') / unit.pct * state.pace_anchor_10k_equiv_s && abs(anchor.equiv_10k_s - state.pace_anchor_10k_equiv_s) <= p('pace.mdc_mult') * p('pace.test_te_pct') / unit.pct * state.pace_anchor_10k_equiv_s",
    "on_unknown": "skip",
    "action": {
@@ -8071,12 +8999,15 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "goal.race_status in ['done', 'abandoned']",
    "on_unknown": "fire",
    "action": {
     "op": "insert_phase",
     "phase": "TRANSITION",
-    "rung_expr": "null"
+    "rung_expr": "null",
+    "weeks_expr": "p('phs.transition_weeks')[goal.distance]"
    },
    "expression_status": "formal",
    "explain": {
@@ -8107,6 +9038,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "event.type == 'availability_changed'",
    "on_unknown": "fire",
    "action": {
@@ -8150,6 +9083,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "event.type == 'week_marked_busy'",
    "on_unknown": "skip",
    "action": {
@@ -8231,6 +9166,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "event.type == 'availability_increased'",
    "on_unknown": "fire",
    "action": {
@@ -8266,6 +9203,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_week",
    "condition": "event.type == 'goal_accepted'",
    "on_unknown": "fire",
    "action": {
@@ -8313,6 +9252,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.red_flag_answer == true",
    "on_unknown": "hold",
    "action": {
@@ -8337,7 +9278,7 @@
    "priority": 450,
    "hit_policy": "PRIORITY",
    "when_text": "a Goal is created or edited",
-   "then_text": "set Goal.family from Goal.distance: {5K, 10K} → short; {HM, M} → road_classic; {50K, 100K} → ultra",
+   "then_text": "set Goal.family from Goal.distance: {5K, 10K} → short; {HM, M} → road_classic; {50K, 100K} → ultra; none (maintain, base goals) → base (v5.2, as 12 §2)",
    "because": "every family-specific rule keys on it",
    "evidence": {
     "text": "criteria.md C1, N/A (engineering: structure or procedure, no physiological claim)",
@@ -8348,10 +9289,16 @@
    },
    "default": false,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S0",
+   "scope": "global",
+   "condition": "has(goal.distance)",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "goal.family",
+    "expr": "{'5K': 'short', '10K': 'short', 'HM': 'road_classic', 'M': 'road_classic', '50K': 'ultra', '100K': 'ultra', 'none': 'base'}[goal.distance]"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-DST",
     "coach": "because: every family-specific rule keys on it"
@@ -8369,22 +9316,29 @@
    "priority": 451,
    "hit_policy": "PRIORITY",
    "when_text": "CMP-007 chooses the node for a key-session slot",
-   "then_text": "only nodes listed in dst.phase_nodes[family][Phase.type] are candidates; if none is eligible the slot becomes SES-M-001",
+   "then_text": "only nodes listed in dst.phase_nodes[family][Phase.type] whose next level is within the cell's ceiling are candidates (SHARPEN uses the SPECIFIC row, MAINTAIN the BUILD row; phases without a row have no key slots); if none is eligible, CMP-007's fallback chain applies (preset list rotation, then strides); v5.2 drops the v5 easy-run fallback, which contradicted CMP-007 (F-09)",
    "because": "phase emphasis differs by family; restricting candidates keeps CMP-007 deterministic",
    "evidence": {
-    "text": "hearing-1 §2 rising specificity, CORROBORATED; wg2 §4 Koop order, CREDIBLE",
+    "text": "hearing-1 §2 rising specificity, CORROBORATED; wg2 §4 Koop order, CREDIBLE; v5.2 cell encoding and empty rows: design choice, UNKNOWN",
     "grades": [
      "CORROBORATED",
-     "CREDIBLE"
+     "CREDIBLE",
+     "UNKNOWN"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.3",
+   "scope": "per_candidate",
+   "condition": "event.type == 'node_candidates'",
+   "on_unknown": "skip",
+   "action": {
+    "op": "filter_candidates",
+    "target": "slot.node_candidates",
+    "expr": "exists(p('dst.phase_nodes')[goal.family][week.phase_row], q, q.node == node.id && state.levels[node.id] + 1 <= q.max_level)"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-DST",
     "coach": "because: phase emphasis differs by family; restricting candidates keeps CMP-007 deterministic"
@@ -8434,7 +9388,7 @@
    "priority": 453,
    "hit_policy": "PRIORITY",
    "when_text": "Goal.expected_conditions = hot",
-   "then_text": "add HEAT L2 to Demand.required_levels and schedule SES-M-022 per 11",
+   "then_text": "add HEAT L2 to Demand.required_levels (FEA-004) and schedule SES-M-022 per 11 (NUT-040: heat.acclim_days easy runs in the last heat.acclim_window_days, never the long run or a key session)",
    "because": "heat acclimatisation over ~1–2 weeks is the main protective step",
    "evidence": {
     "text": "wg5 §4, CORROBORATED",
@@ -8445,10 +9399,15 @@
    },
    "default": false,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.2",
+   "scope": "global",
+   "condition": "goal.expected_conditions == 'hot'",
+   "on_unknown": "skip",
+   "action": {
+    "op": "route",
+    "to": "NUT-040"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-DST",
     "coach": "because: heat acclimatisation over ~1–2 weeks is the main protective step"
@@ -8478,10 +9437,22 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.5",
+   "scope": "per_candidate",
+   "condition": "goal.family == 'short' && event.type == 'sessions_set'",
+   "on_unknown": "fire",
+   "action": {
+    "op": "constraint",
+    "check": "all(plan.long_runs, lr, lr.module_id == 'SES-M-003' && lr.hard_time_s == 0 && lr.e2_time_s == 0)",
+    "then": [
+     {
+      "op": "filter_candidates",
+      "target": "slot.candidates",
+      "expr": "m.id != 'SES-M-005'"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-DST",
     "coach": "because: short-race specificity is speed, while the long run serves AER/DUR"
@@ -8499,10 +9470,10 @@
    "priority": 451,
    "hit_policy": "PRIORITY",
    "when_text": "Goal.distance = HM, goal_type = time, Phase.type = SPECIFIC and MSP L1 prerequisites hold",
-   "then_text": "every dst.race_long_every_weeks-th long run is SES-M-005 with an E3 final segment of min(dst.msp_share[HM][level] × expected race time, dst.msp_segment_max_min.HM, 0.60 × that run); finish goals use the MSP L1 share",
+   "then_text": "every dst.race_long_every_weeks-th non-deload long run of SPECIFIC (counted from its first week) is SES-M-005 with an E3 final segment of min(dst.msp_share[HM][next MSP level] × the target time, dst.msp_segment_max_min.HM, dst.msp_segment_max_ratio × that run); the segment counts in LOD-033's hard budget and is shortened (rest of the run at E1) when it does not fit; finish goals keep easy long runs (v5.2, owner Q7: the v5 clause 'finish goals use the MSP L1 share' could never fire and is removed)",
    "because": "race-effort segments late in long runs are common practice; v1 left the dose unbounded (Room B R5)",
    "evidence": {
-    "text": "hearing-1 phys-field, CORROBORATED (practice); wg2 §1, ALLEGED (Hansons 10 mi MP) → design default",
+    "text": "hearing-1 phys-field, CORROBORATED (practice); wg2 §1, ALLEGED (Hansons 10 mi MP) → design default; v5.2 counting and next-level share: ALLEGED (Pfitzinger and Hansons place goal-pace segments late in long runs, from memory)",
     "grades": [
      "ALLEGED",
      "CORROBORATED"
@@ -8511,10 +9482,23 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.2",
+   "scope": "per_week",
+   "condition": "goal.distance == 'HM' && goal.goal_type == 'time' && week.phase == 'SPECIFIC' && !week.is_deload && week.is_race_long_run_week && level_prereqs_hold('MSP', 1, week.long_run_date)",
+   "on_unknown": "skip",
+   "action": {
+    "op": "replace_module",
+    "target": "week.long_run",
+    "expr": "'SES-M-005'",
+    "then": [
+     {
+      "op": "set",
+      "target": "week.long_run.race_segment_s",
+      "expr": "min(week.msp_share_next * goal.target_time_s, unit.min_s * p('dst.msp_segment_max_min')['HM'], p('dst.msp_segment_max_ratio') * week.lr_s)"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-DST",
     "coach": "because: race-effort segments late in long runs are common practice; v1 left the dose unbounded (Room B R5)"
@@ -8543,7 +9527,7 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "MVP",
+   "release": "spec",
    "condition": null,
    "on_unknown": null,
    "action": null,
@@ -8644,6 +9628,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7",
+   "scope": "per_session",
    "condition": "session.is_b2b_pair && !(goal.family == 'ultra' && state.levels.DUR >= p('b2b.min_dur_level') && state.levels.TOL >= p('b2b.min_tol_level') && profile.b2b_opt_in && week.phase in ['BUILD', 'SPECIFIC'] && !week.is_deload && state.log_status == 'rich' && size(flags.active) == 0)",
    "on_unknown": "fire",
    "action": {
@@ -8681,6 +9667,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7",
+   "scope": "per_session",
    "condition": "session.is_b2b_pair",
    "on_unknown": "fire",
    "action": {
@@ -8886,11 +9874,17 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S5",
+   "scope": "global",
+   "condition": "!has(profile.preset_preference) || profile.preset_preference == 'method_default'",
+   "on_unknown": "fire",
+   "action": {
+    "op": "set",
+    "target": "preset.id",
+    "expr": "'method_default'"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-DST",
     "coach": "because: no school has been shown superior; Koop order is the documented ultra practice"
@@ -8904,11 +9898,11 @@
    "id": "DST-018",
    "module": "09",
    "kind": "rule",
-   "tier": "T5",
+   "tier": "T4",
    "priority": 458,
    "hit_policy": "PRIORITY",
    "when_text": "goal_type = time, Phase.type = SPECIFIC and the MSP L1 prerequisites hold",
-   "then_text": "at least one key session every dst.msp_every_weeks is an MSP module (SES-M-011, or SES-M-005 for road_classic), rotated deterministically with the CMP-007 choice",
+   "then_text": "at least one key session every dst.msp_every_weeks is an MSP module (SES-M-011; for road_classic the long-run segments of DST-006/007 come in addition), applied inside CMP-007's procedure after the node choice: in a SPECIFIC loading week with week.is_msp_week and no slot training MSP, the last slot becomes SES-M-011 (v5.2: moved from T5 to T4 and into the procedure, so CMP-007's priority can no longer suppress it)",
    "because": "rising specificity is part of every proven plan and was lost when one key slot always went to THR (Room A R3)",
    "evidence": {
     "text": "hearing-1 §2, CORROBORATED (rising specificity); design default (interval)",
@@ -8918,11 +9912,17 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S7.3",
+   "scope": "per_week",
+   "condition": "goal.goal_type == 'time' && week.phase == 'SPECIFIC' && !week.is_deload && week.is_msp_week && level_prereqs_hold('MSP', 1, week.start) && !exists(week.key_slots, x, x.node == 'MSP') && size(week.key_slots) > 0",
+   "on_unknown": "skip",
+   "action": {
+    "op": "replace_module",
+    "target": "week.last_key_slot",
+    "expr": "'SES-M-011'"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-DST",
     "coach": "because: rising specificity is part of every proven plan and was lost when one key slot always went to THR (Room A R3)"
@@ -8985,6 +9985,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.C1 || event.C2 || event.C3 || event.C4",
    "on_unknown": "hold",
    "action": {
@@ -9024,6 +10026,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.B1 || event.B2 || event.B3 || event.B4",
    "on_unknown": "hold",
    "action": {
@@ -9062,6 +10066,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_flag",
    "condition": "(event.B1 || event.B2 || event.B3 || event.B4) && event.B5 in p('flag.high_risk_regions')",
    "on_unknown": "hold",
    "action": {
@@ -9098,6 +10104,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.H1 || event.H2",
    "on_unknown": "hold",
    "action": {
@@ -9137,6 +10145,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.E1 == true",
    "on_unknown": "hold",
    "action": {
@@ -9175,6 +10185,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.special_status == 'pregnant' && (event.P1 || event.P2)",
    "on_unknown": "hold",
    "action": {
@@ -9213,6 +10225,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.I1 || event.I2",
    "on_unknown": "hold",
    "action": {
@@ -9251,6 +10265,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_session",
    "condition": "event.I3 == true && event.I1 == false && event.I2 == false",
    "on_unknown": "fire",
    "action": {
@@ -9296,6 +10312,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_flag",
    "condition": "event.reds_screen_positive == true",
    "on_unknown": "fire",
    "action": {
@@ -9307,7 +10325,7 @@
     "then": [
      {
       "op": "freeze",
-      "target": "progression",
+      "target": "plan.progression",
       "until": "has(flag.clearance_attested_on)"
      }
     ]
@@ -9341,6 +10359,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_flag",
    "condition": "exists(flags.cleared, f, f.subkind == flag.subkind && days_between(f.cleared_on, flag.raised_on) <= p('flag.recur_window_days'))",
    "on_unknown": "fire",
    "action": {
@@ -9378,6 +10398,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.handover == 'ADP-053' && event.B1 == false && event.B2 == false && event.B3 == false && event.B4 == false",
    "on_unknown": "fire",
    "action": {
@@ -9416,6 +10438,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.reds_flag_active && (event.bone_stress_flag_raised || event.absent_periods == true)",
    "on_unknown": "fire",
    "action": {
@@ -9442,7 +10466,7 @@
    "tier": "T0",
    "priority": 510,
    "hit_policy": "COLLECT",
-   "when_text": "any RiskFlag with kind ∈ flag.pause_kinds is active",
+   "when_text": "any RiskFlag with subkind ∈ flag.pause_kinds is active (v5.2: subkind, as INV-05 says; v5 tested kind)",
    "then_text": "Plan.status = paused; zero running sessions from raised_on (INV-05); show MSG-SAF-010 and MSG-SAF-004; logging stays open",
    "because": "self-coached users need a hard stop",
    "evidence": {
@@ -9454,7 +10478,9 @@
    },
    "default": false,
    "release": "MVP",
-   "condition": "exists(flags.active, f, f.kind in p('flag.pause_kinds'))",
+   "stage": "S1",
+   "scope": "per_flag",
+   "condition": "exists(flags.active, f, f.subkind in p('flag.pause_kinds'))",
    "on_unknown": "fire",
    "action": {
     "op": "block_sessions",
@@ -9498,6 +10524,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_flag",
    "condition": "event.type == 'clearance_attested' && event.date >= date_add(flag.raised_on, p('flag.clearance_min_delay_days')) && (flag.subkind in p('flag.professional_kinds') ? event.msg_id == 'MSG-SAF-011' : event.msg_id in ['MSG-SAF-011', 'MSG-SAF-012'])",
    "on_unknown": "skip",
    "action": {
@@ -9541,6 +10569,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_flag",
    "condition": "event.type == 'flag_cleared'",
    "on_unknown": "fire",
    "action": {
@@ -9588,6 +10618,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "per_flag",
    "condition": "event.type == 'flag_cleared' && flag.subkind == 'bone_stress_highrisk'",
    "on_unknown": "fire",
    "action": {
@@ -9631,6 +10663,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "age_low(today) < p('minor.min_age')",
    "on_unknown": "fire",
    "action": {
@@ -9667,6 +10701,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "age_low(today) < p('minor.adult_age') && !has(screen.guardian_attested_on)",
    "on_unknown": "fire",
    "action": {
@@ -9703,6 +10739,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "age_low(today) < p('minor.refer_below_age')",
    "on_unknown": "fire",
    "action": {
@@ -9740,6 +10778,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "age_low(goal.race_date) < p('minor.adult_age') && (goal.distance_km > p('minor.max_race_km.recommended')[age_low(goal.race_date)] || (goal.distance == 'M' && age_low(goal.race_date) < p('minor.marathon_min_age')) || (goal.distance in ['50K', '100K'] && age_low(goal.race_date) < p('minor.ultra_min_age')))",
    "on_unknown": "fire",
    "action": {
@@ -9776,6 +10816,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_session",
    "condition": "age_low(session.date) < p('minor.adult_age') && session.planned_distance_m > p('minor.lr_cap_ratio') * unit.km_m * p('minor.max_race_km.recommended')[age_low(session.date)]",
    "on_unknown": "fire",
    "action": {
@@ -9813,6 +10855,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.special_status == 'pregnant' && (profile.training_age_years == 0 || claim.runs_per_week == 0)",
    "on_unknown": "fire",
    "action": {
@@ -9849,6 +10893,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_week",
    "condition": "profile.special_status == 'pregnant' && profile.training_age_years > 0 && claim.runs_per_week > 0",
    "on_unknown": "fire",
    "action": {
@@ -9908,6 +10954,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.special_status == 'postpartum' && days_between(profile.special_status_start, today) < unit.week_d * p('pp.min_weeks')",
    "on_unknown": "fire",
    "action": {
@@ -9944,6 +10992,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.special_status == 'postpartum' && days_between(profile.special_status_start, today) >= unit.week_d * p('pp.min_weeks')",
    "on_unknown": "fire",
    "action": {
@@ -9988,6 +11038,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.special_status == 'pregnant' && today >= date_add(profile.due_date, -p('pp.due_ask_days'))",
    "on_unknown": "fire",
    "action": {
@@ -10033,6 +11085,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "age_high(today) >= p('masters.vigorous_assessment_age') && (exists(plan.sessions, s, effort_rank(s.effort_target) >= effort_rank('E3')) || exists(plan.sessions, s, s.expected_duration_s > unit.min_s * p('lr.long_guard_min'))) && !has(screen.saf060_attested_on)",
    "on_unknown": "fire",
    "action": {
@@ -10079,6 +11133,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "age_high(today) >= p('masters.cv_advice_age') && exists(plan.sessions, s, effort_rank(s.effort_target) >= effort_rank('E3')) && (state.ctx001_applies || age_high(today) >= p('ctx.masters_age')) && !state.saf061_shown_this_season",
    "on_unknown": "skip",
    "action": {
@@ -10121,6 +11177,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S4",
+   "scope": "global",
    "condition": "event.type == 'enter_rtr'",
    "on_unknown": "fire",
    "action": {
@@ -10157,6 +11215,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_session",
    "condition": "session.ladder == 'rtr'",
    "on_unknown": "fire",
    "action": {
@@ -10210,6 +11270,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "count(state.rung_counted_sessions, x, x.clean) >= p('rtr.sessions_per_rung')",
    "on_unknown": "skip",
    "action": {
@@ -10246,6 +11308,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "per_session",
    "condition": "session.ladder != 'none' && session.clean == false",
    "on_unknown": "fire",
    "action": {
@@ -10288,6 +11352,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "state.unclean_weeks_on_rung > p('rtr.max_weeks_per_rung')",
    "on_unknown": "fire",
    "action": {
@@ -10324,6 +11390,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S3",
+   "scope": "global",
    "condition": "event.type == 'compute_weeks_needed' && state.ladder_kind != 'none'",
    "on_unknown": "fire",
    "action": {
@@ -10360,6 +11428,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.never_run == true || (state.log_status == 'none' && profile.training_age_years == 0)",
    "on_unknown": "fire",
    "action": {
@@ -10397,6 +11467,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S7",
+   "scope": "global",
    "condition": "true",
    "on_unknown": "fire",
    "action": {
@@ -10433,6 +11505,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.nutrition_referral_flag == true",
    "on_unknown": "fire",
    "action": {
@@ -10474,6 +11548,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "profile.special_status == 'minor' || age_low(today) < p('minor.adult_age')",
    "on_unknown": "fire",
    "action": {
@@ -10568,21 +11644,36 @@
    "priority": 555,
    "hit_policy": "PRIORITY",
    "when_text": "the goal race is expected to last > fuel.required_above_min (FUEL required, CMP-008) and a planned long run lasts ≥ fuel.practice_min_duration_min",
-   "then_text": "make it a fuelling-practice session (06 rehearsal module) with target intake = the runner's current step, starting at fuel.start_g_h",
+   "then_text": "make it a fuelling-practice session (SES-M-004, the fuelled long run; SES-M-023 stays the later race rehearsal) with target intake = the runner's current step, starting at fuel.start_g_h; v5.2: from late BASE (04 §1: the second half of the BASE phase) onwards, deload long runs included at the same step, taper long runs at the same step without raising it; with NUT-002 the run stays but shows no number (owner Q5)",
    "because": "fuelling is a trainable skill needed above ~90 min",
    "evidence": {
-    "text": "wg5 impl. 3, CORROBORATED; wg5 §5, CORROBORATED",
+    "text": "wg5 impl. 3, CORROBORATED; wg5 §5, CORROBORATED; v5.2 start in late BASE, deload runs count: ALLEGED (practice, from memory)",
     "grades": [
+     "ALLEGED",
      "CORROBORATED"
     ],
     "basis": "evidence"
    },
    "default": false,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7.2",
+   "scope": "per_week",
+   "condition": "goal.expected_duration_s > unit.min_s * p('fuel.required_above_min') && week.lr_s >= unit.min_s * p('fuel.practice_min_duration_min') && week.fuel_practice_allowed",
+   "on_unknown": "skip",
+   "action": {
+    "op": "replace_module",
+    "target": "week.long_run",
+    "expr": "'SES-M-004'",
+    "then": [
+     {
+      "op": "set",
+      "target": "week.long_run.fuel_target_g_h",
+      "expr": "has(state.fuel_step_g_h) ? state.fuel_step_g_h : p('fuel.start_g_h')",
+      "unless": "profile.nutrition_referral_flag"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-NUT",
     "coach": "because: fuelling is a trainable skill needed above ~90 min"
@@ -10600,11 +11691,12 @@
    "priority": 556,
    "hit_policy": "PRIORITY",
    "when_text": "fuel.step_runs consecutive measured practice runs reach the current step with gi_score_0_10 ≤ fuel.gi_pass_max",
-   "then_text": "raise the step by fuel.step_g_h, up to the band ceiling for the goal (§4)",
+   "then_text": "raise the step by fuel.step_g_h, up to the band ceiling for the goal (§4) and the upper edge of the required FUEL level's band (fuel_step_ceiling); v5.2: 'reach' = logged intake ≥ step − fuel.reach_tol_g_h; only practice runs count, other long runs in between are ignored; taper practice runs never raise the step; a blank stomach score holds the step (owner Q5)",
    "because": "coaches add 10–15 g/h every one or two long runs while tolerated",
    "evidence": {
-    "text": "wg5 §5, CREDIBLE; hearing-1 §4, CORROBORATED (sequence)",
+    "text": "wg5 §5, CREDIBLE; hearing-1 §4, CORROBORATED (sequence); v5.2 step 15 g/h and 'reach' tolerance: ALLEGED (gut-training practice adds about 10–20 g/h every one or two weeks, from memory)",
     "grades": [
+     "ALLEGED",
      "CORROBORATED",
      "CREDIBLE"
     ],
@@ -10612,10 +11704,16 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S2",
+   "scope": "global",
+   "condition": "count(log.practice_runs_at_step, x, x.carb_g_per_h >= state.fuel_step_g_h - p('fuel.reach_tol_g_h') && x.gi_score_0_10 <= p('fuel.gi_pass_max')) >= p('fuel.step_runs')",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "state.fuel_step_g_h",
+    "expr": "min(state.fuel_step_g_h + p('fuel.step_g_h'), fuel_step_ceiling(goal, demand))"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-NUT",
     "coach": "because: coaches add 10–15 g/h every one or two long runs while tolerated"
@@ -10633,7 +11731,7 @@
    "priority": 557,
    "hit_policy": "PRIORITY",
    "when_text": "a practice run logs gi_score_0_10 > fuel.gi_pass_max",
-   "then_text": "hold the step; when it logs ≥ fuel.gi_stepdown_min, drop one step",
+   "then_text": "hold the step; when it logs ≥ fuel.gi_stepdown_min, drop one step, never below fuel.start_g_h (v5.2)",
    "because": "tolerance, not a calendar, sets progress",
    "evidence": {
     "text": "wg5 impl. 3, CREDIBLE; design default (step-down)",
@@ -10644,10 +11742,16 @@
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S7",
+   "scope": "per_entry",
+   "condition": "entry.is_practice && entry.gi_score_0_10 > p('fuel.gi_pass_max')",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "state.fuel_step_g_h",
+    "expr": "entry.gi_score_0_10 >= p('fuel.gi_stepdown_min') ? max(p('fuel.start_g_h'), state.fuel_step_g_h - p('fuel.step_g_h')) : state.fuel_step_g_h"
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-NUT",
     "coach": "because: tolerance, not a calendar, sets progress"
@@ -10665,21 +11769,35 @@
    "priority": 558,
    "hit_policy": "PRIORITY",
    "when_text": "fuel.exit_runs measured long runs (for L3: with race-effort segments, MSP L1) reach the level's intake band with gi_score_0_10 ≤ fuel.gi_pass_max",
-   "then_text": "set FUEL level = n, confidence = measured (CMP-002)",
+   "then_text": "set FUEL level = n, confidence = measured (CMP-002); v5.2: 'reach the band' = intake ≥ its lower edge (fuel.level_band; an intake above the band still counts), the last fuel.exit_runs practice runs within cmp.decay_weeks, L3 runs with an E2-or-harder race-effort segment",
    "because": "two rehearsals at target intake are the practice exit test",
    "evidence": {
-    "text": "wg5 impl. 3, CREDIBLE",
+    "text": "wg5 impl. 3, CREDIBLE; v5.2 'lower edge reached': design choice, UNKNOWN",
     "grades": [
-     "CREDIBLE"
+     "CREDIBLE",
+     "UNKNOWN"
     ],
     "basis": "design_default"
    },
    "default": true,
    "release": "MVP",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "stage": "S2",
+   "scope": "global",
+   "condition": "count(log.last_practice_runs, x, x.carb_g_per_h >= fuel_level_low(state.levels.FUEL + 1) && x.gi_score_0_10 <= p('fuel.gi_pass_max') && (state.levels.FUEL + 1 < p('fuel.l3_level') || x.has_race_effort)) >= p('fuel.exit_runs') && level_prereqs_hold('FUEL', state.levels.FUEL + 1, today)",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "state.levels.FUEL",
+    "expr": "state.levels.FUEL + 1",
+    "then": [
+     {
+      "op": "set",
+      "target": "state.level_confidence.FUEL",
+      "expr": "'measured'"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-NUT",
     "coach": "because: two rehearsals at target intake are the practice exit test"
@@ -10774,6 +11892,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S7.8",
+   "scope": "global",
    "condition": "event.type == 'build_race_fuelling'",
    "on_unknown": "fire",
    "action": {
@@ -10810,11 +11930,19 @@
     "basis": "design_default"
    },
    "default": true,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S7.8",
+   "scope": "global",
+   "condition": "has(plan.race_fuel_g_h) && state.max_tolerated_g_h < fuel_band_low(goal.expected_duration_s) && today >= plan.taper_start",
+   "on_unknown": "skip",
+   "action": {
+    "op": "emit_message",
+    "msg": "MSG-NUT-CAPPED",
+    "placeholders": {
+     "g_h": "plan.race_fuel_g_h"
+    }
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-NUT-CAPPED",
     "coach": "because: running short of the band is safer than an untested gut"
@@ -10907,13 +12035,25 @@
     "basis": "evidence"
    },
    "default": false,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S7.8",
+   "scope": "global",
+   "condition": "!has(state.sweat_rate_ml_h)",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "plan.drink_ml_h",
+    "expr": "null",
+    "then": [
+     {
+      "op": "emit_message",
+      "msg": "MSG-NUT-THIRST"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
-    "runner": "MSG-WHY-NUT",
+    "runner": "MSG-NUT-THIRST",
     "coach": "because: thirst-led drinking prevents over-drinking"
    },
    "tests": {
@@ -10940,6 +12080,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "event.type == 'drinking_plan_requested'",
    "on_unknown": "fire",
    "action": {
@@ -10976,6 +12118,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S7",
+   "scope": "per_session",
    "condition": "goal.expected_duration_s > unit.h_s * p('eah.warning_above_h') || session.expected_duration_s > unit.h_s * p('eah.warning_above_h')",
    "on_unknown": "fire",
    "action": {
@@ -11012,6 +12156,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.confusion || event.severe_headache || event.vomiting || event.unusual_swelling",
    "on_unknown": "hold",
    "action": {
@@ -11049,6 +12195,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S7",
+   "scope": "per_session",
    "condition": "session.expected_duration_s > unit.h_s * p('eah.warning_above_h') || (session.expected_duration_s >= unit.min_s * p('lr.long_guard_min') && (session.conditions_hot || session.hot_forecast))",
    "on_unknown": "fire",
    "action": {
@@ -11082,21 +12230,35 @@
    "priority": 569,
    "hit_policy": "PRIORITY",
    "when_text": "Goal.expected_conditions = hot",
-   "then_text": "HEAT L2 becomes a required level; 06 schedules ≥ heat.acclim_days heat-exposure sessions at E0–E1 inside the heat.acclim_window_days before the race; HEAT L2 is attained when they are logged as done",
+   "then_text": "HEAT L2 becomes a required level; 06 schedules heat.acclim_days heat-exposure sessions (SES-M-022, E1, ≤ heat.exposure_max_min, in the warmest part of the day the runner chooses) inside the heat.acclim_window_days before the race, replacing easy runs (never the long run or a key session); HEAT L2 is attained when heat.acclim_days of them are logged with conditions_hot; no clothing-based protocol (v5.2, owner Q8)",
    "because": "1–2 weeks of exposure is the protective step",
    "evidence": {
-    "text": "wg5 §4, CORROBORATED",
+    "text": "wg5 §4, CORROBORATED; v5.2 10 exposures, ≤ 60 min, logged as hot: ALLEGED (practice, from memory)",
     "grades": [
+     "ALLEGED",
      "CORROBORATED"
     ],
     "basis": "design_default"
    },
    "default": true,
-   "release": "spec",
-   "condition": null,
-   "on_unknown": null,
-   "action": null,
-   "expression_status": "text_only",
+   "release": "MVP",
+   "stage": "S7.7",
+   "scope": "per_session",
+   "condition": "goal.expected_conditions == 'hot' && week.in_heat_window && session.kind == 'easy' && !session.is_long_run && !session.is_key && week.heat_runs_before < p('heat.acclim_days')",
+   "on_unknown": "skip",
+   "action": {
+    "op": "replace_module",
+    "target": "session",
+    "expr": "'SES-M-022'",
+    "then": [
+     {
+      "op": "cap",
+      "target": "session.planned_duration_s",
+      "expr": "unit.min_s * p('heat.exposure_max_min')"
+     }
+    ]
+   },
+   "expression_status": "formal",
    "explain": {
     "runner": "MSG-WHY-NUT",
     "coach": "because: 1–2 weeks of exposure is the protective step"
@@ -11125,6 +12287,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S7",
+   "scope": "per_session",
    "condition": "session.conditions_hot || session.hot_forecast || goal.expected_conditions == 'hot'",
    "on_unknown": "fire",
    "action": {
@@ -11195,6 +12359,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "event.confusion || event.collapse || event.loss_of_coordination || (event.faint && event.very_hot)",
    "on_unknown": "hold",
    "action": {
@@ -11232,6 +12398,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "on_event",
+   "scope": "global",
    "condition": "event.type == 'onboarding_complete' || days_between(state.last_reds_screen, today) >= unit.week_d * p('reds.rescreen_weeks') || event.off_cycle_trigger",
    "on_unknown": "fire",
    "action": {
@@ -11270,6 +12438,8 @@
    },
    "default": true,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "exists(event.reds_answers, a, a == true)",
    "on_unknown": "fire",
    "action": {
@@ -11306,6 +12476,8 @@
    },
    "default": false,
    "release": "MVP",
+   "stage": "S1",
+   "scope": "global",
    "condition": "exists(event.reds_answers, a, a == true) && (event.bone_stress_answer || event.amenorrhoea_answer)",
    "on_unknown": "fire",
    "action": {
@@ -11361,6 +12533,8 @@
    "tier": "T2",
    "severity": "repair / block",
    "text": "Planned run distance ≤ `spike.warn_ratio` (1.10) × L30_eff_dist. Runner-edited sessions: warn above 1.10, **block** above `spike.block_ratio` (2.0). Only the **goal race** is exempt (INV-25); tune-up races are checked. Return-ladder sessions carry no planned distance, so only INV-02 binds for them",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, s.is_goal_race || !has(s.planned_distance_m) || s.planned_distance_m <= p('spike.warn_ratio') * l30_dist(s.date))",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11389,6 +12563,8 @@
    "tier": "T2",
    "severity": "repair / block",
    "text": "Same ratios on **duration** for every session (time on feet incl. walk breaks); binding for run-walk and time-prescribed sessions. **Start-ladder sessions are exempt** (v5.1 consistency fix): their steps follow the published programme (10 §4b, SAF-082), e.g. S6's 30 min after S4's 27 min (+11%); return-ladder (RTR) sessions stay bound",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, s.is_goal_race || s.ladder == 'start' || s.planned_duration_s <= p('spike.warn_ratio') * l30_time(s.date))",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11416,6 +12592,8 @@
    "tier": "T2",
    "severity": "repair",
    "text": "v2: the day before and the day after a long run are each ≤ min(`two_day.adjacent_ratio` (0.50) × LR, `two_day.cap_ratio` (1.60) × L30_eff − LR). If the prerequisites of DUR L5 hold (DUR L4, TOL L5) and back-to-backs are enabled (DST-010), a pair instead satisfies ≤ `b2b.pair_cap_ratio` (1.75) × L30_eff, with day 2 ≤ `b2b.day2_ratio` (0.60) × day 1 (DST-011)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.long_runs, lr, lr.is_b2b_pair || all(adjacent(lr), d, d.planned_duration_s <= min(p('two_day.adjacent_ratio') * lr.planned_duration_s, p('two_day.cap_ratio') * l30_time(lr.date) - lr.planned_duration_s)))",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11444,6 +12622,8 @@
    "tier": "T2",
    "severity": "block",
    "text": "**No catch-up = no added time or distance.** After any adaptation, missed time or distance is never added to another day, and future weeks are compared with the parent version **by load ordinal**: the k-th loading week of the new plan ≤ the k-th loading week of the parent, and likewise for deload and taper weeks. Moving a deload therefore never clamps a normal week to the old deload value (F-15). Total planned time over the remaining horizon ≤ the parent's. A missed hard session may *replace* a later easy session of equal or longer duration in the same week (ADP-021). Weeks inside the published window (ADP-014) are unchanged except for reductions. Exempt only on a user-accepted goal change",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "event.goal_changed || all(plan.future_weeks, w, w.planned_time_s <= parent_week(w).planned_time_s && w.lr_s <= parent_week(w).lr_s)",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11471,7 +12651,9 @@
    "tier": "T0",
    "severity": "block",
    "text": "Active `RiskFlag` with subkind ∈ `flag.pause_kinds` → zero running sessions from flag date. Subkinds in `flag.professional_kinds` (red flags, persistent pain, REDs escalation) clear only with a professional-clearance attestation dated ≥ `flag.clearance_min_delay_days` after the flag (SAF-021); `illness` clears through 08's return gate with self-attestation (ADP-042). `reds_screen` alone is a freeze, not a pause (SAF-009)",
-   "assert": "all(flags.active, f, !(f.kind in p('flag.pause_kinds')) || count(plan.sessions, s, s.date >= f.raised_on && s.is_run) == 0)",
+   "stage": "S8",
+   "scope": "per_plan",
+   "assert": "all(flags.active, f, !(f.subkind in p('flag.pause_kinds')) || count(plan.sessions, s, s.date >= f.raised_on && s.is_run) == 0)",
    "check_kind": "B",
    "on_unknown": "fire",
    "evidence": {
@@ -11498,6 +12680,8 @@
    "tier": "T1",
    "severity": "block",
    "text": "Screening unresolved → no session above E2",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "state.gate != 'proceed_restricted' || all(plan.sessions, s, effort_rank(s.effort_target) <= effort_rank('E2'))",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11525,6 +12709,8 @@
    "tier": "T1",
    "severity": "block",
    "text": "Special-population limits hold: minors' distance table, pregnancy maintenance-only, postpartum < `pp.min_weeks` → no plan",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, (profile.special_status != 'pregnant' || (effort_rank(s.effort_target) <= effort_rank(p('pregnancy.max_effort')))) && (age_low(s.date) >= p('minor.adult_age') || !s.is_b2b_pair)) && (profile.special_status != 'pregnant' || all(plan.weeks, w, w.planned_time_s <= p('pregnancy.vol_cap_ratio') * state.V28_at_status_start_s))",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11552,6 +12738,8 @@
    "tier": "T5",
    "severity": "repair",
    "text": "Taper keeps frequency (≥ `taper.freq_min_ratio` × pre-taper runs/week, race week excepted) and intensity (≥ 1 E3+ touch per non-race taper week if the pre-taper block had one)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.taper_weeks, w, w.is_race_week || (w.runs >= p('taper.freq_min_ratio') * plan.pre_taper_runs && (!plan.pre_taper_had_e3 || w.has_e3_touch)))",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11579,6 +12767,8 @@
    "tier": "T2",
    "severity": "block",
    "text": "No HR zone derived from an age-predicted HRmax; HR zones only from measured HRmax/LTHR",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, !has(s.hr_zone) || s.hr_source in ['hrmax_measured', 'lthr_measured'])",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11607,6 +12797,8 @@
    "tier": "T2",
    "severity": "build fail",
    "text": "(static) No rule uses ACWR, monotony or Banister output in a blocking condition",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "static: no blocking condition references acwr, monotony, strain, banister or an age-predicted HRmax",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11634,8 +12826,10 @@
    "kind": "invariant",
    "tier": "T5",
    "severity": "block",
-   "text": "Week totals = sum of sessions (time and distance)",
-   "assert": "all(plan.weeks, w, w.planned_time_s == sum(w.sessions, s, s.planned_duration_s))",
+   "text": "Week totals = sum of sessions (time and distance); v5.2: the goal race is listed in its week but not counted in the week's planned time (spec/schema README §6)",
+   "stage": "S8",
+   "scope": "per_plan",
+   "assert": "all(plan.weeks, w, w.planned_time_s == sum(w.sessions, s, s.is_goal_race ? 0 : s.planned_duration_s))",
    "check_kind": "B",
    "on_unknown": "fire",
    "evidence": {
@@ -11648,7 +12842,7 @@
    "release": "MVP",
    "explain": {
     "runner": "MSG-ADP-CHANGED",
-    "coach": "Week totals = sum of sessions (time and distance)"
+    "coach": "Week totals = sum of sessions (time and distance); v5.2: the goal race is listed in its week but not counted in the week's planned time (spec/schema README §6)"
    },
    "tests": {
     "fires": "T-INV-11-fires",
@@ -11662,6 +12856,8 @@
    "tier": "T5",
    "severity": "build fail",
    "text": "Every parameter used resolves to a registry entry with grade and basis",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "static: every p() id resolves to a registry entry with a grade or basis eng",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11689,6 +12885,8 @@
    "tier": "T5",
    "severity": "repair",
    "text": "Long run ≤ max(active preset cap, `L_hold`) (v4, p1-A R1); the ultra tune-up is exempt from the ultra time cap only, never from INV-01/02/03 (DST-012)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.long_runs, lr, lr.planned_duration_s <= max(preset_cap(lr), state.L_hold_s))",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11716,6 +12914,8 @@
    "tier": "T2",
    "severity": "block",
    "text": "No implausible or unconfirmed entry contributes to L30_eff, V28 or level attainment",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(state.denominator_entries, e, e.plausibility != 'flagged')",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11743,6 +12943,8 @@
    "tier": "T2",
    "severity": "repair (→ effort)",
    "text": "No pace target from an anchor with confidence ≠ measured or older than `anchor.max_age_days`. Paces only from the 03 §3b pace model (FEA-014), never from the target, logged pace or HR formulas",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, !has(s.pace_range) || (anchor.confidence == 'measured' && days_between(anchor.date, s.date) <= p('anchor.max_age_days')))",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11770,6 +12972,8 @@
    "tier": "T5",
    "severity": "repair",
    "text": "Weekly volume increase ≤ active profile ceiling, measured against the last non-deload week if it is ≤ `prog.baseline_max_age_weeks` old, else against the most recent completed week's logged volume (LOD-003/004)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.loading_weeks, w, w.planned_time_s <= (1 + p('prog.' + state.progression_profile + '.week_max')) * baseline(w))",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11796,8 +13000,10 @@
    "kind": "invariant",
    "tier": "T5",
    "severity": "repair",
-   "text": "No two sessions ≥ E3 on consecutive days unless the preset declares it",
-   "assert": "all(plan.sessions, s, !(s.is_hard && next_day(s).is_hard) || preset.consecutive_hard_allowed)",
+   "text": "No two hard days on consecutive days unless the preset declares it (v5.2: hard = a segment at E3 or E4, or the long run, SES-004; strides do not count)",
+   "stage": "S8",
+   "scope": "per_plan",
+   "assert": "all(plan.sessions, s, !(s.is_hard && s.next_day_is_hard) || preset.consecutive_hard_allowed)",
    "check_kind": "B",
    "on_unknown": "fire",
    "evidence": {
@@ -11810,7 +13016,7 @@
    "release": "MVP",
    "explain": {
     "runner": "MSG-ADP-CHANGED",
-    "coach": "No two sessions ≥ E3 on consecutive days unless the preset declares it"
+    "coach": "No two hard days on consecutive days unless the preset declares it (v5.2: hard = a segment at E3 or E4, or the long run, SES-004; strides do not count)"
    },
    "tests": {
     "fires": "T-INV-17-fires",
@@ -11824,6 +13030,8 @@
    "tier": "T2",
    "severity": "repair",
    "text": "Race-day fuelling plan ≤ highest intake tolerated in logged training (GI score ≤ `fuel.gi_pass_max`)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "!has(plan.race_fuel_g_h) || plan.race_fuel_g_h <= state.max_tolerated_g_h",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11852,6 +13060,8 @@
    "tier": "T5",
    "severity": "repair",
    "text": "No deload inside TAPER; no deload when W < `deload.min_plan_weeks`",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "count(plan.taper_weeks, w, w.is_deload) == 0 && (plan.W >= p('deload.min_plan_weeks') || count(plan.weeks, w, w.is_deload) == 0)",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11879,6 +13089,8 @@
    "tier": "T5",
    "severity": "repair",
    "text": "Every session's module prerequisites (02) hold on its date",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, prereqs_hold(module(s.module_id), s.date))",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11906,6 +13118,8 @@
    "tier": "T3",
    "severity": "repair",
    "text": "No session on a blocked day; weekly time ≤ stated available hours; runs/week ≤ stated days",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, weekday(s.date) in profile.available_days && !(s.date in profile.blocked_dates)) && all(plan.weeks, w, w.planned_time_s <= unit.min_s * profile.available_minutes_per_week && w.runs <= profile.max_runs_per_week)",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -11933,6 +13147,8 @@
    "tier": "T4",
    "severity": "block",
    "text": "Every goal or date edit re-ran feasibility; repeated failures logged (§6.3)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(goal.edits, e, e.feasibility_rerun == true)",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11960,6 +13176,8 @@
    "tier": "T6",
    "severity": "flag",
    "text": "Plan within the Knopp normal ranges for its tier, else **flag** (never block)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "flag_only: plan.peak_week_time_s within p('knopp.range') for its tier",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -11987,6 +13205,8 @@
    "tier": "T2",
    "severity": "build fail",
    "text": "In a pause state, all user-facing safety text comes from the generic message catalogue (no condition names, scores or predictions)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "static: every message of a T0/T1 rule has is_safety_generic == true",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -12014,6 +13234,8 @@
    "tier": "T4",
    "severity": "block → S9",
    "text": "Only the **goal race** is exempt from INV-01/02/03; tune-ups are not (DST-012). The plan's peak long run must be ≥ `L_req_time` (time governs, F-14). Wherever distance is known it must also be ≥ `floor_dist = race / race.longest_floor_ratio`; this includes the v3 ultra floors 25 km (50K) and 33.3 km (100K), so a time-capped ultra run below its floor is infeasible, not stretch (d2-C R1). A peak logged this season within `feas.peak_credit_days` counts (FEA-025). A logged race raises L30_eff by at most `spike.warn_ratio` × the pre-race value (LOD-012). Extension runs (DST-019) never count toward demand",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "(plan.peak_lr_s >= demand.L_req_time_s - p('load.round_down_s') && (!has(plan.peak_lr_dist_m) || plan.peak_lr_dist_m >= demand.floor_dist_m)) || demand.met_by_logged_distance || demand.credited",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -12041,6 +13263,8 @@
    "tier": "T5",
    "severity": "build fail",
    "text": "(static) Every active `SchoolPreset` × family declares a % cap (or none), a time cap (or none), an absolute cap (or none), `race.longest_ratio_max` and `race.longest_floor_ratio` for **every** distance of the family (v3: M/HM floors default 2.00/1.60; 50K 2.00; 100K 3.00). Presets with `status = pending_fixture` are never selectable or offered",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "static: every active preset x family declares pct, time and absolute caps, longest_ratio_max and longest_floor_ratio",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -12068,6 +13292,8 @@
    "tier": "T5",
    "severity": "repair",
    "text": "Baseline hold: outside deload, taper, transition, RTR and SHARPEN weeks, no planned V or LR is below `V_hold` or `L_hold` unless a T0–T3 limit or a spike cap requires it (LOD-005)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.loading_weeks, w, w.planned_time_s >= min(state.V_hold_s, t0t3_limit(w)) && w.lr_s >= min(state.L_hold_s, spike_cap(w), t0t3_limit(w)))",
    "check_kind": "S",
    "on_unknown": "fire",
@@ -12095,6 +13321,8 @@
    "tier": "T2",
    "severity": "repair (cap at 180)",
    "text": "No run whose **expected duration** (LOD-017: real logged speed, no planning margin) exceeds `lr.long_guard_min` unless TOL L4 is held at confidence `measured`, and for age_high ≥ `masters.vigorous_assessment_age` the SAF-060 attestation exists; such runs are run-walk",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, s.expected_duration_s <= unit.min_s * p('lr.long_guard_min') || (state.tol_level >= p('lr.long_guard_tol_level') && state.tol_confidence == 'measured' && s.run_walk && (age_high(s.date) < p('masters.vigorous_assessment_age') || has(screen.saf060_attested_on))))",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -12122,6 +13350,8 @@
    "tier": "T2",
    "severity": "repair",
    "text": "Any two runs with expected duration > `lr.long_guard_min` are ≥ `lr.over180_min_gap_days` apart (a back-to-back pair counts once) (LOD-018)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(pairs(plan.over_guard_runs), a, b, same_pair(a, b) || abs(days_between(a.date, b.date)) >= p('lr.over180_min_gap_days'))",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -12149,6 +13379,8 @@
    "tier": "T2",
    "severity": "block",
    "text": "Minors: every run on date d obeys the caps for `age_low` on d (SAF-044 per session date)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "all(plan.sessions, s, age_low(s.date) >= p('minor.adult_age') || s.planned_distance_m <= p('minor.lr_cap_ratio') * unit.km_m * p('minor.max_race_km.recommended')[age_low(s.date)])",
    "check_kind": "B",
    "on_unknown": "fire",
@@ -12176,6 +13408,8 @@
    "tier": "T2",
    "severity": "block → S9",
    "text": "Each goal race is ≥ `race.recovery_days[distance of the previous goal race]` after the previous goal race actually run (logged or planned), across goal changes; TRANSITION after a race survives a goal change (ADP-080)",
+   "stage": "S8",
+   "scope": "per_plan",
    "assert": "!has(state.last_goal_race_date) || days_between(state.last_goal_race_date, goal.race_date) >= p('race.recovery_days')[state.last_goal_race_distance]",
    "check_kind": "B",
    "on_unknown": "fire",

@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://running-method/spec/schema/common.schema.json",
+  "title": "Shared definitions (v5.2)",
+  "description": "Types shared by the generator input (input-profile.schema.json) and its result (result.schema.json). Units follow 12 §1: durations in integer seconds, distances in integer metres, paces in integer s/km, dates as ISO local dates in the runner's time zone, weeks start on Monday.",
+  "$defs": {
+    "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "ISO-8601 local date in the runner's time zone (12 §3.10)."},
+    "timestamp": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?([+-][0-9]{2}:[0-9]{2}|Z)$", "description": "ISO-8601 timestamp with offset."},
+    "weekday": {"enum": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]},
+    "seconds": {"type": "integer", "minimum": 0},
+    "metres": {"type": "integer", "minimum": 0},
+    "effort": {"enum": ["E0", "E1", "E2", "E3", "E4", "E5"], "description": "Effort ladder (12 §1). Ordered by effort_rank (12 §2b.3): E0 < E1 < E2 < E3 < E4; E5 (strides) ranks with E3 for hard-day tests only (v5.2, Q6b)."},
+    "confidence": {"enum": ["measured", "estimated", "unknown"]},
+    "grade": {"enum": ["VERIFIED", "CORROBORATED", "CREDIBLE", "ALLEGED", "CONTRADICTED", "UNKNOWN", "N/A"]},
+    "basis": {"enum": ["evidence", "convention", "design_default", "eng"]},
+    "distance": {"enum": ["5K", "10K", "HM", "M", "50K", "100K", "none"]},
+    "family": {"enum": ["short", "road_classic", "ultra", "base"]},
+    "goal_type": {"enum": ["finish", "time", "maintain", "base"]},
+    "phase_type": {"enum": ["START_LADDER", "RTR", "ONBOARD", "BASE", "BUILD", "SPECIFIC", "SHARPEN", "TAPER", "RACE", "TRANSITION", "MAINTAIN"], "description": "04 §1 phase types; START_LADDER is the never-runner ladder of 10 §4b (v5.2: declared as a phase type, as LOD-007 already reads it)."},
+    "gate_outcome": {"enum": ["proceed", "proceed_restricted", "pause_until_clearance", "no_plan"]},
+    "preset_id": {"enum": ["method_default", "daniels", "hansons", "pfitzinger_classic", "higdon_novice", "galloway", "first", "koop_ultra", "norwegian_elite"]},
+    "module_id": {"type": "string", "pattern": "^SES-M-[0-9]{3}$"},
+    "rule_id": {"type": "string", "pattern": "^([A-Z]{3}-[0-9]{3}|INV-[0-9]{2}|NUT-INV-[0-9]{2})$"},
+    "node": {"enum": ["HAB", "TOL", "AER", "THR", "VO2", "ECO", "DUR", "MSP", "FUEL", "HEAT", "PACE"]},
+    "levels": {"type": "object", "propertyNames": {"$ref": "#/$defs/node"}, "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 5}},
+    "verdict": {"enum": ["feasible", "stretch", "infeasible"]},
+    "horizon": {"enum": ["H0", "H1", "H2", "H3", "H4", "H5"]},
+    "reason_code": {
+      "description": "Feasibility reason codes. The ORDER of this enum is the canonical 'code order' of FEA-036 (v5.2, Q-oracle §2.7): infeasible reasons first, then stretch reasons, then information-only codes. FeasibilityResult.reasons is always sorted by this order.",
+      "enum": [
+        "AVAILABILITY_TIME", "AVAILABILITY_DAYS", "MINOR_DISTANCE", "RACE_TOO_SOON", "LONG_RUN_UNREACHABLE_PRESET", "LEVELS_UNREACHABLE", "PHASES_DO_NOT_FIT", "CURRENT_STATE_SHORT", "TARGET_OUTSIDE_BAND", "CUTOFF_UNREACHABLE", "MARGIN_REQUIRED", "ENGINE_NONCONVERGENT",
+        "LOW_SLACK", "TARGET_IN_FAST_BAND", "TARGET_BEYOND_CURRENT", "ANCHOR_UNKNOWN", "LOW_VOLUME_PREDICTION", "ULTRA_LOW_CONFIDENCE", "LONG_HORIZON_UNPROJECTED", "LONG_RUN_TIME_CAPPED", "DEGRADED_COMPLETION", "CUTOFF_AT_RISK",
+        "LOW_FREQ"
+      ]
+    },
+    "label_code": {"enum": ["ESTIMATED_INPUTS", "LOW_VOLUME_PREDICTION", "LONG_RUN_TIME_CAPPED"], "description": "Labels never change the verdict (FEA-035, FEA-011, FEA-003 for finish goals)."},
+    "message_instance": {
+      "type": "object",
+      "description": "A message shown to the runner: an id from messages.md plus typed placeholder values (12 §5). Values are raw engine values (seconds, metres, s/km, ISO dates, integers, text); the display layer rounds them by messages.md §0.",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^MSG-[A-Z0-9]+(-[A-Z0-9]+)*$"},
+        "layer": {"enum": ["card", "why", "coach"]},
+        "placeholders": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["type", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "type": {"enum": ["min", "km", "pace", "time", "date", "int", "text"]},
+              "value": {"type": ["integer", "string"]}
+            }
+          }
+        },
+        "rule_id": {"$ref": "#/$defs/rule_id"}
+      }
+    },
+    "segment": {
+      "type": "object",
+      "description": "One block of a session (06 §1). Exactly one of duration_s or distance_m is the prescription; repeats ≥ 1; recovery is taken between repeats (repeats − 1 times).",
+      "required": ["effort", "repeats"],
+      "additionalProperties": false,
+      "properties": {
+        "effort": {"$ref": "#/$defs/effort"},
+        "role": {"enum": ["warmup", "work", "cooldown", "main", "strides", "walk", "race"]},
+        "duration_s": {"$ref": "#/$defs/seconds"},
+        "distance_m": {"$ref": "#/$defs/metres"},
+        "repeats": {"type": "integer", "minimum": 1},
+        "recovery": {
+          "type": "object",
+          "required": ["effort", "duration_s"],
+          "additionalProperties": false,
+          "properties": {"effort": {"$ref": "#/$defs/effort"}, "duration_s": {"$ref": "#/$defs/seconds"}}
+        }
+      },
+      "oneOf": [{"required": ["duration_s"]}, {"required": ["distance_m"]}]
+    },
+    "run_walk_ratio": {
+      "type": "object",
+      "required": ["run_s", "walk_s"],
+      "additionalProperties": false,
+      "properties": {"run_s": {"$ref": "#/$defs/seconds"}, "walk_s": {"$ref": "#/$defs/seconds"}, "label": {"type": "string", "description": "ses.runwalk.ladder entry, e.g. '2:1', or a ladder rung id 'S4' / 'R2'."}}
+    },
+    "competence_state": {
+      "type": "object",
+      "required": ["node", "level", "confidence", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "node": {"$ref": "#/$defs/node"},
+        "level": {"type": "integer", "minimum": 0, "maximum": 5},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "source": {"enum": ["log_threshold", "exit_test", "self_report", "ladder_credit"]},
+        "achieved_on": {"$ref": "#/$defs/date"},
+        "last_exercised_on": {"$ref": "#/$defs/date"}
+      }
+    },
+    "goal": {
+      "type": "object",
+      "description": "Goal (12 §2, 03 §1). target_time_s is null unless goal_type = time; race_date is null for maintain/base goals (H0).",
+      "required": ["id", "distance", "goal_type", "race_date", "target_time_s", "expected_conditions"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string"},
+        "distance": {"$ref": "#/$defs/distance"},
+        "family": {"$ref": "#/$defs/family", "description": "Derived by DST-001; inputs may omit it."},
+        "goal_type": {"$ref": "#/$defs/goal_type"},
+        "target_time_s": {"type": ["integer", "null"], "minimum": 1},
+        "race_date": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]},
+        "expected_conditions": {"enum": ["normal", "hot"]},
+        "cutoff_h": {"type": ["number", "null"], "exclusiveMinimum": 0},
+        "milestones": {"type": "array", "items": {"type": "object", "required": ["date", "distance"], "properties": {"date": {"$ref": "#/$defs/date"}, "distance": {"$ref": "#/$defs/distance"}}}},
+        "race_status": {"enum": ["planned", "done", "abandoned"]},
+        "created_at": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "engine_state": {
+      "type": "object",
+      "description": "EngineState (v5.2, 12 §3.8): the only state that survives between generator calls. Everything else is recomputed from the inputs. The generator returns the new EngineState in every result; the caller stores it and passes it back unchanged with the next call. A first call passes null.",
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {"$ref": "#/$defs/date"},
+        "plan_version": {"type": "integer", "minimum": 0},
+        "progression_profile_until": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}], "description": "probation_until (GEN-014/032, LOD-070)."},
+        "rich_weeks_consecutive": {"type": "integer", "minimum": 0},
+        "baseline_confirmed": {"type": "boolean", "description": "LOD-008; true for the rest of the season once set."},
+        "est_confirm_weeks": {"type": "integer", "minimum": 0},
+        "ladder": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"enum": ["rtr", "start"]},
+            "rung_index": {"type": "integer", "minimum": 0, "maximum": 9},
+            "floor_rung": {"type": "integer", "minimum": 0},
+            "start": {"$ref": "#/$defs/date"},
+            "entry_reason": {"enum": ["gap", "postpartum", "pregnancy_stop", "bone_stress", "illness", "never_run", "no_history"]},
+            "counted_session_ids": {"type": "array", "items": {"type": "string"}},
+            "unclean_weeks_on_rung": {"type": "integer", "minimum": 0},
+            "backfill_advance_dates": {"type": "array", "items": {"$ref": "#/$defs/date"}}
+          }
+        },
+        "levels": {"type": "array", "items": {"$ref": "#/$defs/competence_state"}, "description": "Competence states whose source is exit_test or ladder_credit; log-threshold levels are recomputed from the log (CMP-001)."},
+        "module_dose": {"type": "object", "propertyNames": {"$ref": "#/$defs/module_id"}, "additionalProperties": {"type": "integer", "minimum": 0}, "description": "Last logged dose step per module (index into ses.dose.<id>.steps; SES-011, v5.2)."},
+        "exit_tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["node", "level", "status"],
+            "additionalProperties": false,
+            "properties": {
+              "node": {"$ref": "#/$defs/node"},
+              "level": {"type": "integer", "minimum": 1},
+              "status": {"enum": ["due", "scheduled", "passed", "failed", "unlogged"]},
+              "scheduled_week_start": {"$ref": "#/$defs/date"},
+              "retest_not_before": {"$ref": "#/$defs/date"}
+            }
+          }
+        },
+        "fuel_step_g_h": {"type": ["integer", "null"], "minimum": 0},
+        "runwalk_rung": {"type": ["integer", "null"], "minimum": 0, "description": "Index into ses.runwalk.ladder (SES-010)."},
+        "pace_anchor_10k_equiv_s": {"type": ["integer", "null"]},
+        "active_anchor_id": {"type": ["string", "null"]},
+        "pending_anchor": {"type": ["object", "null"], "properties": {"equiv_10k_s": {"type": "integer"}, "date": {"$ref": "#/$defs/date"}}, "additionalProperties": false},
+        "effort_ceilings": {"type": "array", "items": {"type": "object", "required": ["rule_id", "effort", "until"], "additionalProperties": false, "properties": {"rule_id": {"$ref": "#/$defs/rule_id"}, "effort": {"$ref": "#/$defs/effort"}, "until": {"type": "string", "description": "Stored until predicate: an ISO date, a RuleExpr, or 'never' (12 §3.3b)."}}}},
+        "blocks": {"type": "array", "items": {"type": "object", "required": ["rule_id", "filter", "until"], "additionalProperties": false, "properties": {"rule_id": {"$ref": "#/$defs/rule_id"}, "filter": {"type": "string"}, "until": {"type": "string"}, "bound": {"type": "object"}}}},
+        "freezes": {"type": "array", "items": {"type": "object", "required": ["rule_id", "target", "until"], "additionalProperties": false, "properties": {"rule_id": {"$ref": "#/$defs/rule_id"}, "target": {"type": "string"}, "fields": {"type": "array", "items": {"type": "string"}}, "until": {"type": "string"}, "bound": {"type": "object"}}}},
+        "holds": {"type": "array", "items": {"type": "object", "required": ["rule_id", "until"], "additionalProperties": false, "properties": {"rule_id": {"$ref": "#/$defs/rule_id"}, "until": {"$ref": "#/$defs/date"}}}},
+        "counters": {"type": "object", "additionalProperties": {"type": "integer"}, "description": "Named consecutive counters: adp022_consecutive_weeks, adp052_consecutive, adp055_consecutive_weeks, fatigue_weeks_consecutive, weeks_in_maintain."},
+        "dated_events": {"type": "object", "additionalProperties": {"type": "array", "items": {"$ref": "#/$defs/date"}}, "description": "Named dated event lists, e.g. adp052_events, fatigue_signals."},
+        "messages_shown": {"type": "array", "items": {"type": "object", "required": ["id", "on"], "properties": {"id": {"type": "string"}, "on": {"$ref": "#/$defs/date"}, "season": {"type": "integer"}}}, "description": "For once-only messages (emit_message.once, SAF-061 once per season)."},
+        "last_goal_race": {"type": ["object", "null"], "properties": {"date": {"$ref": "#/$defs/date"}, "distance": {"$ref": "#/$defs/distance"}}, "additionalProperties": false},
+        "last_verdict": {"oneOf": [{"$ref": "#/$defs/verdict"}, {"type": "null"}]},
+        "season_index": {"type": "integer", "minimum": 0},
+        "deload_counter_from": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}], "description": "Start of the last recovery-like week (PHS-001); carries over a goal change (FEA-025)."}
+      }
+    }
+  }
+}

@@ -48,6 +48,7 @@ When reasons of several kinds apply, the order is ambitious > tight > uncertain.
 | LEVELS_UNREACHABLE | "There isn't enough time to build {skill:text} for this goal." | "Some abilities take several weeks each to build." | — |
 | PHASES_DO_NOT_FIT | "Reaching the long run and weekly running this race needs takes about {weeks:int} weeks; you have {have:int}." | "Your longest run should grow by about a tenth at a time." | earliest feasible date |
 | CURRENT_STATE_SHORT | "With only {weeks:int} weeks, we can only sharpen what you already do, and that isn't yet enough for this race." | "There's no time to build safely." | — |
+| ENGINE_NONCONVERGENT | "We could not build a plan we are sure is safe. Your current plan stays as it is." | "When our checks do not agree, we keep what you have rather than guess." | — |
 | TARGET_OUTSIDE_BAND | "{target:time} is faster than the range your current fitness suggests ({fast_edge:time} to {slow_edge:time}), and there isn't time to re-test." | "Race predictions are usually within 6–8%." | — |
 | MARGIN_REQUIRED | "After several attempts, we only show options with a safety margin." | "Plans that fit by a hair break with one missed week." | — |
 | CUTOFF_UNREACHABLE | "Even the fast end of your predicted range ({fast_edge:time}) is slower than the cut-off ({cutoff:time})." | "Finishing within the cut-off is part of a safe race plan." | — |
@@ -145,6 +146,7 @@ Banned on the card: bare "likely", "rare" or "common" without a number; "moderat
 | MSG-FEA-DEGRADED | card | "After your break, we've kept your race as a finish goal with a gentler build." | "Missed weeks are never made up." | — | FEA-043 | — |
 | MSG-FEA-LADDER-RACE | card | "You'll run your 5K with walk breaks at your current step. That is a normal way to finish. Run easy, and stop if anything hurts." | "Run-walk lets you finish without rushing the beginner steps." | — | FEA-043 (b) | — |
 | MSG-LOD-FILL | card | "Add a run day if you want your weekly running to keep growing." | "With {runs:int} runs a week, each run would otherwise get too long." | runs:int | LOD-016 | — |
+| MSG-PHS-MAINT-LIMIT | card | "You have kept fit for {weeks:int} weeks. A short test run is planned this week. Keeping fit does not keep you ready for a long race; set a goal when you want to build again." | "Keeping fit holds your fitness for a few months, but not your staying power for long races." | weeks:int | PHS-014 (v5.2) | — |
 | MSG-LOD-017 | card | "This long run is {cap:min} for now. Longer runs open once your logged running shows you're ready." | "Runs over 3 hours are only added when your log shows you handle long runs." | cap:min | LOD-017 | — |
 | MSG-LOD-018 | card | "Your next very long run moves to {date:date}, so there is enough rest between them." | "Very long runs need more days apart." | date:date | LOD-018 | — |
 | MSG-LOD-EST-CAP | card | "Your weekly running grows by at most {pct:int}% a week until your logged runs confirm where you started." | "Your starting numbers came from memory. We build up gently until your log shows them. (v5.1)" | pct:int | LOD-007 | — |
@@ -191,6 +193,13 @@ Banned on the card: bare "likely", "rare" or "common" without a number; "moderat
 | MSG-SES-VO2 | card | "Very hard: you cannot talk. Jog easy between repeats until your breathing settles." | "This raises your top-end fitness." | — | UI (no rule) | — |
 | MSG-SES-RACE | card | "Race effort for your goal race (see the effort word for your distance)." | "Practising race effort teaches pace and confidence." | — | UI (no rule) | — |
 | MSG-SES-TEST | card | "A test run: even effort, the best you can hold for the distance. Log it today." | "It sets your training paces; until then we use effort only." | — | UI (no rule) | — |
+| MSG-SES-STRIDES-SLOT | card | "Strides today instead of a hard session: a few short, fast, relaxed runs at the end of an easy run." | "Strides keep your legs quick without tiring you." | — | CMP-007 (v5.2) | — |
+| MSG-SES-TEST-Q | card | "Level test done? Three quick answers: Did you finish every part as planned? Could you hold the effort to the end without slowing down or walking? Any pain?" | "Your answers tell us whether you are ready for the next step." | — | SES-024 (v5.2) | — |
+| MSG-SES-TEST-AGAIN | card | "Not this time. You keep training at the same level, and we will try the test again in {weeks:int} weeks." | "A test that did not go well is useful information, not a failure." | weeks:int | SES-013 (v5.2) | — |
+| MSG-SES-LEVEL-FROM-TRAINING | card | "Your last sessions show you are ready: you have moved up a level without a test." | "Two full-size sessions that felt right show the same thing a test would." | — | SES-025 (v5.2) | — |
+| MSG-SES-TEST-SKIP | card | "Prefer not to test? Skip it: you will do a normal session, and your training will show when you are ready." | "Tests are optional; they just get you there sooner." | — | UI (v5.2, SES-025) | — |
+| MSG-SES-STEP | why | "Last time this session felt as planned, so this one is a small step bigger." | "Sessions grow only after you have handled the last one." | — | SES-011 (v5.2) | — |
+| MSG-SES-HOLD-DOSE | why | "Same size as last time: it felt harder than planned, or you did not rate it." | "We step up only after a session felt right." | — | SES-011 (v5.2) | — |
 | MSG-ONBOARD-NOPACE | card | "No paces yet: the first weeks are by feel. A short test in week {n:int} sets your paces." | "Paces need a measured result; guesses can mislead." | n:int | UI (no rule) | — |
 | MSG-LADDER-NORMAL | card | "Most people repeat a week; that is normal." | "The steps are never rushed." | — | UI (no rule) | — |
 
@@ -237,6 +246,7 @@ Banned on the card: bare "likely", "rare" or "common" without a number; "moderat
 | MSG-NUT-L4 | card | "Above 90 g an hour has no proven benefit and upsets more stomachs. Only try it if 90 g has felt fine." | "Evidence above 90 g an hour is thin." | — | NUT-014 | — |
 | MSG-NUT-CAPPED | card | "Your race plan uses the most your stomach handled in training: {g_h:int} g an hour." | "Nothing new on race day." | g_h:int | NUT-020, NUT-021 | — |
 | MSG-NUT-EAH | card | "Drink to thirst. Do not drink so much that you gain weight. Avoid anti-inflammatory painkillers during the event." | "Drinking far more than you sweat can be dangerous in long events." | — | NUT-032, NUT-034 | S |
+| MSG-NUT-THIRST | card | "Drink when you are thirsty. If you want a drinking plan, measure your sweat rate on a long run first." | "Drinking to thirst stops you drinking far more than you sweat." | — | NUT-030 (v5.2) | — |
 | MSG-NUT-HEAT | card | "It will be hot: run by feel, expect to be slower, and follow the organisers' heat advice." | "Heat makes any pace feel harder." | — | NUT-041 | — |
 | MSG-NUT-REDS-Q | card | "A few questions about eating and energy. There are no wrong answers." | "They help us keep your training safe." | — | NUT-050 | S |
 | MSG-NUT-REDS | card | "Some of your answers suggest your eating may not match your training. Please talk to a doctor or registered dietitian. Your plan will not increase until you have." | "Training more while under-fuelled can harm health and performance." | — | NUT-051 | S |

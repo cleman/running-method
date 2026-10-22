@@ -1,6 +1,6 @@
-# 00 — Overview (v5.1)
+# 00 — Overview (v5.2)
 
-Status: **v5.1**, 22 Oct 2026: v5 plus four targeted fixes from the external review of v5 (study grades, pace deadband, weekly cap for estimated baselines, consistency fixes; `CHANGELOG-v5.1.md`). No new audit has been run after these fixes. v5 (final design version, 21 Oct 2026): Revised after plenary round 2 (acceptance pre-check, implementation readiness, red team) and factdesk6. Earlier versions: v4 (plenary round 1), v3, v2, v1. Changes: `CHANGELOG-v5.1.md` (v5 → v5.1), `CHANGELOG-v5.md` (v4 → v5) and the earlier changelogs; decisions: `RESOLUTIONS.md` (Round 1, Round 2, Plenary round 1, **Plenary round 2**).
+Status: **v5.2**, 22 Oct 2026: v5.1 plus the completed build contract (Engine session, part A; `CHANGELOG-v5.2.md`): JSON schemas for the generator's input and result, complete persona inputs, the engine glue (rule binding, write composition, evaluation loop, stored engine state, blank/unknown/null, repair records, a machine parameter registry), the ordered weekly session choice with dose ladders and level tests, Ana's worked plan rewritten to the 04 §3 phases, and machine records for every MVP rule (release blocker B-4 closed in the rule base; nothing has been executed by an engine yet). Owner decisions of 22 Oct 2026 in `CHANGELOG-v5.2.md` §2. **v5.1**, 22 Oct 2026: v5 plus four targeted fixes from the external review of v5 (study grades, pace deadband, weekly cap for estimated baselines, consistency fixes; `CHANGELOG-v5.1.md`). No new audit has been run after these fixes. v5 (final design version, 21 Oct 2026): Revised after plenary round 2 (acceptance pre-check, implementation readiness, red team) and factdesk6. Earlier versions: v4 (plenary round 1), v3, v2, v1. Changes: `CHANGELOG-v5.1.md` (v5 → v5.1), `CHANGELOG-v5.md` (v4 → v5) and the earlier changelogs; decisions: `RESOLUTIONS.md` (Round 1, Round 2, Plenary round 1, **Plenary round 2**).
 
 ## 1. Purpose
 
@@ -105,8 +105,9 @@ Key properties:
 | `CONTRACTS.md` | module contracts, rule-ID ranges, priority blocks | authors |
 | `RESOLUTIONS.md` | decisions on cross-module conflicts; OPEN items | all |
 | `CHANGELOG-v2.md` … `CHANGELOG-v5.md` | every change → source → criterion | reviewers |
-| `rules.json` | one machine record per rule and invariant, **generated** from the module texts (12 §3.2): 293 rules (210 formal, 12 procedure, 6 static, 65 text-only) and 31 invariants (v5.1) | engineers |
-| `tools/` | `build_rules.py` (build), `check_rules_v5.py` (TST-121), `check_messages_v5.py` (TST-094) | engineers, CI |
+| `rules.json` | one machine record per rule and invariant, **generated** from the module texts (12 §3.2): 301 rules (248 formal, 14 procedure, 7 static, 32 text-only) and 31 invariants (v5.2); every MVP rule has a machine record | engineers |
+| `tools/` | `build_rules.py` (build), `build_parameters.py` (v5.2: `parameters.json`), `check_rules_v5.py` (TST-121), `check_messages_v5.py` (TST-094) | engineers, CI |
+| `schema/`, `fixtures-input/` (v5.2) | JSON Schemas of the generator input and result (the engine–oracle contract) and complete input profiles for every persona of 13 and 14 (inputs only) | engineers, oracle |
 | `messages.md` | the single typed message catalogue (reason texts, headlines, evidence wording, display rounding) | engineers, writers |
 | `../rationale.md` | key design choices → why → alternatives → evidence | reviewers |
 
@@ -189,24 +190,24 @@ Disclaimer, shown at onboarding and on every pause screen: "This tool gives gene
 - **B-1** PAR-Q+ 2023 licence, and clinical sign-off of the item-to-factor map (`ScreeningItemMap`).
 - **B-2** Regulatory reading: whether the fixed screen, the age-triggered check-up advice (SAF-060/061) and the safety hold stay general wellness [factdesk2 §2, UNKNOWN for screens].
 - **B-3** Clinical review of every **S** message and of LADDER_RUNWALK (FEA-043b) and the start ladder.
-- **B-4** **27** rules that MVP code paths reach are still prose only (`text_only`). Post-audit they are tagged `release: MVP`, so TST-121 (`check_rules_v5.py`) **fails** until they get machine records; that failure is the honest state of v5: CMP-007/008 (key-session choice), SES-004…019 (module dosing and progression), DST-001/002/004–007 (family demand for 5K–HM), PHS-013–015, NUT-010–013 (fuelling on long runs). They must get machine records before the MVP build freezes.
+- **B-4** **Closed in the rule base (v5.2).** The 27 MVP rules that were prose only now have machine records (PHS-015, DST-007 and SES-019 are retagged `spec`: not reachable in the MVP), nine more MVP-reachable rules were formalised and tagged MVP, and `check_rules_v5.py` passes. Honest limit: the records rest on design defaults accepted by the owner on 22 Oct 2026 and have not been executed; they count as tested only when the engine and the independent oracle agree (B-5).
 - **B-5** Fixture bodies: 13's hand values and 14's fixtures exist as text; they must be encoded as data, and the oracle written by someone who has not read the generator.
 - **R2 only:** conformance fixtures encoded from the primary books (Hansons, Pfitzinger, Higdon, Galloway, Daniels).
 
 **8b. When a published plan is enough (signed: Status-quo seat; post-audit fix 10).**
 - A healthy runner with a year of steady history, no recent injury and a goal that fits their time does well on a good book plan (Daniels, Pfitzinger, Hansons, Higdon, Galloway [author]) or on Couch-to-5K (NHS [state]) for a first 5K. These plans are tested by use, if not by trials.
 - This method adds what books cannot: a fixed health screen and red-flag stops, an honest feasibility check before the plan starts, re-planning without catch-up, and caps checked on every session.
-- It can also be **worse** than a book plan: DST-015 re-steps progressions that a book has proven in practice; 210 of its 293 rules (v5.1) rest on untested design defaults; its more cautious caps may under-train an experienced runner; and it has never been run.
+- It can also be **worse** than a book plan: DST-015 re-steps progressions that a book has proven in practice; 213 of its 301 rules (v5.2) rest on untested design defaults; its more cautious caps may under-train an experienced runner; and it has never been run.
 - **Neither approach has outcome evidence**: no study compares adaptive and static plans [factdesk1 §5]. Choosing this method over a book is a bet on safety process, not on proven results.
 
 **Known limits (honest).**
-- **Safety evidence is thin where it matters most.** The spike cap (1.10×) rests on one distance-only cohort; nothing measures the risk of runs over 3 hours; deload cadence, taper fractions and most ladder steps are conventions or design defaults. 206 of 290 rules have `basis = design_default` (197 before the post-audit two-source re-basis). The method says so on every card ("our cautious choice, not tested").
+- **Safety evidence is thin where it matters most.** The spike cap (1.10×) rests on one distance-only cohort; nothing measures the risk of runs over 3 hours; deload cadence, taper fractions and most ladder steps are conventions or design defaults. 213 of 301 rules have `basis = design_default` (v5.2). The method says so on every card ("our cautious choice, not tested").
 - **No outcome claim.** No study shows adaptive plans prevent injury, and none was run for this method. The pilot (14 §10) measures; it does not prove.
 - **Self-report only.** Manual logging means "measured" is "logged on time", not device-checked. A runner who answers "no pain" falsely defeats the pain rules; the method can only ask well and hold steps when answers are missing.
 - **Prompt compliance is unknown for running apps.** The 70% answered-pain threshold is anchored on general EMA data (75%) [factdesk6 §3]; real compliance may be lower, which would hold plans more often.
 - **Readability is measured by formula,** a proxy for understanding; the comprehension test (TST-090) is the real check.
 - **Predictions are ±6–8% at best** and widen for estimates, low volume and ultras.
-- **65 rules remain `text_only`** (14 T4, 30 T5, 21 T6): ultra and marathon family detail, presets other than `method_default`, H4/H5 seasons, advanced fuelling and preferences. 27 of them are MVP-reachable (B-4).
+- **32 rules remain `text_only`** (v5.2; 5 T4, 11 T5, 16 T6): ultra and marathon family detail, presets other than `method_default`, H4/H5 seasons, advanced fuelling and preferences. None is MVP-reachable.
 - **Validator independence is partial.** The S group re-implements shared formulas from the same text; the oracle and metamorphic tests reduce, not remove, correlated errors [factdesk6 §5].
 - **The design has not been run.** Every number in 13 is hand-computed. Writing v5 found two defects in earlier worked plans (13 R-01, R-04); more are likely until the oracle runs.
 

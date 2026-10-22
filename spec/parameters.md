@@ -1,4 +1,4 @@
-# Parameter register (v5.1, after plenary round 2)
+# Parameter register (v5.2)
 
 Every tunable number in the method lives here; rules reference IDs only (INV-12). Changing a value is a data edit with a registry version bump, never a code change [opening-executor R2]. This register merges the "Parameters proposed" sections of modules 01, 03, 05, 06, 08, 09, 10, 11 and 14. Duplicates were merged (RESOLUTIONS P1–P4). If a module's own table differs from this file, **this file governs**.
 
@@ -277,7 +277,7 @@ Resolution at run time: registry default → active `SchoolPreset` override → 
 | fuel.required_above_min | 90 | min race duration | 75–90 | — | CORROBORATED | ev | wg5 impl. 3 | 11 |
 | fuel.band.by_duration | < 45 min 0; 45–75 optional; 1–2.5 h 30–60; > 2.5 h 60–90 | g/h | — | — | CORROBORATED | ev | wg5 §3 | 11 |
 | fuel.max_default_g_h | 90 | g/h | 60–90 | — | CORROBORATED (> 90 benefit UNKNOWN) | ev | wg5 §3 | 11 |
-| fuel.start_g_h / .step_g_h | 30 / 10–15 | g/h | 20–40 / 10–15 | — | CREDIBLE | conv | wg5 §5 | 11 |
+| fuel.start_g_h / .step_g_h | 30 / 15 (v5.2: one value, owner Q5; was 10–15) | g/h | 20–40 / 10–15 | — | CREDIBLE | conv | wg5 §5 | 11 |
 | fuel.step_runs / .exit_runs | 2 / 2 | runs | 1–2 / 2–3 | — | CREDIBLE | conv | wg5 §5, impl. 3 | 11 |
 | fuel.gi_pass_max | 2 | /10 | 1–3 | — | CREDIBLE | conv | wg5 impl. 3 | 11 |
 | fuel.gi_stepdown_min | 5 | /10 | 4–6 | — | UNKNOWN | dd | 11 | 11 |
@@ -288,7 +288,7 @@ Resolution at run time: registry default → active `SchoolPreset` override → 
 | hyd.abs_cap_ml_h | 1000 | mL/h | 800–1200 | — | CORROBORATED (> 1.5 L/h a risk factor); value dd | dd | wg5 §4 | 11 |
 | hyd.sweat_test_min_min | 60 | min | 45–90 | — | UNKNOWN | dd | wg5 §4 | 11 |
 | eah.warning_above_h | 4 | h | 3–4 | — | CORROBORATED | ev | wg5 §4 | 11 |
-| heat.acclim_days | 7–14 | exposure days | 7–14 | — | CORROBORATED | ev | wg5 §4 | 11 |
+| heat.acclim_days | 10 (v5.2: one value, owner Q8; was 7–14) | exposure days | 7–14 | — | CORROBORATED | ev | wg5 §4 | 11 |
 | heat.acclim_window_days | 21 | days before race | 14–28 | — | UNKNOWN (window) | dd | wg5 §4 | 11 |
 | caffeine.default / .max | 3 / 6 | mg/kg | 2–3 / 3–6 | — | CORROBORATED | ev | wg5 §3 | 11 |
 | cho.daily_bands | light 3–5; ~1 h 5–7; 1–3 h 6–10; ≥ 4 h 8–12 | g/kg/day | — | — | CORROBORATED range; CREDIBLE edges | ev | wg5 §1 | 11 |
@@ -358,3 +358,382 @@ Every row has a grade or basis `eng` (TST-121 checks this for the whole register
 | phs.sharpen_max_weeks | 4 | weeks | 3–5 | — | UNKNOWN | dd | 04 PHS-010/011 | 04 |
 | b2b.min_dur_level / .min_tol_level | 4 / 5 | levels | — | — | N/A (engineering: DUR L5 prerequisites of 02) | eng | 09 DST-010 | 09 |
 | miss.refeas_hold_weeks | 2 | consecutive ADP-022 weeks before feasibility re-runs | 2–3 | — | UNKNOWN | dd | 08 ADP-023 | 08 |
+
+## 15. Added in v5.2 (Engine session, part A)
+
+Every row is a design default unless its basis says `eng`. "Owner Q" = the plain-language question put to the owner on 22 Oct 2026; the owner accepted every recommended answer (CHANGELOG-v5.2 §2).
+
+| ID | Default | Unit | Range | Presets | Grade | Basis | Source | Owner |
+|---|---|---|---|---|---|---|---|---|
+| engine.max_iterations | 5 | passes per stage | 3–10 | — | N/A (engineering: fixpoint bound, 12 §3.7) | eng | gap/engine.md Q3 | 12 |
+| ask.no_answer_days | 7 | days before an ask_confirm counts as unanswered | 3–14 | — | N/A (engineering) | eng | gap/engine.md §1 #9 | 12 |
+| quality.min_hab_level | 2 | HAB level below which no key session is planned | — | — | N/A (engineering: restates SES-007's "HAB < L2") | eng | 06 SES-007 | 06 |
+| quality.low_tol_level | 2 | TOL level at or below which at most 1 key session is planned | — | — | N/A (engineering: restates SES-007's "TOL ≤ L2") | eng | 06 SES-007 | 06 |
+| quality.method_default_max | 2 | key sessions per week (BUILD, SPECIFIC) | 1–2 | — | CORROBORATED (school range 0–2, wg2 impl. 7) / value dd | dd | 06 SES-007 | 06 |
+| quality.non_key_runs_min | 2 | runs a week that are not key sessions (the long run and at least one easy run; owner Q2) | 1–3 | — | ALLEGED (common novice and intermediate practice, from memory) | dd | gap/prose-rules.md SES-006 | 06 |
+| quality.key_modules.<preset>.<phase> | method_default: BASE SES-M-006, 007, 008, 012; BUILD SES-M-008, 010, 012; SPECIFIC SES-M-011, 009 (then the BUILD list for levels still missing) | module lists | — | per 06 §5 | CORROBORATED core structure (hearing-1 §2) / lists dd | dd | 06 §5 | 06 |
+| ses.target_rpe | E1 3; E2 5; E3 6; E4 7 | session RPE 0–10 (whole session) | ±1 | — | ALLEGED (session-RPE method, Foster, from memory) | dd | gap/prose-rules.md SES-011 | 06 |
+| ses.dose.<SES-M-id>.steps | 06 §2c table | ordered dose steps | — | — | ALLEGED (practice, from memory) | dd | 06 §2c; owner Q3 | 06 |
+| ses.msp_rep_max_min | 5K 10; 10K 10; HM 15; M 20 | min per race-effort repeat (SES-M-011) | 5–20 | — | ALLEGED | dd | 06 §2c | 06 |
+| ses.runwalk.entry_rung | preference only: 2 (2:1); HAB < L2: 1 (1:1) | index into ses.runwalk.ladder | 0–3 | galloway by pace | ALLEGED (Galloway 2:1 beginner ratio, wg2 §1 CORROBORATED for the ratio; entry rule dd) | dd | gap/prose-rules.md SES-010 | 06 |
+| ses.exit_test.<node>.<level> | 06 §3b table (THR1 2 × 8 min; THR2 5 × 5 min; THR3 30 min; THR4 3 × 15 min; VO2_2 5 × 3 min; VO2_3 6 × 3 min; MSP share; DUR 60/90/135/180 min; HAB2 FT-0) | test session | — | — | ALLEGED (02 §2 levels) | dd | 06 §3b | 06 |
+| cmp.max_level.<node> | HAB 4; TOL 5; AER 5; THR 4; VO2 3; ECO 3; DUR 5; MSP 3; FUEL 4; HEAT 2; PACE 3 | level | — | — | N/A (engineering: the 02 §2 table) | eng | 02 §2 | 02 |
+| cmp.node_tie_order | DUR, THR, AER, MSP, VO2, ECO, FUEL | order | — | — | N/A (engineering: CMP-007 tie order) | eng | 02 CMP-007 | 02 |
+| dst.msp_segment_max_ratio | 0.60 | × the long run's duration (race-effort segment) | 0.5–0.7 | — | ALLEGED (replaces the literal 0.60 of DST-006/007) | dd | 09 §4 | 09 |
+| fuel.reach_tol_g_h | 5 | g/h below the step that still counts as reaching it | 0–10 | — | UNKNOWN (a gel is about 20–25 g) | dd | gap/prose-rules.md NUT-011 | 11 |
+| fuel.level_band | L1 30; L2 45–60; L3 60–90; L4 > 90 | g/h (lower edge proves the level, NUT-013) | — | — | CORROBORATED (bands, wg5 §3) / use as level proof dd | dd | 02 §2; 11 §3 | 11 |
+| fuel.l3_level | 3 | FUEL level that needs race-effort practice runs | — | — | N/A (engineering: 02 §2) | eng | 11 NUT-013 | 11 |
+| fuel.required_level_mid / .required_level_long | 2 / 3 | FUEL level required for races > 90 min / > 2.5 h (time goals only for L3; owner Q6) | — | — | CORROBORATED (bands, wg5 impl. 3) / finish-goal limit dd | dd | 02 CMP-008; owner Q6 | 02 |
+| tid.hard_share_max.HM | 0.15 | fraction of weekly time at E3–E4 for the half marathon (owner Q10) | 0.10–0.20 | polarized 0.15 | ALLEGED (HM plans hold more threshold work than marathon plans; from memory); trial doses 10–20% zone 3 CREDIBLE (hearing-2 coach-acad) | dd | gap/prose-rules.md §4.6 | 05 |
+| heat.exposure_max_min | 60 | min per heat-exposure easy run (SES-M-022) | 30–60 | — | ALLEGED | dd | gap/prose-rules.md DST-004; owner Q8 | 11 |
+
+## 16. Machine registry (v5.2, engine glue Q8; 12 §3.11)
+
+One JSON object per parameter: `id`, `type` ∈ {number, int, bool, enum, set, map, list, text, segments}, `unit`, typed `default`, optional `keys` (what a map is indexed by), `limit_direction` ∈ {upper, lower, none} (how ContextModifier and preset overrides combine: MIN for upper limits, MAX for lower limits), `owner`, optional `family` (the table row a concrete id belongs to) and `note`. Grade, basis, range, presets and sources come from the tables above. `tools/build_parameters.py` joins the two and writes `parameters.json`; a table row without a machine line, or a machine line without a table row, fails the build. **This block is the machine source; when a default changes, edit both the table and this line.**
+
+```param
+{"id": "spike.warn_ratio", "type": "number", "unit": "× L30_eff", "default": 1.1, "limit_direction": "upper", "owner": "05"}
+{"id": "spike.block_ratio", "type": "number", "unit": "× L30_eff", "default": 2.0, "limit_direction": "upper", "owner": "05"}
+{"id": "spike.apply_duration", "type": "bool", "unit": "bool", "default": true, "limit_direction": "upper", "owner": "05"}
+{"id": "two_day.cap_ratio", "type": "number", "unit": "× L30_eff (two consecutive days)", "default": 1.6, "limit_direction": "upper", "owner": "05"}
+{"id": "two_day.adjacent_ratio", "type": "number", "unit": "× LR(w) (day before/after the long run)", "default": 0.5, "limit_direction": "upper", "owner": "05"}
+{"id": "b2b.enabled_default", "type": "bool", "unit": "bool", "default": false, "limit_direction": "none", "owner": "09"}
+{"id": "b2b.day2_ratio", "type": "number", "unit": "× day 1", "default": 0.6, "limit_direction": "upper", "owner": "09"}
+{"id": "b2b.day2_start_ratio", "type": "number", "unit": "× day 1 (first pair)", "default": 0.4, "limit_direction": "upper", "owner": "09"}
+{"id": "b2b.pair_cap_ratio", "type": "number", "unit": "× L30_eff", "default": 1.75, "limit_direction": "upper", "owner": "05"}
+{"id": "b2b.pair_week_share_max", "type": "number", "unit": "× V(w)", "default": 0.65, "limit_direction": "upper", "owner": "05"}
+{"id": "b2b.min_interval_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "lower", "owner": "09"}
+{"id": "lod.min_run_s", "type": "int", "unit": "s", "default": 900, "limit_direction": "lower", "owner": "05"}
+{"id": "load.round_down_s", "type": "int", "unit": "s / m", "default": 60, "limit_direction": "none", "owner": "05"}
+{"id": "load.round_down_m", "type": "int", "unit": "s / m", "default": 100, "limit_direction": "none", "owner": "05"}
+{"id": "log.contemporaneous_window_h", "type": "int", "unit": "h", "default": 48, "limit_direction": "upper", "owner": "01"}
+{"id": "log.min_entries_30d", "type": "int", "unit": "runs", "default": 3, "limit_direction": "lower", "owner": "01"}
+{"id": "log.bulk_backfill_max", "type": "int", "unit": "entries/day", "default": 5, "limit_direction": "upper", "owner": "01"}
+{"id": "log.probation_weeks", "type": "int", "unit": "weeks", "default": 3, "limit_direction": "none", "owner": "01"}
+{"id": "log.pace_min_s_per_km", "type": "int", "unit": "s/km", "default": 165, "limit_direction": "lower", "owner": "01"}
+{"id": "log.pace_max_s_per_km.run", "type": "int", "unit": "s/km", "default": 900, "limit_direction": "upper", "owner": "01"}
+{"id": "log.pace_max_s_per_km.run_walk", "type": "int", "unit": "s/km", "default": 1200, "limit_direction": "upper", "owner": "01"}
+{"id": "log.confirm_ratio", "type": "number", "unit": "× L30_eff", "default": 2.0, "limit_direction": "upper", "owner": "01"}
+{"id": "log.week_confirm_ratio", "type": "number", "unit": "× max prior 4 weeks", "default": 1.5, "limit_direction": "upper", "owner": "01"}
+{"id": "claim.l30_discount", "type": "number", "unit": "× claimed", "default": 0.9, "limit_direction": "none", "owner": "01"}
+{"id": "claim.l30_week_ratio_max", "type": "number", "unit": "× claimed weekly distance", "default": 0.6, "limit_direction": "upper", "owner": "01", "note": "1.00 when claimed runs/week ≤ 1"}
+{"id": "claim.agegrade_confirm_pct", "type": "int", "unit": "WMA %", "default": 80, "limit_direction": "none", "owner": "01"}
+{"id": "cmp.self_report_level_cap", "type": "map", "unit": "level", "default": {"HAB": 2, "AER": 2, "TOL": 2, "DUR": 2, "THR": 1, "VO2": 1, "MSP": 1, "FUEL": 1}, "limit_direction": "upper", "owner": "02"}
+{"id": "inp.default_days", "type": "set", "unit": "weekdays", "default": ["Tue", "Thu", "Sat"], "limit_direction": "none", "owner": "01"}
+{"id": "inp.default_runs", "type": "int", "unit": "runs/week", "default": 3, "limit_direction": "none", "owner": "01"}
+{"id": "inp.default_session_min", "type": "int", "unit": "min", "default": 30, "limit_direction": "lower", "owner": "01"}
+{"id": "screen.instrument", "type": "text", "unit": "—", "default": "PAR-Q+ 2023", "limit_direction": "none", "owner": "01"}
+{"id": "screen.valid_days", "type": "int", "unit": "days", "default": 365, "limit_direction": "none", "owner": "01"}
+{"id": "screen.active_runs_min", "type": "int", "unit": "sessions/week", "default": 3, "limit_direction": "lower", "owner": "01"}
+{"id": "screen.health_check_weeks", "type": "int", "unit": "weeks", "default": 12, "limit_direction": "none", "owner": "01"}
+{"id": "perf.agegrade_bands", "type": "list", "unit": "WMA %", "default": [60, 70, 80, 90], "limit_direction": "none", "owner": "01"}
+{"id": "perf.competitive_min_pct", "type": "int", "unit": "WMA %", "default": 70, "limit_direction": "lower", "owner": "01"}
+{"id": "ctx.novice_training_age_years", "type": "int", "unit": "years", "default": 1, "limit_direction": "none", "owner": "01"}
+{"id": "ctx.masters_age", "type": "int", "unit": "years", "default": 50, "limit_direction": "none", "owner": "01"}
+{"id": "ctx.lowfreq_runs", "type": "int", "unit": "runs/week", "default": 3, "limit_direction": "none", "owner": "01"}
+{"id": "ctx.lowfreq_quality_max", "type": "int", "unit": "sessions/week", "default": 1, "limit_direction": "upper", "owner": "01"}
+{"id": "deload.every_ctx", "type": "int", "unit": "weeks", "default": 3, "limit_direction": "none", "owner": "01"}
+{"id": "gap.reduce_trigger_days", "type": "int", "unit": "days", "default": 8, "limit_direction": "none", "owner": "08"}
+{"id": "gap.rtr_trigger_days", "type": "int", "unit": "days", "default": 30, "limit_direction": "none", "owner": "08"}
+{"id": "gap.vol_factor.8_14", "type": "number", "unit": "× prior V7", "default": 0.75, "limit_direction": "none", "owner": "08"}
+{"id": "gap.vol_factor.15_29", "type": "number", "unit": "× prior V7", "default": 0.5, "limit_direction": "none", "owner": "08"}
+{"id": "gap.long_factor.8_14", "type": "number", "unit": "× L30_eff", "default": 0.8, "limit_direction": "none", "owner": "08"}
+{"id": "gap.long_factor.15_29", "type": "number", "unit": "× L30_eff", "default": 0.6, "limit_direction": "none", "owner": "08"}
+{"id": "miss.partial_ratio", "type": "number", "unit": "× planned", "default": 0.75, "limit_direction": "upper", "owner": "08"}
+{"id": "miss.repeat_week_ratio", "type": "number", "unit": "× planned week", "default": 0.6, "limit_direction": "upper", "owner": "08"}
+{"id": "miss.fit_check_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "illness.rest_days_min", "type": "int", "unit": "days", "default": 10, "limit_direction": "lower", "owner": "08"}
+{"id": "illness.symptom_free_days", "type": "int", "unit": "days", "default": 7, "limit_direction": "none", "owner": "08"}
+{"id": "illness.stage1_min", "type": "int", "unit": "min", "default": 15, "limit_direction": "lower", "owner": "08"}
+{"id": "illness.above_neck_dur_ratio", "type": "number", "unit": "× planned", "default": 0.75, "limit_direction": "upper", "owner": "10 (used by 08)"}
+{"id": "pain.during_max", "type": "int", "unit": "/10", "default": 3, "limit_direction": "upper", "owner": "08"}
+{"id": "pain.next_morning_rule", "type": "bool", "unit": "bool", "default": true, "limit_direction": "none", "owner": "08"}
+{"id": "pain.severe_min", "type": "int", "unit": "/10", "default": 7, "limit_direction": "lower", "owner": "08"}
+{"id": "pain.persist_sessions", "type": "int", "unit": "sessions", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "pain.clear_sessions", "type": "int", "unit": "sessions", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "pain.recur_count", "type": "int", "unit": "ADP-052 events / days", "default": 3, "limit_direction": "none", "owner": "08"}
+{"id": "pain.recur_window_days", "type": "int", "unit": "ADP-052 events / days", "default": 42, "limit_direction": "none", "owner": "08"}
+{"id": "rpe.expected_by_effort", "type": "map", "unit": "CR-10", "default": {"E0": [0, 2], "E1": [0, 3], "E2": [4, 5], "E3": [6, 7], "E4": [8, 10]}, "limit_direction": "none", "owner": "08"}
+{"id": "fatigue.rpe_excess", "type": "int", "unit": "RPE points", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "fatigue.signals_required", "type": "int", "unit": "signals", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "fatigue.window_days", "type": "int", "unit": "days", "default": 7, "limit_direction": "none", "owner": "08"}
+{"id": "fatigue.persist_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "fatigue.refer_weeks", "type": "int", "unit": "weeks", "default": 3, "limit_direction": "none", "owner": "08"}
+{"id": "fatigue.clear_weeks", "type": "int", "unit": "weeks", "default": 1, "limit_direction": "none", "owner": "08"}
+{"id": "result.exclusion_days", "type": "int", "unit": "days", "default": 7, "limit_direction": "none", "owner": "08"}
+{"id": "result.max_upgrade_pct", "type": "int", "unit": "% pace", "default": 3, "limit_direction": "upper", "owner": "08"}
+{"id": "result.confirm_window_days", "type": "int", "unit": "days", "default": 42, "limit_direction": "none", "owner": "08"}
+{"id": "result.pattern_sessions", "type": "int", "unit": "sessions", "default": 3, "limit_direction": "none", "owner": "08"}
+{"id": "rtr.ladder", "type": "list", "unit": "rungs", "default": ["R0", "R1", "R2", "R3", "R4", "R5"], "limit_direction": "none", "owner": "10", "note": "sessions per 10 §4 table"}
+{"id": "rtr.start_ladder", "type": "list", "unit": "rungs", "default": [{"rung": "S1", "run_min": [8]}, {"rung": "S2", "run_min": [9]}, {"rung": "S3", "run_min": [9]}, {"rung": "S4", "run_min": [16]}, {"rung": "S5", "run_min": [15, 16, 20]}, {"rung": "S6", "run_min": [18, 20, 25]}, {"rung": "S7", "run_min": [25]}, {"rung": "S8", "run_min": [28]}, {"rung": "S9", "run_min": [30]}], "limit_direction": "none", "owner": "10"}
+{"id": "rtr.session_min", "type": "map", "unit": "min", "default": {"0": 30, "1": 30, "2": 30, "3": 45, "4": 45, "5": 45}, "keys": "prior_tol_tier", "limit_direction": "lower", "owner": "10"}
+{"id": "rtr.illness_r0_min", "type": "int", "unit": "min", "default": 15, "limit_direction": "lower", "owner": "10"}
+{"id": "rtr.sessions_per_rung", "type": "int", "unit": "sessions", "default": 3, "limit_direction": "none", "owner": "10"}
+{"id": "rtr.rest_days_between", "type": "int", "unit": "days", "default": 1, "limit_direction": "upper", "owner": "10"}
+{"id": "rtr.max_runs_per_week", "type": "int", "unit": "runs", "default": 4, "limit_direction": "upper", "owner": "10"}
+{"id": "rtr.long_gap_days", "type": "int", "unit": "days", "default": 90, "limit_direction": "none", "owner": "10"}
+{"id": "rtr.bone_pain_max", "type": "int", "unit": "/10", "default": 0, "limit_direction": "upper", "owner": "10"}
+{"id": "rtr.max_weeks_per_rung", "type": "int", "unit": "weeks", "default": 3, "limit_direction": "upper", "owner": "10"}
+{"id": "flag.clearance_min_delay_days", "type": "int", "unit": "days", "default": 1, "limit_direction": "lower", "owner": "10"}
+{"id": "flag.pause_kinds", "type": "set", "unit": "set", "default": ["cardiac", "bone_stress", "bone_stress_highrisk", "heat", "eah", "pregnancy_stop", "reds_escalated", "pain_persistent", "illness"], "limit_direction": "none", "owner": "10"}
+{"id": "flag.professional_kinds", "type": "set", "unit": "set", "default": ["cardiac", "bone_stress", "bone_stress_highrisk", "heat", "eah", "pregnancy_stop", "reds_escalated", "pain_persistent"], "limit_direction": "none", "owner": "10"}
+{"id": "flag.recur_window_days", "type": "int", "unit": "days", "default": 60, "limit_direction": "none", "owner": "10"}
+{"id": "flag.high_risk_regions", "type": "set", "unit": "set", "default": ["hip_groin", "front_of_shin", "midfoot", "outer_foot"], "limit_direction": "none", "owner": "10"}
+{"id": "masters.vigorous_assessment_age", "type": "int", "unit": "years", "default": 65, "limit_direction": "none", "owner": "10"}
+{"id": "masters.cv_advice_age", "type": "int", "unit": "years", "default": 35, "limit_direction": "none", "owner": "10"}
+{"id": "minor.min_age", "type": "int", "unit": "years", "default": 14, "limit_direction": "lower", "owner": "10"}
+{"id": "minor.refer_below_age", "type": "int", "unit": "years", "default": 16, "limit_direction": "none", "owner": "10"}
+{"id": "minor.adult_age", "type": "int", "unit": "years", "default": 18, "limit_direction": "none", "owner": "10"}
+{"id": "minor.max_race_km.recommended", "type": "map", "unit": "km", "default": {"14": 8, "15": 8, "16": 12, "17": 14}, "keys": "age_low", "limit_direction": "upper", "owner": "10"}
+{"id": "minor.max_race_km.hard", "type": "map", "unit": "km", "default": {"14": 8, "15": 12, "16": 15, "17": 25}, "keys": "age_low", "limit_direction": "upper", "owner": "10"}
+{"id": "minor.marathon_min_age", "type": "int", "unit": "years", "default": 18, "limit_direction": "lower", "owner": "10"}
+{"id": "minor.ultra_min_age", "type": "int", "unit": "years", "default": 18, "limit_direction": "lower", "owner": "10"}
+{"id": "minor.lr_cap_ratio", "type": "number", "unit": "× race cap", "default": 1.0, "limit_direction": "upper", "owner": "10"}
+{"id": "pp.min_weeks", "type": "int", "unit": "weeks postpartum", "default": 12, "limit_direction": "lower", "owner": "10"}
+{"id": "pregnancy.mode", "type": "text", "unit": "—", "default": "maintenance only, prior runners, clinician agreement", "limit_direction": "none", "owner": "10"}
+{"id": "pregnancy.max_effort", "type": "enum", "unit": "effort", "default": "E2", "limit_direction": "upper", "owner": "10"}
+{"id": "pregnancy.vol_cap_ratio", "type": "number", "unit": "× V28 at start", "default": 1.0, "limit_direction": "upper", "owner": "10"}
+{"id": "pregnancy.reattest_weeks", "type": "int", "unit": "weeks", "default": 12, "limit_direction": "none", "owner": "10"}
+{"id": "reds.rescreen_weeks", "type": "int", "unit": "weeks", "default": 10, "limit_direction": "none", "owner": "11"}
+{"id": "taper.weeks", "type": "map", "unit": "weeks", "default": {"5K": 2, "10K": 2, "HM": 2, "M": 3, "50K": 3, "100K": 3}, "keys": "distance", "limit_direction": "none", "owner": "05"}
+{"id": "taper.weeks_short", "type": "map", "unit": "weeks", "default": {"5K": 1, "10K": 1, "HM": 1, "M": 2, "50K": 2, "100K": 2}, "keys": "distance", "limit_direction": "none", "owner": "04", "note": "M/ultra 1 if W < 3"}
+{"id": "taper.weeks.short_finish", "type": "int", "unit": "weeks", "default": 1, "limit_direction": "none", "owner": "04"}
+{"id": "taper.volume_cut", "type": "number", "unit": "fraction", "default": 0.5, "limit_direction": "none", "owner": "05"}
+{"id": "taper.shape", "type": "enum", "unit": "enum", "default": "progressive", "limit_direction": "none", "owner": "05"}
+{"id": "taper.cut_profile", "type": "map", "unit": "× taper.volume_cut per week", "default": {"1": [1.0], "2": [0.6, 1.0], "3": [0.4, 0.7, 1.0]}, "keys": "T", "limit_direction": "none", "owner": "05"}
+{"id": "taper.freq_min_ratio", "type": "number", "unit": "× pre-taper runs/week", "default": 1.0, "limit_direction": "lower", "owner": "05"}
+{"id": "deload.every", "type": "int", "unit": "weeks", "default": 4, "limit_direction": "none", "owner": "05"}
+{"id": "deload.volume_cut", "type": "number", "unit": "fraction", "default": 0.25, "limit_direction": "none", "owner": "05"}
+{"id": "deload.quality_max", "type": "int", "unit": "sessions", "default": 1, "limit_direction": "upper", "owner": "05 (used by 06)"}
+{"id": "deload.min_plan_weeks", "type": "int", "unit": "weeks", "default": 6, "limit_direction": "lower", "owner": "04"}
+{"id": "deload.exclusion_before_taper", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "none", "owner": "04"}
+{"id": "deload.min_gap_weeks", "type": "int", "unit": "loading weeks between deloads", "default": 2, "limit_direction": "lower", "owner": "04"}
+{"id": "transition.vol_max_ratio", "type": "number", "unit": "× pre-taper V_ref", "default": 0.5, "limit_direction": "upper", "owner": "05"}
+{"id": "phs.onboard_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "none", "owner": "04"}
+{"id": "phs.specific_min", "type": "map", "unit": "weeks", "default": {"5K": 2, "10K": 2, "HM": 3, "M": 4, "50K": 4, "100K": 4}, "keys": "distance", "limit_direction": "lower", "owner": "04"}
+{"id": "phs.specific_target", "type": "map", "unit": "weeks", "default": {"5K": 4, "10K": 4, "HM": 6, "M": 8, "50K": 8, "100K": 10}, "keys": "distance", "limit_direction": "none", "owner": "04"}
+{"id": "phs.build_min", "type": "int", "unit": "weeks", "default": 1, "limit_direction": "lower", "owner": "04"}
+{"id": "phs.build_max", "type": "int", "unit": "weeks", "default": 8, "limit_direction": "upper", "owner": "04"}
+{"id": "phs.season_max_weeks", "type": "int", "unit": "weeks", "default": 24, "limit_direction": "upper", "owner": "04"}
+{"id": "phs.final_season_min_weeks", "type": "int", "unit": "weeks", "default": 12, "limit_direction": "lower", "owner": "04"}
+{"id": "phs.transition_weeks", "type": "map", "unit": "weeks", "default": {"5K": 1, "10K": 1, "HM": 1, "M": 2, "50K": 2, "100K": 2}, "keys": "distance", "limit_direction": "none", "owner": "04"}
+{"id": "maint.sessions_min", "type": "int", "unit": "runs/week", "default": 2, "limit_direction": "lower", "owner": "04"}
+{"id": "maint.max_weeks", "type": "int", "unit": "weeks", "default": 15, "limit_direction": "upper", "owner": "04"}
+{"id": "maint.volume_cut_max", "type": "number", "unit": "fraction", "default": 0.5, "limit_direction": "upper", "owner": "05"}
+{"id": "prog.standard.week_max", "type": "number", "unit": "fraction", "default": 0.15, "limit_direction": "upper", "owner": "05"}
+{"id": "prog.standard.2wk_max", "type": "number", "unit": "fraction", "default": 0.3, "limit_direction": "upper", "owner": "05"}
+{"id": "prog.slow.week_max", "type": "number", "unit": "fraction", "default": 0.1, "limit_direction": "upper", "owner": "05"}
+{"id": "prog.slow.2wk_max", "type": "number", "unit": "fraction", "default": 0.2, "limit_direction": "upper", "owner": "05"}
+{"id": "prog.baseline_max_age_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "upper", "owner": "05"}
+{"id": "prog.est.week_max", "type": "number", "unit": "fraction above week.est_base_s (best logged week of the window), while the baseline is unconfirmed (LOD-007, v5.1)", "default": 0.1, "limit_direction": "upper", "owner": "05"}
+{"id": "prog.est.window_weeks", "type": "int", "unit": "completed weeks looked back for week.est_base_s", "default": 4, "limit_direction": "none", "owner": "05"}
+{"id": "prog.est.confirm_weeks", "type": "int", "unit": "consecutive logged weeks that confirm the baseline (LOD-008)", "default": 6, "limit_direction": "none", "owner": "05"}
+{"id": "prog.est.confirm_ratio", "type": "number", "unit": "× planned weekly time, logged from measured entries, for a week to count (LOD-008)", "default": 0.8, "limit_direction": "upper", "owner": "05"}
+{"id": "lr.pct_cap.<preset>.<family>", "type": "map", "unit": "× weekly **time**", "default": {"method_default": {"short": {"2": 0.6, "3": 0.45, "4": 0.4, "5+": 0.3}, "base": {"2": 0.6, "3": 0.45, "4": 0.4, "5+": 0.3}, "road_classic": 0.5, "ultra": "lr.ultra_pct_cap"}, "daniels": 0.25, "higdon_novice": 0.5, "hansons": null, "pfitzinger_classic": null, "galloway": null}, "keys": "preset, family, runs", "limit_direction": "upper", "owner": "05"}
+{"id": "lr.over_cap_pct.road_classic", "type": "number", "unit": "× weekly time, for road long runs above the time cap (floor and extension runs)", "default": 0.6, "limit_direction": "upper", "owner": "05"}
+{"id": "lr.floor_time_max_min.<distance>", "type": "map", "unit": "min (time on feet incl. walks)", "default": {"M": 240, "HM": 150, "50K": 240, "100K": 330, "5K": 150, "10K": 150}, "keys": "distance", "limit_direction": "upper", "owner": "03"}
+{"id": "lr.m_ext_km", "type": "int", "unit": "km / runs / days", "default": 29, "limit_direction": "none", "owner": "09"}
+{"id": "lr.m_ext_max_runs", "type": "int", "unit": "km / runs / days", "default": 3, "limit_direction": "upper", "owner": "09"}
+{"id": "lr.m_ext_min_gap_days", "type": "int", "unit": "km / runs / days", "default": 21, "limit_direction": "lower", "owner": "09"}
+{"id": "lr.over180_min_gap_days", "type": "int", "unit": "days between runs expected > 180 min (all families; a back-to-back pair counts once)", "default": 14, "limit_direction": "lower", "owner": "05"}
+{"id": "lr.pct_floor_s", "type": "int", "unit": "s", "default": 3600, "limit_direction": "lower", "owner": "05"}
+{"id": "lr.pct_monotone", "type": "bool", "unit": "bool", "default": true, "limit_direction": "none", "owner": "05"}
+{"id": "lr.time_cap_min.<preset>.<distance>", "type": "map", "unit": "min", "default": {"method_default": {"5K": 150, "10K": 150, "HM": 150, "M": 180}, "daniels": 150, "galloway": 240}, "keys": "preset, distance", "limit_direction": "upper", "owner": "05"}
+{"id": "lr.abs_cap_km.<preset>", "type": "map", "unit": "km", "default": {"method_default": 32, "hansons": 26, "pfitzinger_classic": 35, "higdon_novice": 32}, "keys": "preset", "limit_direction": "upper", "owner": "05"}
+{"id": "lr.ultra_pct_cap", "type": "number", "unit": "× weekly time", "default": 0.6, "limit_direction": "upper", "owner": "09"}
+{"id": "lr.ultra_time_cap_min.<distance>", "type": "map", "unit": "min", "default": {"50K": 240, "100K": 330}, "keys": "distance", "limit_direction": "upper", "owner": "09"}
+{"id": "lr.ultra_peak_every_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "none", "owner": "09"}
+{"id": "tid.model", "type": "enum", "unit": "enum", "default": "pyramidal", "limit_direction": "none", "owner": "05"}
+{"id": "tid.easy_share_min", "type": "number", "unit": "fraction of time E0–E1", "default": 0.75, "limit_direction": "lower", "owner": "05"}
+{"id": "tid.hard_share_max.<family>", "type": "map", "unit": "fraction of weekly time at E3–E4", "default": {"short": 0.2, "road_classic": 0.1, "ultra": 0.1}, "keys": "family", "limit_direction": "upper", "owner": "05"}
+{"id": "tid.e2_share_max", "type": "number", "unit": "fraction of time E2", "default": 0.2, "limit_direction": "upper", "owner": "05"}
+{"id": "quality.per_week", "type": "map", "unit": "sessions", "default": {"method_default": "quality.method_default", "daniels": 2, "hansons": 3, "pfitzinger_classic": 3, "higdon_novice": 0, "first": 3, "norwegian_elite": 5}, "keys": "preset", "limit_direction": "none", "owner": "06"}
+{"id": "quality.method_default", "type": "map", "unit": "sessions", "default": {"ONBOARD": 0, "RTR": 0, "TRANSITION": 0, "BASE": 1, "BUILD": 2, "SPECIFIC": 2}, "keys": "phase", "limit_direction": "none", "owner": "06"}
+{"id": "quality.counts_long", "type": "map", "unit": "bool per preset", "default": {"method_default": false, "hansons": true, "first": true, "pfitzinger_classic": "SES-M-005"}, "keys": "preset", "limit_direction": "none", "owner": "06"}
+{"id": "cmp.decay_weeks", "type": "int", "unit": "weeks", "default": 6, "limit_direction": "none", "owner": "02"}
+{"id": "cmp.min_weeks_per_level.<node>", "type": "int", "unit": "weeks", "default": 4, "limit_direction": "lower", "owner": "02"}
+{"id": "cmp.pace_split_tol", "type": "number", "unit": "fraction", "default": 0.03, "limit_direction": "none", "owner": "02"}
+{"id": "cmp.weight.<distance>.<node>", "type": "map", "unit": "weight", "default": {"5K": {"AER": 0.25, "THR": 0.2, "VO2": 0.3, "ECO": 0.15, "DUR": 0.0, "MSP": 0.1, "FUEL": 0.0}, "10K": {"AER": 0.25, "THR": 0.3, "VO2": 0.2, "ECO": 0.1, "DUR": 0.05, "MSP": 0.1, "FUEL": 0.0}, "HM": {"AER": 0.3, "THR": 0.3, "VO2": 0.1, "ECO": 0.05, "DUR": 0.1, "MSP": 0.15, "FUEL": 0.0}, "M": {"AER": 0.3, "THR": 0.15, "VO2": 0.05, "ECO": 0.05, "DUR": 0.25, "MSP": 0.15, "FUEL": 0.05}, "50K": {"AER": 0.35, "THR": 0.1, "VO2": 0.05, "ECO": 0.0, "DUR": 0.3, "MSP": 0.1, "FUEL": 0.1}, "100K": {"AER": 0.35, "THR": 0.05, "VO2": 0.0, "ECO": 0.05, "DUR": 0.35, "MSP": 0.05, "FUEL": 0.15}}, "keys": "distance, node", "limit_direction": "none", "owner": "02 (09 may refine)"}
+{"id": "cmp.required.<distance>.<node>", "type": "map", "unit": "level", "default": {"5K": {"finish": {"HAB": 2, "AER": 1, "TOL": 1}, "time": {"THR": 1, "VO2": 2, "MSP": 1}}, "10K": {"finish": {"HAB": 2, "AER": 1, "TOL": 1, "DUR": 1}, "time": {"THR": 2, "VO2": 2, "MSP": 1}}, "HM": {"finish": {"HAB": 2, "AER": 2, "TOL": 2, "DUR": 2}, "time": {"THR": 2, "MSP": 2, "AER": 3}}, "M": {"finish": {"HAB": 2, "AER": 3, "TOL": 3, "DUR": 3, "FUEL": 2}, "time": {"HAB": 3, "THR": 2, "MSP": 2, "FUEL": 3}}, "50K": {"finish": {"HAB": 3, "AER": 3, "TOL": 4, "DUR": 4, "FUEL": 3}, "time": {"MSP": 2}}, "100K": {"finish": {"HAB": 4, "AER": 4, "TOL": 4, "DUR": 4, "FUEL": 3}, "time": {"MSP": 2}}}, "keys": "distance, goal_type, node", "limit_direction": "none", "owner": "02"}
+{"id": "ses.dose.<SES-M-id>", "type": "map", "unit": "segments", "default": "see ses.dose.<SES-M-id>.steps (v5.2)", "keys": "module", "limit_direction": "none", "owner": "06"}
+{"id": "ses.warmup_s", "type": "int", "unit": "s", "default": 600, "limit_direction": "none", "owner": "06"}
+{"id": "ses.cooldown_s", "type": "int", "unit": "s", "default": 300, "limit_direction": "none", "owner": "06"}
+{"id": "ses.easy_min_min", "type": "int", "unit": "min", "default": 20, "limit_direction": "lower", "owner": "06"}
+{"id": "ses.runwalk.ladder", "type": "list", "unit": "min run : min walk", "default": [[1, 2], [1, 1], [2, 1], [3, 1], [5, 1], [8, 1], "continuous"], "limit_direction": "none", "owner": "06", "note": "[run min, walk min]"}
+{"id": "ses.runwalk.sessions_per_rung", "type": "int", "unit": "sessions / CR-10", "default": 2, "limit_direction": "none", "owner": "06"}
+{"id": "ses.runwalk.rpe_max", "type": "int", "unit": "sessions / CR-10", "default": 4, "limit_direction": "upper", "owner": "06"}
+{"id": "ses.progress_rpe_margin", "type": "int", "unit": "RPE points", "default": 1, "limit_direction": "none", "owner": "06"}
+{"id": "ses.exit_ready_sessions", "type": "int", "unit": "instances", "default": 2, "limit_direction": "none", "owner": "06"}
+{"id": "ses.exit_retest_weeks", "type": "int", "unit": "weeks", "default": 3, "limit_direction": "none", "owner": "06"}
+{"id": "ses.drift_window_min", "type": "int", "unit": "min / RPE", "default": 20, "limit_direction": "lower", "owner": "06"}
+{"id": "ses.drift_rpe_max", "type": "int", "unit": "min / RPE", "default": 2, "limit_direction": "upper", "owner": "06"}
+{"id": "ses.exit.THR2_min", "type": "int", "unit": "min at E3", "default": 25, "limit_direction": "lower", "owner": "06"}
+{"id": "ses.exit.THR4_min", "type": "int", "unit": "min at E3", "default": 45, "limit_direction": "lower", "owner": "06"}
+{"id": "ses.exit.VO2_3_min", "type": "int", "unit": "min at E4", "default": 18, "limit_direction": "lower", "owner": "06"}
+{"id": "ses.exit.DUR3_min", "type": "int", "unit": "min", "default": 135, "limit_direction": "lower", "owner": "06"}
+{"id": "ses.exit.ECO_weeks", "type": "int", "unit": "weeks", "default": 6, "limit_direction": "none", "owner": "06"}
+{"id": "ses.retest_lead_days", "type": "int", "unit": "days", "default": 14, "limit_direction": "none", "owner": "06"}
+{"id": "ses.ft0_min", "type": "int", "unit": "min", "default": 30, "limit_direction": "lower", "owner": "06"}
+{"id": "ses.ft1_dist_m", "type": "int", "unit": "m", "default": 3000, "limit_direction": "none", "owner": "06"}
+{"id": "ses.ft2_dists_m", "type": "list", "unit": "m", "default": [400, 2000], "limit_direction": "none", "owner": "06"}
+{"id": "ses.taper_touch", "type": "map", "unit": "segments", "default": {"E3": {"reps": 2, "rep_s": 300, "rec_s": 120}, "E4": {"reps": 4, "rep_s": 60, "rec_s": 60}}, "limit_direction": "none", "owner": "06"}
+{"id": "ses.strength_per_week", "type": "int", "unit": "sessions / min", "default": 2, "limit_direction": "none", "owner": "06"}
+{"id": "ses.strength_session_min", "type": "int", "unit": "sessions / min", "default": 20, "limit_direction": "lower", "owner": "06"}
+{"id": "ses.strides_per_week", "type": "int", "unit": "sessions", "default": 2, "limit_direction": "none", "owner": "06"}
+{"id": "ses.medlong_ratio", "type": "number", "unit": "× current long run", "default": 0.65, "limit_direction": "upper", "owner": "06"}
+{"id": "ses.race_effort", "type": "map", "unit": "effort", "default": {"5K": "E4", "10K": "E3", "HM": "E3", "M": "E2", "50K": "E1", "100K": "E1"}, "keys": "distance", "limit_direction": "none", "owner": "06", "note": "10K is the E3/E4 boundary; 50K E1/E2 (prose 06 §6)"}
+{"id": "dst.phase_nodes", "type": "map", "unit": "node sets", "default": {"short": {"BASE": [{"node": "AER", "max_level": 5}, {"node": "DUR", "max_level": 5}, {"node": "ECO", "max_level": 1}, {"node": "VO2", "max_level": 1}, {"node": "THR", "max_level": 1}], "BUILD": [{"node": "THR", "max_level": 4}, {"node": "VO2", "max_level": 3}], "SPECIFIC": [{"node": "MSP", "max_level": 3}, {"node": "VO2", "max_level": 3}, {"node": "THR", "max_level": 4}], "TAPER": [{"node": "MSP", "max_level": 3}]}, "road_classic": {"BASE": [{"node": "AER", "max_level": 5}, {"node": "DUR", "max_level": 5}, {"node": "ECO", "max_level": 1}, {"node": "THR", "max_level": 1}], "BUILD": [{"node": "THR", "max_level": 4}, {"node": "DUR", "max_level": 5}, {"node": "VO2", "max_level": 3}], "SPECIFIC": [{"node": "MSP", "max_level": 3}, {"node": "DUR", "max_level": 5}, {"node": "THR", "max_level": 4}, {"node": "FUEL", "max_level": 4}], "TAPER": [{"node": "MSP", "max_level": 3}]}, "ultra": {"BASE": [{"node": "AER", "max_level": 5}, {"node": "DUR", "max_level": 5}, {"node": "ECO", "max_level": 3}], "BUILD": [{"node": "VO2", "max_level": 3}, {"node": "THR", "max_level": 4}, {"node": "AER", "max_level": 5}], "SPECIFIC": [{"node": "DUR", "max_level": 5}, {"node": "MSP", "max_level": 3}, {"node": "FUEL", "max_level": 4}, {"node": "HEAT", "max_level": 2}], "TAPER": [{"node": "MSP", "max_level": 3}]}}, "keys": "family, phase", "limit_direction": "none", "owner": "09", "note": "[node, max level]; road_classic BUILD VO2 for HM only; phases without a row (ONBOARD, RTR, TRANSITION, RACE) have no key slots; SHARPEN uses the SPECIFIC row, MAINTAIN the BUILD row (v5.2)"}
+{"id": "dst.ultra_build_split", "type": "list", "unit": "share of BUILD (VO2 / THR / steady)", "default": [0.33, 0.33, 0.34], "limit_direction": "none", "owner": "09"}
+{"id": "dst.msp_share.<d>.L1", "type": "map", "unit": "share of race duration", "default": {"5K": {"1": 0.1, "2": 0.3, "3": 0.75}, "10K": {"1": 0.1, "2": 0.3, "3": 0.65}, "HM": {"1": 0.1, "2": 0.3, "3": 0.55}, "M": {"1": 0.1, "2": 0.3, "3": 0.5}, "50K": {"1": 0.1, "2": 0.3, "3": 0.3}, "100K": {"1": 0.1, "2": 0.3, "3": 0.3}}, "keys": "distance, level", "limit_direction": "none", "owner": "09"}
+{"id": "dst.race_long_every_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "none", "owner": "09"}
+{"id": "dst.msp_every_weeks", "type": "int", "unit": "weeks (time goals, SPECIFIC)", "default": 2, "limit_direction": "none", "owner": "09"}
+{"id": "dst.msp_segment_max_min", "type": "map", "unit": "min", "default": {"M": 90, "HM": 40}, "keys": "distance", "limit_direction": "upper", "owner": "09"}
+{"id": "dst.ultra_alt_long_ratio", "type": "number", "unit": "× last peak", "default": 0.7, "limit_direction": "upper", "owner": "09"}
+{"id": "dst.tuneup_dist_km", "type": "map", "unit": "km", "default": {"50K": 42.2, "100K": 50}, "keys": "distance", "limit_direction": "none", "owner": "09"}
+{"id": "dst.tuneup_weeks_out", "type": "int", "unit": "weeks before race", "default": 5, "limit_direction": "none", "owner": "09"}
+{"id": "dst.tuneup_recovery_days", "type": "int", "unit": "days", "default": 7, "limit_direction": "upper", "owner": "09"}
+{"id": "preset.compat.<id>", "type": "map", "unit": "days, min/week", "default": "09 §7 table", "keys": "preset", "limit_direction": "none", "owner": "09"}
+{"id": "race.longest_ratio_max.5K", "type": "number", "unit": "race ÷ peak long run", "default": 1.3, "limit_direction": "upper", "owner": "03"}
+{"id": "race.longest_ratio_max.10K", "type": "number", "unit": "race ÷ peak long run", "default": 1.25, "limit_direction": "upper", "owner": "03"}
+{"id": "race.longest_ratio_max.HM", "type": "number", "unit": "race ÷ peak long run", "default": 1.3, "limit_direction": "upper", "owner": "03"}
+{"id": "race.longest_ratio_max.M", "type": "map", "unit": "ratio (time demand capped by lr.time_cap_min)", "default": {"method_default": 1.4, "daniels": 2.0, "hansons": 1.65, "pfitzinger_classic": 1.3, "higdon_novice": 1.32, "galloway": 1.6}, "keys": "preset", "limit_direction": "upper", "owner": "03"}
+{"id": "race.longest_floor_ratio.<distance>.<preset>", "type": "map", "unit": "race ÷ minimum peak long run (distance)", "default": {"M": 2.0, "HM": 1.6, "50K": 2.0, "100K": 3.0, "5K": 1.3, "10K": 1.25}, "keys": "distance", "limit_direction": "upper", "owner": "03"}
+{"id": "race.5k_finish_lr_min", "type": "int", "unit": "min (continuous or run-walk)", "default": 30, "limit_direction": "lower", "owner": "03"}
+{"id": "race.longest_ratio_max.50K", "type": "number", "unit": "ratio", "default": 1.6, "limit_direction": "upper", "owner": "03"}
+{"id": "race.longest_ratio_max.100K", "type": "number", "unit": "ratio", "default": 2.5, "limit_direction": "upper", "owner": "03"}
+{"id": "feas.finish_floor.peak_week", "type": "map", "unit": "time/dist", "default": {"5K": {"runs": 3}, "10K": {"time_min": 90}, "HM": {"time_min": 150}, "M": {"time_min": 240, "dist_km": 32}, "50K": {"dist_km": 50}, "100K": {"dist_km": 60}}, "keys": "distance", "limit_direction": "lower", "owner": "03"}
+{"id": "feas.planning_speed_margin", "type": "number", "unit": "fraction", "default": 0.1, "limit_direction": "none", "owner": "03"}
+{"id": "feas.default_planning_pace_s_per_km", "type": "int", "unit": "s/km", "default": 480, "limit_direction": "none", "owner": "03"}
+{"id": "feas.stretch_margin_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "none", "owner": "03"}
+{"id": "pred.band_min_pct", "type": "int", "unit": "± %", "default": 7, "limit_direction": "lower", "owner": "03"}
+{"id": "pred.band_widen_estimated", "type": "number", "unit": "× band", "default": 1.5, "limit_direction": "none", "owner": "03"}
+{"id": "pred.marathon_from_half", "type": "number", "unit": "× half time", "default": 2.19, "limit_direction": "none", "owner": "03"}
+{"id": "pred.riegel_exp_min", "type": "number", "unit": "exponent", "default": 1.06, "limit_direction": "lower", "owner": "03"}
+{"id": "pred.low_volume_km_week", "type": "int", "unit": "km/week", "default": 48, "limit_direction": "none", "owner": "03"}
+{"id": "pred.low_volume_widen", "type": "number", "unit": "× slow half-band", "default": 1.5, "limit_direction": "none", "owner": "03"}
+{"id": "pred.max_extrapolation_ratio", "type": "number", "unit": "target ÷ anchor distance", "default": 4.5, "limit_direction": "upper", "owner": "03"}
+{"id": "pred.ultra_mode", "type": "text", "unit": "—", "default": "range only, low confidence", "limit_direction": "none", "owner": "03"}
+{"id": "pred.ultra_exp_low", "type": "number", "unit": "exponent", "default": 1.06, "limit_direction": "none", "owner": "03"}
+{"id": "pred.ultra_exp_high", "type": "number", "unit": "exponent", "default": 1.3, "limit_direction": "none", "owner": "03"}
+{"id": "pred.taper_gain_pct", "type": "int", "unit": "%", "default": 2, "limit_direction": "none", "owner": "03"}
+{"id": "pred.round_s", "type": "int", "unit": "s", "default": 60, "limit_direction": "none", "owner": "03"}
+{"id": "anchor.max_age_days", "type": "int", "unit": "days", "default": 120, "limit_direction": "upper", "owner": "03"}
+{"id": "goal.date_search_max_weeks", "type": "int", "unit": "weeks", "default": 52, "limit_direction": "upper", "owner": "07"}
+{"id": "goal.edit_fail_limit", "type": "int", "unit": "count / days / weeks", "default": 3, "limit_direction": "upper", "owner": "07"}
+{"id": "goal.edit_window_days", "type": "int", "unit": "count / days / weeks", "default": 7, "limit_direction": "none", "owner": "07"}
+{"id": "goal.edit_margin_weeks", "type": "int", "unit": "count / days / weeks", "default": 1, "limit_direction": "none", "owner": "07"}
+{"id": "goal.edit_margin_pct", "type": "int", "unit": "% of target time", "default": 1, "limit_direction": "none", "owner": "03"}
+{"id": "pred.checkpoint_weeks", "type": "int", "unit": "weeks between field tests for an ambitious long-horizon target", "default": 6, "limit_direction": "none", "owner": "03"}
+{"id": "feas.peak_credit_days", "type": "int", "unit": "days before the race within which a logged peak long run counts", "default": 70, "limit_direction": "none", "owner": "03"}
+{"id": "pace.deadband_pct", "type": "number", "unit": "% change of the 10K-equivalent below which a new result is treated as noise (v5.1: a change above it but ≤ the minimum detectable change moves paces only when confirmed, ADP-067)", "default": 3.5, "limit_direction": "none", "owner": "03"}
+{"id": "pace.test_te_pct", "type": "number", "unit": "% typical error of one recreational 5K/10K test (as CV)", "default": 3.4, "limit_direction": "none", "owner": "08"}
+{"id": "pace.mdc_mult", "type": "number", "unit": "× pace.test_te_pct = minimum detectable change of one test (2.8 × 3.4 ≈ 9.5%)", "default": 2.8, "limit_direction": "none", "owner": "08"}
+{"id": "pred.band_same_distance_pct", "type": "int", "unit": "% fast half-width / days", "default": 4, "limit_direction": "none", "owner": "03"}
+{"id": "pred.same_distance_max_age_days", "type": "int", "unit": "% fast half-width / days", "default": 56, "limit_direction": "upper", "owner": "03"}
+{"id": "pace.e3_low", "type": "number", "unit": "× CS speed", "default": 0.92, "limit_direction": "none", "owner": "03"}
+{"id": "pace.e3_high", "type": "number", "unit": "× CS speed", "default": 0.97, "limit_direction": "none", "owner": "03"}
+{"id": "pace.e1_low", "type": "number", "unit": "× M-equivalent speed", "default": 0.72, "limit_direction": "none", "owner": "03"}
+{"id": "pace.e1_high", "type": "number", "unit": "× M-equivalent speed", "default": 0.92, "limit_direction": "none", "owner": "03"}
+{"id": "pace.round_s", "type": "int", "unit": "s/km", "default": 5, "limit_direction": "none", "owner": "03"}
+{"id": "replan.published_days", "type": "int", "unit": "days", "default": 7, "limit_direction": "none", "owner": "08"}
+{"id": "repair.max_passes", "type": "int", "unit": "count", "default": 3, "limit_direction": "upper", "owner": "07"}
+{"id": "repair.max_options", "type": "int", "unit": "count", "default": 4, "limit_direction": "upper", "owner": "07"}
+{"id": "fuel.required_above_min", "type": "int", "unit": "min race duration", "default": 90, "limit_direction": "lower", "owner": "11"}
+{"id": "fuel.band.by_duration", "type": "list", "unit": "g/h", "default": [{"max_min": 45, "g_h": [0, 0]}, {"max_min": 75, "g_h": [0, 30], "optional": true}, {"max_min": 150, "g_h": [30, 60]}, {"max_min": null, "g_h": [60, 90]}], "limit_direction": "upper", "owner": "11"}
+{"id": "fuel.max_default_g_h", "type": "int", "unit": "g/h", "default": 90, "limit_direction": "upper", "owner": "11"}
+{"id": "fuel.start_g_h", "type": "int", "unit": "g/h", "default": 30, "limit_direction": "none", "owner": "11"}
+{"id": "fuel.step_g_h", "type": "int", "unit": "g/h", "default": 15, "limit_direction": "none", "owner": "11", "note": "v5.2: one value (was 10–15), owner question 5"}
+{"id": "fuel.step_runs", "type": "int", "unit": "runs", "default": 2, "limit_direction": "none", "owner": "11"}
+{"id": "fuel.exit_runs", "type": "int", "unit": "runs", "default": 2, "limit_direction": "none", "owner": "11"}
+{"id": "fuel.gi_pass_max", "type": "int", "unit": "/10", "default": 2, "limit_direction": "upper", "owner": "11"}
+{"id": "fuel.gi_stepdown_min", "type": "int", "unit": "/10", "default": 5, "limit_direction": "lower", "owner": "11"}
+{"id": "fuel.practice_min_duration_min", "type": "int", "unit": "min", "default": 60, "limit_direction": "upper", "owner": "11"}
+{"id": "fuel.l4_min_race_h", "type": "number", "unit": "h", "default": 2.5, "limit_direction": "lower", "owner": "11"}
+{"id": "fuel.dual_source_above_g_h", "type": "int", "unit": "g/h", "default": 60, "limit_direction": "none", "owner": "11"}
+{"id": "hyd.no_test_cap_ml_h", "type": "int", "unit": "mL/h", "default": 800, "limit_direction": "upper", "owner": "11"}
+{"id": "hyd.abs_cap_ml_h", "type": "int", "unit": "mL/h", "default": 1000, "limit_direction": "upper", "owner": "11"}
+{"id": "hyd.sweat_test_min_min", "type": "int", "unit": "min", "default": 60, "limit_direction": "lower", "owner": "11"}
+{"id": "eah.warning_above_h", "type": "int", "unit": "h", "default": 4, "limit_direction": "none", "owner": "11"}
+{"id": "heat.acclim_days", "type": "int", "unit": "exposure days", "default": 10, "limit_direction": "none", "owner": "11", "note": "v5.2: one value (was 7–14), owner question 8"}
+{"id": "heat.acclim_window_days", "type": "int", "unit": "days before race", "default": 21, "limit_direction": "none", "owner": "11"}
+{"id": "caffeine.default", "type": "int", "unit": "mg/kg", "default": 3, "limit_direction": "none", "owner": "11"}
+{"id": "caffeine.max", "type": "int", "unit": "mg/kg", "default": 6, "limit_direction": "none", "owner": "11"}
+{"id": "cho.daily_bands", "type": "list", "unit": "g/kg/day", "default": [{"day_min": 0, "g_kg": [3, 5]}, {"day_min": 60, "g_kg": [5, 7]}, {"day_min": 90, "g_kg": [6, 10]}, {"day_min": 240, "g_kg": [8, 12]}], "limit_direction": "none", "owner": "11"}
+{"id": "cho.loading_band", "type": "list", "unit": "g/kg/day", "default": [10, 12], "limit_direction": "none", "owner": "11"}
+{"id": "protein.daily_band", "type": "list", "unit": "g/kg/day", "default": [1.2, 2.0], "limit_direction": "none", "owner": "11"}
+{"id": "trainlow.min_aer_level", "type": "int", "unit": "level", "default": 3, "limit_direction": "lower", "owner": "11"}
+{"id": "knopp.range", "type": "map", "unit": "—", "default": {"weekly_mean_km": [43, 59, 108], "longest_km": [31, 35], "z45_share": 0.06}, "limit_direction": "none", "owner": "14 (values); INV-23 defined in 07"}
+{"id": "knopp.range.ultra", "type": "map", "unit": "km/week peak by goal tier", "default": {"finish": [45, 50], "bronze": [50, 65], "tier3": [60, 70], "tier4": [75, 80], "silver": [100, 120]}, "limit_direction": "none", "owner": "14"}
+{"id": "val.conformance_tol_pct", "type": "int", "unit": "%", "default": 10, "limit_direction": "none", "owner": "14"}
+{"id": "val.removal_material_pct", "type": "int", "unit": "%", "default": 5, "limit_direction": "none", "owner": "14"}
+{"id": "val.property_cases_min", "type": "int", "unit": "cases", "default": 100000, "limit_direction": "lower", "owner": "14"}
+{"id": "val.comprehension_n", "type": "int", "unit": "runners / %", "default": 8, "limit_direction": "none", "owner": "14"}
+{"id": "val.comprehension_pass_pct", "type": "int", "unit": "runners / %", "default": 80, "limit_direction": "none", "owner": "14"}
+{"id": "val.pilot_n", "type": "int", "unit": "runners", "default": 60, "limit_direction": "none", "owner": "14"}
+{"id": "val.pilot_min_hours", "type": "int", "unit": "h", "default": 2000, "limit_direction": "lower", "owner": "14"}
+{"id": "val.injury_days_lost", "type": "int", "unit": "days", "default": 7, "limit_direction": "none", "owner": "14"}
+{"id": "val.long_run_review_ratio", "type": "number", "unit": "injury rate ratio, weeks with a long run > 150 min vs other weeks", "default": 1.5, "limit_direction": "upper", "owner": "14"}
+{"id": "display.duration_round_min", "type": "map", "unit": "min", "default": {"le60": 5, "gt60": 10}, "limit_direction": "upper", "owner": "12"}
+{"id": "display.distance_round_km", "type": "map", "unit": "km", "default": {"default": 0.5, "ge20km": 1}, "limit_direction": "none", "owner": "12"}
+{"id": "display.time_round_s", "type": "map", "unit": "s", "default": {"default": 60, "races_le30min": 15}, "limit_direction": "none", "owner": "12"}
+{"id": "display.pace_round_s", "type": "int", "unit": "s/km", "default": 5, "limit_direction": "none", "owner": "12"}
+{"id": "display.max_reasons_card", "type": "int", "unit": "reasons", "default": 2, "limit_direction": "upper", "owner": "12"}
+{"id": "inp.no_unknown_fields", "type": "set", "unit": "field list", "default": ["screen.answers", "screen.followup_answers", "event.C1", "event.C2", "event.C3", "event.C4", "event.B1", "event.B2", "event.B3", "event.B4", "event.B5", "event.H1", "event.H2", "event.E1", "event.P1", "event.P2", "event.I1", "event.I2", "event.I3", "profile.special_status", "profile.birth_month", "profile.birth_year", "screen.guardian_attested_on"], "limit_direction": "none", "owner": "01"}
+{"id": "lr.long_guard_min", "type": "int", "unit": "min", "default": 180, "limit_direction": "lower", "owner": "05"}
+{"id": "lr.long_guard_tol_level", "type": "int", "unit": "TOL level", "default": 4, "limit_direction": "none", "owner": "05"}
+{"id": "pain.answered_min_ratio", "type": "number", "unit": "share of the last 14 days' sessions with an answered pain prompt", "default": 0.7, "limit_direction": "lower", "owner": "05"}
+{"id": "pain.hold_step_weeks", "type": "int", "unit": "weeks", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "claim.l30_cap_by_tol", "type": "map", "unit": "min", "default": {"0": 30, "1": 60, "2": 90, "3": 120, "4": null, "5": null}, "keys": "tol_tier", "limit_direction": "upper", "owner": "07"}
+{"id": "claim.l30_check_min_runs", "type": "int", "unit": "runs/week", "default": 2, "limit_direction": "lower", "owner": "07"}
+{"id": "race.recovery_days", "type": "map", "unit": "days between goal races", "default": {"5K": 7, "10K": 10, "HM": 14, "M": 28, "50K": 42, "100K": 42}, "keys": "distance", "limit_direction": "upper", "owner": "07"}
+{"id": "ladder.est_pace_s_per_km", "type": "int", "unit": "s/km, run-walk at S5+", "default": 660, "limit_direction": "none", "owner": "03"}
+{"id": "ladder.runwalk_race_min_rung", "type": "int", "unit": "rung index", "default": 5, "limit_direction": "lower", "owner": "03"}
+{"id": "pp.due_ask_days", "type": "int", "unit": "days before due_date", "default": 14, "limit_direction": "none", "owner": "10"}
+{"id": "anchor.jump_confirm_mult", "type": "int", "unit": "× pace.deadband_pct", "default": 2, "limit_direction": "none", "owner": "01"}
+{"id": "result.rpe_high", "type": "int", "unit": "RPE 0–10", "default": 8, "limit_direction": "none", "owner": "08"}
+{"id": "result.rpe_high_sessions", "type": "int", "unit": "consecutive sessions ≥ E3", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "cmp.heat_required_level", "type": "int", "unit": "HEAT level", "default": 2, "limit_direction": "none", "owner": "03"}
+{"id": "phs.sharpen_max_weeks", "type": "int", "unit": "weeks", "default": 4, "limit_direction": "upper", "owner": "04"}
+{"id": "b2b.min_dur_level", "type": "int", "unit": "levels", "default": 4, "limit_direction": "lower", "owner": "09"}
+{"id": "b2b.min_tol_level", "type": "int", "unit": "levels", "default": 5, "limit_direction": "lower", "owner": "09"}
+{"id": "miss.refeas_hold_weeks", "type": "int", "unit": "consecutive ADP-022 weeks before feasibility re-runs", "default": 2, "limit_direction": "none", "owner": "08"}
+{"id": "engine.max_iterations", "type": "int", "unit": "passes per stage", "default": 5, "limit_direction": "upper", "owner": "12"}
+{"id": "ask.no_answer_days", "type": "int", "unit": "days before an ask_confirm counts as unanswered", "default": 7, "limit_direction": "none", "owner": "12"}
+{"id": "quality.min_hab_level", "type": "int", "unit": "HAB level below which no key session is planned", "default": 2, "limit_direction": "lower", "owner": "06"}
+{"id": "quality.low_tol_level", "type": "int", "unit": "TOL level at or below which at most 1 key session is planned", "default": 2, "limit_direction": "none", "owner": "06"}
+{"id": "quality.method_default_max", "type": "int", "unit": "key sessions per week (BUILD, SPECIFIC)", "default": 2, "limit_direction": "upper", "owner": "06"}
+{"id": "quality.non_key_runs_min", "type": "int", "unit": "runs a week that are not key sessions (the long run and at least one easy run; owner Q2)", "default": 2, "limit_direction": "lower", "owner": "06"}
+{"id": "quality.key_modules.<preset>.<phase>", "type": "map", "unit": "module lists", "default": {"method_default": {"BASE": ["SES-M-006", "SES-M-007", "SES-M-008", "SES-M-012"], "BUILD": ["SES-M-008", "SES-M-010", "SES-M-012"], "SPECIFIC": ["SES-M-011", "SES-M-009"]}}, "keys": "preset, phase", "limit_direction": "none", "owner": "06", "note": "BASE: SES-M-008/012 only in late BASE (allowed phases); SPECIFIC falls back to the BUILD list for levels still missing (07 §2b)"}
+{"id": "ses.target_rpe", "type": "map", "unit": "session RPE 0–10 (whole session)", "default": {"E1": 3, "E2": 5, "E3": 6, "E4": 7}, "keys": "effort", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.<SES-M-id>.steps", "type": "segments", "unit": "ordered dose steps", "default": "one concrete entry per module below", "keys": "module", "limit_direction": "none", "owner": "06"}
+{"id": "ses.msp_rep_max_min", "type": "map", "unit": "min per race-effort repeat (SES-M-011)", "default": {"5K": 10, "10K": 10, "HM": 15, "M": 20}, "keys": "distance", "limit_direction": "upper", "owner": "06"}
+{"id": "ses.runwalk.entry_rung", "type": "map", "unit": "index into ses.runwalk.ladder", "default": {"preference": 2, "hab_low": 1}, "limit_direction": "none", "owner": "06"}
+{"id": "ses.exit_test.<node>.<level>", "type": "map", "unit": "test session", "default": {"HAB": {"2": {"module": "SES-M-018", "segments": [{"effort": "E1", "duration_s": 1800, "repeats": 1}]}}, "THR": {"1": {"module": "SES-M-008", "segments": [{"effort": "E3", "duration_s": 480, "repeats": 2, "recovery_s": 120}]}, "2": {"module": "SES-M-008", "segments": [{"effort": "E3", "duration_s": 300, "repeats": 5, "recovery_s": 120}]}, "3": {"module": "SES-M-009", "segments": [{"effort": "E3", "duration_s": 1800, "repeats": 1}]}, "4": {"module": "SES-M-009", "segments": [{"effort": "E3", "duration_s": 900, "repeats": 3, "recovery_s": 180}]}}, "VO2": {"2": {"module": "SES-M-010", "segments": [{"effort": "E4", "duration_s": 180, "repeats": 5, "recovery_s": 180}]}, "3": {"module": "SES-M-010", "segments": [{"effort": "E4", "duration_s": 180, "repeats": 6, "recovery_s": 180}]}}, "MSP": {"1": {"module": "SES-M-011", "share_level": 1}, "2": {"module": "SES-M-011", "share_level": 2}, "3": {"module": "SES-M-011", "share_level": 3}}, "DUR": {"1": {"module": "SES-M-003", "long_run_min": 60}, "2": {"module": "SES-M-003", "long_run_min": 90}, "3": {"module": "SES-M-003", "long_run_min": "ses.exit.DUR3_min"}, "4": {"module": "SES-M-004", "long_run_min": 180}}}, "keys": "node, level", "limit_direction": "none", "owner": "06"}
+{"id": "cmp.max_level.<node>", "type": "map", "unit": "level", "default": {"HAB": 4, "TOL": 5, "AER": 5, "THR": 4, "VO2": 3, "ECO": 3, "DUR": 5, "MSP": 3, "FUEL": 4, "HEAT": 2, "PACE": 3}, "keys": "node", "limit_direction": "upper", "owner": "02"}
+{"id": "cmp.node_tie_order", "type": "list", "unit": "order", "default": ["DUR", "THR", "AER", "MSP", "VO2", "ECO", "FUEL"], "limit_direction": "none", "owner": "02"}
+{"id": "dst.msp_segment_max_ratio", "type": "number", "unit": "× the long run's duration (race-effort segment)", "default": 0.6, "limit_direction": "upper", "owner": "09"}
+{"id": "fuel.reach_tol_g_h", "type": "int", "unit": "g/h below the step that still counts as reaching it", "default": 5, "limit_direction": "none", "owner": "11"}
+{"id": "fuel.level_band", "type": "map", "unit": "g/h (lower edge proves the level, NUT-013)", "default": {"1": [30, 30], "2": [45, 60], "3": [60, 90], "4": [90, null]}, "keys": "level", "limit_direction": "none", "owner": "11"}
+{"id": "fuel.l3_level", "type": "int", "unit": "FUEL level that needs race-effort practice runs", "default": 3, "limit_direction": "none", "owner": "11"}
+{"id": "fuel.required_level_mid", "type": "int", "unit": "FUEL level required for races > 90 min / > 2.5 h (time goals only for L3; owner Q6)", "default": 2, "limit_direction": "none", "owner": "02"}
+{"id": "fuel.required_level_long", "type": "int", "unit": "FUEL level required for races > 90 min / > 2.5 h (time goals only for L3; owner Q6)", "default": 3, "limit_direction": "none", "owner": "02"}
+{"id": "tid.hard_share_max.HM", "type": "number", "unit": "fraction of weekly time at E3–E4 for the half marathon (owner Q10)", "default": 0.15, "limit_direction": "upper", "owner": "05"}
+{"id": "heat.exposure_max_min", "type": "int", "unit": "min per heat-exposure easy run (SES-M-022)", "default": 60, "limit_direction": "upper", "owner": "11"}
+{"id": "ses.dose.SES-M-002.steps", "type": "segments", "unit": "steps", "default": [{"total_s": 1200}, {"total_s": 1500}, {"total_s": 1800}, {"total_s": 2100}, {"total_s": 2400}, {"total_s": 2700}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-006.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E5", "reps": 4, "rep_s": 20, "rec_s": 60, "rec_effort": "E0"}, {"effort": "E5", "reps": 6, "rep_s": 20, "rec_s": 60, "rec_effort": "E0"}, {"effort": "E5", "reps": 8, "rep_s": 20, "rec_s": 60, "rec_effort": "E0"}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-008.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E3", "reps": 3, "rep_s": 300, "rec_s": 120}, {"effort": "E3", "reps": 3, "rep_s": 360, "rec_s": 120}, {"effort": "E3", "reps": 3, "rep_s": 420, "rec_s": 120}, {"effort": "E3", "reps": 3, "rep_s": 480, "rec_s": 120}, {"effort": "E3", "reps": 4, "rep_s": 480, "rec_s": 120}, {"effort": "E3", "reps": 5, "rep_s": 480, "rec_s": 120}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-009.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E3", "reps": 1, "rep_s": 900}, {"effort": "E3", "reps": 1, "rep_s": 1200}, {"effort": "E3", "reps": 1, "rep_s": 1500}, {"effort": "E3", "reps": 1, "rep_s": 1800}, {"effort": "E3", "reps": 1, "rep_s": 2100}, {"effort": "E3", "reps": 1, "rep_s": 2400}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-010.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E4", "reps": 5, "rep_s": 120, "rec_s": 120}, {"effort": "E4", "reps": 6, "rep_s": 120, "rec_s": 120}, {"effort": "E4", "reps": 5, "rep_s": 180, "rec_s": 180}, {"effort": "E4", "reps": 6, "rep_s": 180, "rec_s": 180}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-011.steps", "type": "segments", "unit": "steps", "default": [{"effort": "race", "share": 0.1, "rec_s": 120}, {"effort": "race", "share": 0.15, "rec_s": 120}, {"effort": "race", "share": 0.2, "rec_s": 120}, {"effort": "race", "share": 0.25, "rec_s": 120}, {"effort": "race", "share": 0.3, "rec_s": 120}, {"effort": "race", "share": 0.4, "rec_s": 120}, {"effort": "race", "share": 0.5, "rec_s": 120}, {"effort": "race", "share": "L3", "rec_s": 120}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-012.steps", "type": "segments", "unit": "steps", "default": [{"total_s": 2400, "shares": {"E1": 0.7, "E2": 0.15, "E3": 0.15}}, {"total_s": 3000, "shares": {"E1": 0.7, "E2": 0.15, "E3": 0.15}}, {"total_s": 3600, "shares": {"E1": 0.7, "E2": 0.15, "E3": 0.15}}, {"total_s": 4200, "shares": {"E1": 0.7, "E2": 0.15, "E3": 0.15}}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-013.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E2", "reps": 1, "rep_s": 1800}, {"effort": "E2", "reps": 1, "rep_s": 2400}, {"effort": "E2", "reps": 1, "rep_s": 3000}, {"effort": "E2", "reps": 1, "rep_s": 3600}, {"effort": "E2", "reps": 1, "rep_s": 4500}, {"effort": "E2", "reps": 1, "rep_s": 5400}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-018.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E1", "reps": 1, "rep_s": 1800}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-019.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E4", "distance_m": 3000}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-020.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E4", "distance_m": 2000, "then_rec_s": 900, "then": {"effort": "E5", "distance_m": 400}}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-022.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E1", "total_s": 1800}, {"effort": "E1", "total_s": 2400}, {"effort": "E1", "total_s": 3000}, {"effort": "E1", "total_s": 3600}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-024.steps", "type": "segments", "unit": "steps", "default": [{"effort": "E3", "reps": 2, "rep_s": 300, "rec_s": 120}, {"effort": "E4", "reps": 4, "rep_s": 60, "rec_s": 60}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-003.steps", "type": "segments", "unit": "steps", "default": [{"from": "05 long-run curve"}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-004.steps", "type": "segments", "unit": "steps", "default": [{"from": "05 long-run curve", "intake": "NUT-010"}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-005.steps", "type": "segments", "unit": "steps", "default": [{"from": "05 long-run curve", "segment": "DST-006"}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+{"id": "ses.dose.SES-M-021.steps", "type": "segments", "unit": "steps", "default": [{"from": "last logged dose (SES-018)"}], "family": "ses.dose.<SES-M-id>.steps", "limit_direction": "none", "owner": "06"}
+```

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://running-method/spec/schema/fixture-input.schema.json",
+  "title": "Persona input fixture (v5.2)",
+  "description": "One persona of 13 or 14: the generator input at day 0, plus how the runner behaves afterwards and scripted events. INPUTS ONLY: expected outputs belong to the oracle (B-5). Every value carries its provenance: a 'spec' value cites the line of 13/14 it comes from; an 'invented' value was chosen in v5.2 to complete the persona and must be reviewed (gap/oracle.md §7).",
+  "type": "object",
+  "required": ["fixture_id", "persona", "sources", "release", "input", "behaviour", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "fixture_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$"},
+    "persona": {"type": "string", "description": "Name and one-line description as in 13/14."},
+    "sources": {"type": "array", "minItems": 1, "items": {"type": "string"}, "description": "13/14 sections and test ids this fixture serves, e.g. '13 §3', 'TST-110'."},
+    "release": {"enum": ["MVP", "R2", "R3"], "description": "Release profile that the goal needs (12 §6)."},
+    "input": {"$ref": "input-profile.schema.json"},
+    "behaviour": {
+      "type": "object",
+      "description": "How the runner logs after day 0. The oracle and the integration harness simulate the log week by week from it; the generator itself never reads this block.",
+      "required": ["model"],
+      "additionalProperties": false,
+      "properties": {
+        "model": {"enum": ["as_planned", "day0_only", "scripted"], "description": "as_planned: every planned session is ticked 'done as planned' on its date (entered the same evening, source tick), RPE = the target RPE of its effort (ses.target_rpe), pain tap answered No, next-morning prompt answered No, GI 0 and intake = the planned fuelling target on practice runs, level tests answered yes/yes/no pain. day0_only: only the day-0 call is in scope. scripted: as_planned except the listed deviations."},
+        "replan": {"enum": ["weekly", "on_event"], "description": "weekly: the harness calls the generator every Monday with the log so far (13's tables show the week as published at its Monday)."},
+        "deviations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["week", "what"],
+            "additionalProperties": false,
+            "properties": {
+              "week": {"type": "integer", "minimum": 1},
+              "day": {"$ref": "common.schema.json#/$defs/weekday"},
+              "what": {"enum": ["skip_session", "skip_week_unlogged", "partial", "pain", "illness", "fatigue_tap", "result", "goal_change", "availability_change", "race_done", "backfill", "red_flag_answer", "no_answer_to_questions"]},
+              "detail": {"type": "object"}
+            }
+          }
+        },
+        "horizon_weeks": {"type": ["integer", "null"], "description": "How many weeks to simulate (null = to race week + transition)."}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "JSON-pointer-like paths into 'input' (e.g. 'profile.birth_year', 'claim.L30_duration_s') → 'spec: <source line>' or 'invented: <reason>'. Every leaf value that is not an empty list or a structural default must appear.",
+      "additionalProperties": {"type": "string", "pattern": "^(spec|invented|derived): .+"}
+    },
+    "notes": {"type": "string"}
+  }
+}

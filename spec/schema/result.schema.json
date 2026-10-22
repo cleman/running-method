@@ -1,0 +1,1494 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://running-method/spec/schema/result.schema.json",
+  "title": "Generator result (v5.2)",
+  "description": "The single object the generator returns for one call. kind selects the outcome: 'plan' (a validated plan), 'fail_closed' (no plan for the requested goal; ranked, pre-validated options, 07 §6.2), 'gate_stop' (S1 outcome pause_until_clearance or no_plan, GEN-001), 'hold' (a declared unknown under on_unknown hold or ask, 12 §3.2 rule 4), 'safe_state' (an error value E was reached, 12 §3.2 rule 5). Serialisation is canonical (README.md): byte-identical for identical inputs (GEN-004).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "ruleset_version",
+    "registry_version",
+    "today",
+    "messages",
+    "fired_rules",
+    "engine_state",
+    "flags"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "v5.2"
+    },
+    "kind": {
+      "enum": [
+        "plan",
+        "fail_closed",
+        "gate_stop",
+        "hold",
+        "safe_state"
+      ]
+    },
+    "ruleset_version": {
+      "type": "string"
+    },
+    "registry_version": {
+      "type": "string"
+    },
+    "today": {
+      "$ref": "common.schema.json#/$defs/date"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/message_instance"
+      },
+      "description": "Plan-level and verdict-level messages in display order (headline, reasons ≤ display.max_reasons_card on the card, the rest on 'why'); session messages live on the sessions."
+    },
+    "fired_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/fired_rule"
+      }
+    },
+    "engine_state": {
+      "$ref": "common.schema.json#/$defs/engine_state",
+      "description": "The EngineState to store and pass back on the next call (12 §3.8)."
+    },
+    "gate": {
+      "$ref": "common.schema.json#/$defs/gate_outcome"
+    },
+    "plan": {
+      "$ref": "#/$defs/plan"
+    },
+    "feasibility": {
+      "$ref": "#/$defs/feasibility"
+    },
+    "validation": {
+      "$ref": "#/$defs/validation_report"
+    },
+    "ledger": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ledger_entry"
+      }
+    },
+    "state": {
+      "$ref": "#/$defs/state_snapshot"
+    },
+    "previous_plan_kept": {
+      "type": "boolean",
+      "description": "fail_closed at re-generation, hold and safe_state: true when a previous version exists and stays the active plan; false at first generation (then the runner sees no plan, only the messages and, for fail_closed, the options)."
+    },
+    "hold": {
+      "type": "object",
+      "required": [
+        "rule_ids",
+        "questions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "rule_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/rule_id"
+          }
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths whose answers resolve the hold (e.g. event[0].C1, profile.birth_year)."
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "required": [
+        "rule_id",
+        "detail"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "rule_id": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "$ref": "input-profile.schema.json#/properties/flags/items"
+      },
+      "description": "The runner's RiskFlags after this call (raised or cleared by SAF rules); the caller stores them and passes them back as input.flags (12 §3.8)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "plan"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "gate",
+          "plan",
+          "feasibility",
+          "validation",
+          "ledger",
+          "state"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "fail_closed"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "gate",
+          "feasibility",
+          "previous_plan_kept"
+        ],
+        "properties": {
+          "feasibility": {
+            "properties": {
+              "verdict": {
+                "const": "infeasible"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "gate_stop"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "gate"
+        ],
+        "properties": {
+          "gate": {
+            "enum": [
+              "pause_until_clearance",
+              "no_plan"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "hold"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "hold",
+          "previous_plan_kept"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "safe_state"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "error",
+          "previous_plan_kept"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "fired_rule": {
+      "type": "object",
+      "description": "FiredRuleLog entry (12 §2). No wall-clock timestamp: the position in the list is the evaluation order (determinism, 12 §3.10).",
+      "required": [
+        "stage",
+        "rule_id",
+        "op"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "type": "string",
+          "pattern": "^(S[0-9]+r?|S7\\.[1-8]|on_entry|on_event)$"
+        },
+        "rule_id": {
+          "$ref": "common.schema.json#/$defs/rule_id"
+        },
+        "binding": {
+          "type": "string",
+          "description": "What the rule was bound to: 'global', 'week:<index>', 'session:<id>', 'node:<id>', 'entry:<id>', 'flag:<id>', 'option:<rank>'."
+        },
+        "op": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "integer",
+            "number",
+            "string",
+            "boolean",
+            "null"
+          ]
+        },
+        "applied": {
+          "type": "boolean",
+          "description": "false when the write lost in composition (12 §3.6)."
+        }
+      }
+    },
+    "ledger_entry": {
+      "type": "object",
+      "description": "DeviationLedgerEntry (07 §7).",
+      "required": [
+        "week_index",
+        "field",
+        "template_value",
+        "plan_value",
+        "rule_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "week_index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "session_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "field": {
+          "type": "string"
+        },
+        "template_value": {
+          "type": [
+            "integer",
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "plan_value": {
+          "type": [
+            "integer",
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "rule_id": {
+          "$ref": "common.schema.json#/$defs/rule_id"
+        },
+        "criterion": {
+          "type": "string"
+        },
+        "grade": {
+          "$ref": "common.schema.json#/$defs/grade"
+        }
+      }
+    },
+    "validation_report": {
+      "type": "object",
+      "required": [
+        "pass",
+        "passes_used",
+        "violations"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pass": {
+          "type": "boolean"
+        },
+        "passes_used": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Repair passes used (0 for a parity-clean plan, TST-092); at most repair.max_passes."
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "inv_id",
+              "observed",
+              "limit",
+              "severity"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "inv_id": {
+                "type": "string"
+              },
+              "week_index": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "session_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "observed": {
+                "type": [
+                  "integer",
+                  "number",
+                  "string",
+                  "boolean",
+                  "null"
+                ]
+              },
+              "limit": {
+                "type": [
+                  "integer",
+                  "number",
+                  "string",
+                  "boolean",
+                  "null"
+                ]
+              },
+              "severity": {
+                "enum": [
+                  "repair",
+                  "block",
+                  "flag",
+                  "build_fail"
+                ]
+              },
+              "repaired_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "state_snapshot": {
+      "type": "object",
+      "description": "DerivedState at plan time (as_of = today). Informational: the validator and the oracle recompute what they check from the inputs (07 §5a); a mismatch is a finding, not a value to copy.",
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "$ref": "common.schema.json#/$defs/date"
+        },
+        "log_status": {
+          "enum": [
+            "rich",
+            "sparse",
+            "none"
+          ]
+        },
+        "L30_eff_time_s": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "L30_eff_dist_m": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "L30_source": {
+          "enum": [
+            "log_rich",
+            "log_sparse_claim",
+            "undefined_rtr"
+          ]
+        },
+        "V28_time_s": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "V28_week_s": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "V_hold_s": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "L_hold_s": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "days_since_last_run": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "age_low": {
+          "type": "integer"
+        },
+        "age_high": {
+          "type": "integer"
+        },
+        "tol_tier": {
+          "type": "integer"
+        },
+        "tol_confidence": {
+          "$ref": "common.schema.json#/$defs/confidence"
+        },
+        "progression_profile": {
+          "enum": [
+            "standard",
+            "slow"
+          ]
+        },
+        "baseline_confirmed": {
+          "type": "boolean"
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/competence_state"
+          }
+        },
+        "s_slow_m_s": {
+          "type": "number",
+          "description": "Planning speed S_slow (FEA-002: demand conversion only)."
+        },
+        "effort_ceiling": {
+          "$ref": "common.schema.json#/$defs/effort"
+        },
+        "max_tolerated_g_h": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "feasibility": {
+      "type": "object",
+      "description": "FeasibilityResult (12 §2, 03).",
+      "required": [
+        "goal_id",
+        "verdict",
+        "horizon",
+        "weeks_available",
+        "weeks_needed",
+        "slack",
+        "reasons",
+        "labels",
+        "demand"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "goal_id": {
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "common.schema.json#/$defs/verdict"
+        },
+        "headline": {
+          "enum": [
+            "ambitious",
+            "tight",
+            "uncertain",
+            null
+          ]
+        },
+        "horizon": {
+          "$ref": "common.schema.json#/$defs/horizon"
+        },
+        "weeks_available": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "W (04 §2); null in H0."
+        },
+        "weeks_needed": {
+          "type": "object",
+          "required": [
+            "rtr",
+            "onboard",
+            "base",
+            "build",
+            "specific",
+            "taper"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "rtr": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Return-ladder or start-ladder weeks (SAF-085)."
+            },
+            "onboard": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "base": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "build": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "specific": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "taper": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "G": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Growth weeks from the dry run (FEA-020)."
+            },
+            "n_L": {
+              "type": "integer"
+            },
+            "n_V": {
+              "type": "integer"
+            },
+            "K": {
+              "type": "integer"
+            },
+            "K_key": {
+              "type": "integer"
+            }
+          }
+        },
+        "slack": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "03 §4 (v5.2): W − (rtr + max(base, onboard − rtr) + build + specific + taper)."
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/reason_code"
+          },
+          "uniqueItems": true,
+          "description": "Sorted by the enum order of reason_code (FEA-036)."
+        },
+        "reason_details": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/message_instance"
+          },
+          "description": "One message per reason, same order, with its placeholders (extra minutes, day to add, test name, dates)."
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/label_code"
+          },
+          "uniqueItems": true
+        },
+        "predicted_band": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "model_id",
+            "point_s",
+            "p_race_s",
+            "fast_edge_s",
+            "slow_edge_s",
+            "b_fast",
+            "b_slow",
+            "confidence"
+          ],
+          "properties": {
+            "model_id": {
+              "enum": [
+                "riegel",
+                "riegel_marathon",
+                "ultra_range"
+              ]
+            },
+            "point_s": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "p_race_s": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "fast_edge_s": {
+              "type": "integer"
+            },
+            "slow_edge_s": {
+              "type": "integer"
+            },
+            "b_fast": {
+              "type": "number"
+            },
+            "b_slow": {
+              "type": "number"
+            },
+            "inputs_used": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "confidence": {
+              "$ref": "common.schema.json#/$defs/confidence"
+            },
+            "target_where": {
+              "enum": [
+                "inside",
+                "faster",
+                "slower",
+                null
+              ]
+            }
+          }
+        },
+        "demand": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "preset_id": {
+              "$ref": "common.schema.json#/$defs/preset_id"
+            },
+            "L_req_time_s": {
+              "type": "integer"
+            },
+            "L_req_dist_m": {
+              "type": "integer"
+            },
+            "floor_dist_m": {
+              "type": "integer"
+            },
+            "distance_stop_m": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "min(race / longest_ratio_max, lr.abs_cap_km): the 'whichever comes first' stop at the time cap (03 §2)."
+            },
+            "V_req_time_s": {
+              "type": "integer"
+            },
+            "V_req_dist_m": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "runs_req": {
+              "type": "integer"
+            },
+            "required_levels": {
+              "$ref": "common.schema.json#/$defs/levels"
+            },
+            "expected_race_duration_s": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "03 §2 (v5.2) definition of the expected race duration."
+            },
+            "met_by_logged_distance": {
+              "type": "boolean"
+            },
+            "credited": {
+              "type": "boolean"
+            }
+          }
+        },
+        "interim_target_s": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repair_option"
+          },
+          "description": "Ranked goal-level repairs (07 §6.2, FEA-040), each validated; at most repair.max_options."
+        },
+        "alternative_option": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/repair_option"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The separately labelled 'alternative approach' (alternative_preset); never counted in repair.max_options."
+        }
+      }
+    },
+    "repair_option": {
+      "type": "object",
+      "required": [
+        "rank",
+        "kind",
+        "new_goal",
+        "explanation",
+        "verdict",
+        "plan"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "rank": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "enum": [
+            "change_availability",
+            "change_availability+move_date",
+            "move_date",
+            "lower_goal",
+            "shorter_distance",
+            "base_plan",
+            "alternative_preset"
+          ]
+        },
+        "new_goal": {
+          "$ref": "common.schema.json#/$defs/goal"
+        },
+        "availability_change": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "extra_minutes_per_week": {
+              "type": "integer"
+            },
+            "add_day": {
+              "$ref": "common.schema.json#/$defs/weekday"
+            },
+            "roster_dates_blocking": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/date"
+              }
+            }
+          }
+        },
+        "preset_id": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/preset_id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "explanation": {
+          "$ref": "common.schema.json#/$defs/message_instance"
+        },
+        "verdict": {
+          "enum": [
+            "feasible",
+            "stretch"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/reason_code"
+          }
+        },
+        "plan": {
+          "$ref": "#/$defs/plan",
+          "description": "The option's validated plan (FEA-041 dropped every option whose plan failed)."
+        }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "parent_plan_id",
+        "goal_id",
+        "preset_id",
+        "status",
+        "degraded",
+        "pace_mode",
+        "plan_start",
+        "W",
+        "horizon",
+        "published_until",
+        "phases",
+        "weeks"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "sha256 of the canonical serialisation of {input, ruleset_version, registry_version} (README.md)."
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "parent_plan_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "goal_id": {
+          "type": "string"
+        },
+        "preset_id": {
+          "$ref": "common.schema.json#/$defs/preset_id"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "superseded",
+            "paused"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "pace_mode": {
+          "enum": [
+            "paced",
+            "effort_only"
+          ]
+        },
+        "plan_start": {
+          "$ref": "common.schema.json#/$defs/date",
+          "description": "Monday of week 1 (04 §2)."
+        },
+        "race_date": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "W": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Whole weeks from plan_start to race week inclusive; null for rolling H0 plans."
+        },
+        "horizon": {
+          "$ref": "common.schema.json#/$defs/horizon"
+        },
+        "published_until": {
+          "$ref": "common.schema.json#/$defs/date"
+        },
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "start_week",
+              "n_weeks"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "$ref": "common.schema.json#/$defs/phase_type"
+              },
+              "start_week": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "n_weeks": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "season_index": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "taper_weeks_n": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "v_ref_s": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "lr_ref_s": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "pre_taper_runs": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Rounded-down mean runs/week of the 3 weeks before taper (INV-08)."
+        },
+        "pre_taper_had_e3": {
+          "type": "boolean"
+        },
+        "peak_lr_s": {
+          "type": "integer"
+        },
+        "peak_lr_dist_m": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "race_fuel_g_h": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "NUT-020 output (INV-18); null when no race fuelling plan applies or NUT-002 suppresses it."
+        },
+        "drink_ml_h": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "weeks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/week"
+          }
+        }
+      }
+    },
+    "week": {
+      "type": "object",
+      "required": [
+        "index",
+        "start",
+        "phase",
+        "load_kind",
+        "load_ordinal",
+        "is_deload",
+        "taper_k",
+        "is_race_week",
+        "planned_time_s",
+        "lr_s",
+        "runs",
+        "key_session_count",
+        "e3_touches",
+        "hard_time_s",
+        "frozen",
+        "sessions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "start": {
+          "$ref": "common.schema.json#/$defs/date",
+          "description": "Monday."
+        },
+        "iso_week": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-W[0-9]{2}$"
+        },
+        "phase": {
+          "$ref": "common.schema.json#/$defs/phase_type"
+        },
+        "season_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "phase_week_index": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based week inside its phase (v5.2)."
+        },
+        "load_kind": {
+          "enum": [
+            "loading",
+            "deload",
+            "taper",
+            "race",
+            "transition",
+            "rtr",
+            "start_ladder",
+            "sharpen",
+            "maintain"
+          ],
+          "description": "INV-04 compares weeks of the same load_kind and load_ordinal (parent_week). ONBOARD, BASE, BUILD and SPECIFIC non-deload weeks are 'loading' (v5.2)."
+        },
+        "load_ordinal": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "k-th week of this load_kind in the season."
+        },
+        "is_deload": {
+          "type": "boolean"
+        },
+        "taper_k": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "is_race_week": {
+          "type": "boolean"
+        },
+        "kind": {
+          "enum": [
+            "normal",
+            "maintenance"
+          ]
+        },
+        "planned_time_s": {
+          "$ref": "common.schema.json#/$defs/seconds",
+          "description": "Sum of planned_duration_s of the week's sessions EXCLUDING the goal race (v5.2, INV-11)."
+        },
+        "planned_dist_m": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "lr_s": {
+          "$ref": "common.schema.json#/$defs/seconds",
+          "description": "Planned long-run duration (0 when the week has no long run)."
+        },
+        "runs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Running sessions in the week, goal race included (INV-21)."
+        },
+        "quality_max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "key_session_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "e3_touches": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sessions with a segment at E3 or E4 (INV-08, LOD-051)."
+        },
+        "has_e3_touch": {
+          "type": "boolean"
+        },
+        "hard_time_s": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "E3 + E4 segment time (LOD-033)."
+        },
+        "e2_time_s": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "easy_time_s": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "frozen": {
+          "type": "boolean"
+        },
+        "log_state": {
+          "enum": [
+            "logged",
+            "partial",
+            "unlogged",
+            "future"
+          ]
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/session"
+          },
+          "description": "Sorted by (date, slot order long < key < easy < strides < strength, id)."
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "required": [
+        "id",
+        "date",
+        "module_id",
+        "kind",
+        "is_run",
+        "is_long_run",
+        "is_goal_race",
+        "is_key",
+        "is_hard",
+        "effort_target",
+        "segments",
+        "planned_duration_s",
+        "planned_distance_m",
+        "expected_duration_s",
+        "pace_range",
+        "hr_zone",
+        "hr_source",
+        "run_walk",
+        "run_walk_ratio",
+        "ladder",
+        "why_message",
+        "rule_ids",
+        "status",
+        "in_published_window"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date": {
+          "$ref": "common.schema.json#/$defs/date"
+        },
+        "weekday": {
+          "$ref": "common.schema.json#/$defs/weekday"
+        },
+        "module_id": {
+          "$ref": "common.schema.json#/$defs/module_id"
+        },
+        "kind": {
+          "enum": [
+            "easy",
+            "run_walk",
+            "long",
+            "key",
+            "test",
+            "race",
+            "taper_touch",
+            "strength",
+            "cross_training",
+            "ladder"
+          ]
+        },
+        "is_run": {
+          "type": "boolean"
+        },
+        "is_long_run": {
+          "type": "boolean"
+        },
+        "is_peak_long_run": {
+          "type": "boolean"
+        },
+        "is_goal_race": {
+          "type": "boolean"
+        },
+        "is_race": {
+          "type": "boolean"
+        },
+        "is_key": {
+          "type": "boolean",
+          "description": "Fills a key-session slot (counts toward week.key_session_count)."
+        },
+        "is_hard": {
+          "type": "boolean",
+          "description": "Hard day for spacing (SES-004, INV-17, v5.2): any segment with effort_rank ≥ E3 (strides E5 excluded, SES-021), or the long run (v5.2 choice, owner Q2)."
+        },
+        "is_test": {
+          "type": "boolean"
+        },
+        "test_for": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "node": {
+              "$ref": "common.schema.json#/$defs/node"
+            },
+            "level": {
+              "type": "integer"
+            }
+          }
+        },
+        "is_extension": {
+          "type": "boolean"
+        },
+        "is_floor_bound": {
+          "type": "boolean"
+        },
+        "is_b2b_pair": {
+          "type": "boolean"
+        },
+        "pair_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "effort_target": {
+          "$ref": "common.schema.json#/$defs/effort",
+          "description": "Highest segment effort (strides E5 do not raise it above the base run)."
+        },
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "common.schema.json#/$defs/segment"
+          }
+        },
+        "dose_step": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Index into ses.dose.<module>.steps (v5.2)."
+        },
+        "prescription": {
+          "enum": [
+            "time",
+            "distance",
+            "ladder"
+          ]
+        },
+        "planned_duration_s": {
+          "$ref": "common.schema.json#/$defs/seconds",
+          "description": "Time target (time prescription) or time stop (distance prescription); time on feet incl. walk breaks."
+        },
+        "planned_distance_m": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Distance target, or the 'whichever comes first' distance stop of a time-prescribed run (05 §3); null for ladder sessions and when L30_eff_dist is undefined. INV-01 checks it."
+        },
+        "floor_extension": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "to_distance_m",
+            "max_duration_s"
+          ],
+          "properties": {
+            "to_distance_m": {
+              "type": "integer"
+            },
+            "max_duration_s": {
+              "type": "integer"
+            }
+          },
+          "description": "Floor-bound runs (03 §2b): 'if you have not reached {floor} km, continue to it, at most {max}'. INV-02 checks max_duration_s too."
+        },
+        "expected_duration_s": {
+          "$ref": "common.schema.json#/$defs/seconds",
+          "description": "LOD-017 expected duration (real logged speed, no margin)."
+        },
+        "pace_range": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "fast_s_per_km",
+            "slow_s_per_km"
+          ],
+          "properties": {
+            "fast_s_per_km": {
+              "type": "integer"
+            },
+            "slow_s_per_km": {
+              "type": "integer"
+            },
+            "effort": {
+              "$ref": "common.schema.json#/$defs/effort"
+            }
+          }
+        },
+        "hr_zone": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "low_bpm": {
+              "type": "integer"
+            },
+            "high_bpm": {
+              "type": "integer"
+            }
+          }
+        },
+        "hr_source": {
+          "enum": [
+            "hrmax_measured",
+            "lthr_measured",
+            null
+          ]
+        },
+        "run_walk": {
+          "type": "boolean"
+        },
+        "run_walk_ratio": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/run_walk_ratio"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ladder": {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "none",
+                "rtr",
+                "start"
+              ]
+            },
+            "rung": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^(S[1-9]|R[0-5])$"
+            }
+          }
+        },
+        "fuel_target_g_h": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Fuelling-practice target (NUT-010); null when not a practice run or NUT-002 suppresses numbers."
+        },
+        "why_message": {
+          "$ref": "common.schema.json#/$defs/message_instance"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/message_instance"
+          }
+        },
+        "rule_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/rule_id"
+          }
+        },
+        "grade_label": {
+          "enum": [
+            "well supported by research",
+            "some research support",
+            "common coaching practice",
+            "our cautious choice, not tested",
+            "not known",
+            null
+          ]
+        },
+        "status": {
+          "enum": [
+            "planned",
+            "done",
+            "partial",
+            "missed",
+            "replaced",
+            "unlogged"
+          ]
+        },
+        "in_published_window": {
+          "type": "boolean"
+        },
+        "test_declined": {
+          "type": "boolean",
+          "description": "The runner skipped this level test (v5.2)."
+        }
+      }
+    }
+  }
+}

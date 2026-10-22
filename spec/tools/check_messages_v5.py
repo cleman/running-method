@@ -75,5 +75,22 @@ for rr in recs:
     if ms & age_msgs and not re.search(r"age_(low|high)\(", rr["condition"] or ""):
         l8.append(rr["id"] + " emits an age message without an age_low/age_high condition")
 check("L8 age messages only from age_low/age_high conditions, birth fields never unknown (static part; runtime part TST-103)", l8)
+# L9 (v5.2): placeholders passed by a record's emit_message exist in the message text
+ph_bad = []
+rowmap = {r[0]: r for r in rows}
+for rr in recs:
+    if not rr.get("action"): continue
+    for a in walk(rr["action"]):
+        if a.get("op") == "emit_message" and a.get("placeholders"):
+            txt = rowmap.get(a["msg"], ("", "", "", ""))[2]
+            for name in a["placeholders"]:
+                if "{" + name + ":" not in txt: ph_bad.append((rr["id"], a["msg"], name))
+check("L9 placeholders passed by records missing from the message text (v5.2)", ph_bad)
+# L10 (v5.2): every message id named in a module text, 07 or 12 is defined (module copies are non-normative, ids are not)
+import glob as _g
+named = set()
+for mf in _g.glob(os.path.join(V, "[0-9][0-9]-*.md")):
+    named |= set(re.findall(r"MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*(?![-*A-Z0-9])", open(mf, encoding="utf-8").read()))
+check("L10 message ids named in module texts but not defined in messages.md (v5.2)", sorted(m for m in named if m not in defined and not m.endswith("-")))
 print("\nRESULT:", "FAIL " + ", ".join(fails) if fails else "ALL MESSAGE CHECKS PASS")
 sys.exit(1 if fails else 0)

@@ -1,4 +1,4 @@
-# 01 — Inputs and screening (v5.1; v1 author A, revised by the architect after plenary rounds 1–2)
+# 01 — Inputs and screening (v5.2; v1 author A, revised by the architect after plenary rounds 1–2)
 
 Serves criteria 2, 7, 12. Rules INP/SCR/CTX-001…099, priorities `nnn` 050–099. Runs at 07 S0 (normalise), S1 (gate, with 10), S2 (tolerance tier, modifiers); hands symptoms to 10, `tol_tier` to 02/05.
 
@@ -25,6 +25,7 @@ Every field not in `inp.no_unknown_fields` accepts "I don't know" (INP-001; post
 | long_run_day | "Which day suits your longest run?" | INP-008 | placement (06) |
 | run_walk_preference | "Would you like to mix running and walking?" | INP-008 | run-walk modules (06) |
 | preset_preference | "Do you follow a named method?" | INP-008 | S5 preset |
+| level_tests_opt_out (v5.2) | "Would you rather skip level tests? Your training will show when you are ready." (settings, default no) | no | SES-012 plans no test; SES-025 credits levels from training |
 | night_shift_dates[] (v4: a dated roster, any day of the week, editable weeks ahead) | "Do you work night shifts? Enter your roster." | none | CTX-005; the feasibility dry run excludes post-shift dates for long and key sessions (FEA-031, p1-B R9) |
 
 ### 1.2 `OnboardingClaim` (all `estimated`)

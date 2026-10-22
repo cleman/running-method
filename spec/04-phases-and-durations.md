@@ -1,4 +1,4 @@
-# 04 — Phases and durations (v5, architect)
+# 04 — Phases and durations (v5.2, architect)
 
 Serves criteria 3 (any duration, phase decomposition, insufficient time), 10 (phase templates as modules), 5 (deterministic). Rule range: PHS-001…099. Parameters: `phs.*`, `taper.*`, `deload.*` in `parameters.md`.
 
@@ -22,6 +22,12 @@ Each phase is a `PhaseTemplate` (12 §2). **Phases are time-boxed; the "Exit che
 
 Evidence: shared core of proven plans (mostly easy, 1–3 key sessions, long run, rising specificity, taper) [hearing-1 §2, CORROBORATED]; no periodisation model is superior [wg1 §5, CORROBORATED] so the linear base→build→specific order is a convention, chosen because it matches the corpus of published plans [wg2 §2, CORROBORATED as description]; Koop ultra order "far = intense, near = specific" [wg2 §4, CREDIBLE]; taper keeps intensity and frequency, volume −41–60% [wg1 §5; wg2 §3, CORROBORATED]; maintenance with ≥ 2 sessions/week and intensity kept holds VO2max ≤ ~15 weeks but not long-race durability [wg1 §5, CORROBORATED / UNKNOWN].
 
+**Phase sub-structure (v5.2).** Some modules and rules name part of a phase. One definition serves them all (06 SES-001's phase test, 11 NUT-010):
+- **"BASE (late)"** = the weeks of the BASE phase (ONBOARD weeks excluded) whose index inside the phase is > ⌊n/2⌋, where n is the BASE length: the second half, and the only week of a 1-week BASE. Path `week.phase_part = 'late'`.
+- **"BUILD (last third)"** = the last ⌈n/3⌉ weeks of BUILD. Path `week.phase_part = 'last_third'`.
+- **"SPECIFIC (last 2–6 wk)"** (SES-M-023) = SPECIFIC weeks with at most 6 weeks to the race and at least 2.
+A module whose allowed phases name a part (e.g. SES-M-008 "BASE (late)–SPECIFIC") is a candidate in that part of the first phase and in the whole of the later phases.
+
 ## 2. Horizon classes
 
 `W` = whole weeks from plan start (Monday of the first full week; a partial first week is an ONBOARD/BASE stub) to race week inclusive. Without a race date the plan is rolling (H0).
@@ -42,10 +48,10 @@ Inputs: `W`, `distance`, `goal_type`, `FeasibilityResult.weeks_needed` (03: `bas
 0. **Never-runners (v3).** The start ladder (10 §4b, ≥ 9 weeks at 3 runs) replaces RTR/ONBOARD in P0. **No deload is placed inside the start ladder** (v4, p1-C R13): the ladder's repeatable rungs are its recovery mechanism, and the deload counter starts at ladder exit.
 0. **Short finish goals (v2, Room A R4).** For a 5K/10K `finish` goal whose required levels add no THR, VO2 or MSP level: `build_min = specific_min = 0` and `T = taper.weeks.short_finish` (1). Empty phases no longer inflate the weeks needed; all weeks between P0 and the taper are BASE.
 1. **Taper.** `T = taper.weeks[distance]` (5K/10K/half 2, marathon 3, 50K/100K 3). If `W ≤ 4`: `T = taper.weeks_short[distance]` (1 for ≤ half; 2 for marathon/ultra if W ≥ 3, else 1). The RACE week is the last taper week.
-2. **Front phases.** `P0 = rtr_needed + max(0, onboard_needed − rtr_needed)`: return-ladder weeks count toward ONBOARD (a novice with no history enters the ladder at R1 and does not also repeat ONBOARD; RESOLUTIONS A9). ONBOARD weeks also count as BASE weeks for volume; they differ only in effort-only prescription.
+2. **Front phases.** `P0 = rtr_needed + max(0, onboard_needed − rtr_needed)`: return-ladder weeks count toward ONBOARD (a novice with no history enters the ladder at R1 and does not also repeat ONBOARD; RESOLUTIONS A9). ONBOARD weeks also count as BASE weeks for volume; they differ only in effort-only prescription. **v5.2:** they are therefore part of `B` (step 5) and of 03's slack count, never added on top.
 3. **Remaining** `R = W − T − rtr_needed`. Taper weeks are whole weeks; a preset that prescribes a shorter taper (Hansons ~10 days) expresses it through `taper.cut_profile` inside 2 weeks (05).
 4. **Specific.** `S = min(phs.specific_target[distance], max(phs.specific_min[distance], R − base_needed − phs.build_min))`.
-5. **Base.** `B = max(base_needed, onboard_needed)`.
+5. **Base.** `B = max(base_needed, onboard_needed − rtr_needed)` (v5.2: ONBOARD weeks not already covered by a ladder sit inside BASE; a start-ladder plan does not add them again. 03 §4 counts slack the same way).
 6. **Build.** `U = R − B − S`. If `U > phs.build_max[distance]`, the excess goes to BASE (H3/H4) or a new season starts (H5).
 7. **Infeasible** if `U < 0` with `S = specific_min` and `B = base_needed` → return reason `PHASES_DO_NOT_FIT` to 03; 07 then fails closed with goal-level repairs. H1 is exempt from steps 4–6 (SHARPEN): it is feasible only if the *current* state already meets the goal demand (03).
 7b. **Re-plans (v2, F-21).** When 08 re-allocates phases mid-season, completed weeks are frozen. Each phase minimum is reduced by the weeks already spent in it, so a done BUILD or SPECIFIC is never added again (03 FEA-025).
@@ -77,8 +83,8 @@ RULE PHS-010 | priority T4.210 | when W ≤ 4 | then use SHARPEN: hold volume �
 RULE PHS-011 | priority T4.211 | when W ≤ 4 and the current state does not meet the goal demand | then do not generate a goal plan; return goal-level repairs (07 §6) | because a squeezed plan concentrates load (catch-up spike) | evidence wg4 §1 Frandsen, CREDIBLE (one cohort; several summaries) (observational); opening-contrarian §1.2 | basis design_default | default? yes
 RULE PHS-012 | priority T4.212 | when W > 52 | then split into seasons as §3 step 8 and plan only the first season in sessions; later seasons are outlines re-planned at each season start from logged results; H4 (25–52 weeks) is one macrocycle | because multi-year improvement rates are unknown; a deterministic split keeps the dry run and the plan identical (p1-A R6) | evidence factdesk1 §6, UNKNOWN; hearing-1 §2, UNKNOWN | basis design_default | default? yes
 RULE PHS-016 | priority T5.218 | when a non-final season ends in a test, not a race | then schedule one deload week after it instead of a TRANSITION, so L30_eff does not decay across the boundary | because a test is not a race; a transition would force the long run to regrow every season (p1-A case 2) | evidence p1-A R6; hearing-1 §2, CORROBORATED (transition after races) | basis design_default | default? yes
-RULE PHS-013 | priority T5.214 | when a goal race is completed (or abandoned) | then insert TRANSITION of phs.transition_weeks[distance] before any new BASE | because recovery after racing is universal practice | evidence hearing-1 §2 shared core, CORROBORATED (structure); length design default | basis design_default | default? yes
-RULE PHS-014 | priority T5.215 | when MAINTAIN has run maint.max_weeks | then schedule a field test and warn that long-race durability is not preserved | because maintenance evidence covers VO2max ≤ ~15 weeks in general populations only | evidence wg1 §5 Spiering, CORROBORATED / UNKNOWN for long races | basis design_default | default? yes
+RULE PHS-013 | priority T5.214 | when a goal race is completed (or abandoned), or nothing is logged within log.contemporaneous_window_h after the race date (v5.2: treated as run) | then insert TRANSITION of phs.transition_weeks[distance] before any new BASE | because recovery after racing is universal practice | evidence hearing-1 §2 shared core, CORROBORATED (structure); length design default | basis design_default | default? yes
+RULE PHS-014 | priority T5.215 | when MAINTAIN has run maint.max_weeks | then schedule a field test (SES-014's choice of test) in that week, warn that long-race durability is not preserved (MSG-PHS-MAINT-LIMIT) and start a new MAINTAIN block unless the runner sets a goal; it never switches to BASE by itself (v5.2, owner Q9) | because maintenance evidence covers VO2max ≤ ~15 weeks in general populations only | evidence wg1 §5 Spiering, CORROBORATED / UNKNOWN for long races; v5.2 new block after the test, no automatic BASE: design choice, UNKNOWN | basis design_default | default? yes
 RULE PHS-015 | priority T5.216 | when goal.family = ultra | then order BUILD emphasis VO2 → THR → steady, and SPECIFIC emphasis DUR/MSP/FUEL | because Koop's intensity-first sequence is the documented ultra practice | evidence wg2 §4 impl. 6, CREDIBLE | basis design_default | default? yes
 ```
 
@@ -100,6 +106,8 @@ Source of `rules.json` (12 §3.2). One JSON object per line: `id`, `condition` (
 {"id": "PHS-004", "condition": "week.is_deload && week.weeks_to_phase_boundary <= 1", "on_unknown": "fire", "action": {"op": "move_deload", "target": "week", "expr": "phase_last_week(week.phase)"}}
 {"id": "PHS-005", "condition": "state.deload_every_ctx_set == true", "on_unknown": "fire", "action": {"op": "set", "target": "override.deload.every", "expr": "p('deload.every_ctx')"}}
 {"id": "PHS-006", "condition": "week.is_deload && week.loading_weeks_since_recovery < p('deload.min_gap_weeks')", "on_unknown": "fire", "action": {"op": "drop_deload", "target": "week", "unless": "week.unmoved_position_respects_gap"}}
+{"id": "PHS-013", "condition": "event.type == 'goal_race_closed'", "on_unknown": "fire", "action": {"op": "insert_phase", "phase": "TRANSITION", "rung_expr": "null", "weeks_expr": "p('phs.transition_weeks')[goal.distance]"}}
+{"id": "PHS-014", "condition": "week.phase == 'MAINTAIN' && week.weeks_in_phase == p('maint.max_weeks')", "on_unknown": "skip", "action": {"op": "schedule_session", "module_expr": "(state.levels.VO2 >= 1 && state.levels.THR >= 1) ? 'SES-M-020' : (prereqs_hold(module('SES-M-019'), week.start) ? 'SES-M-019' : 'SES-M-018')", "week_expr": "week.start", "then": [{"op": "emit_message", "msg": "MSG-PHS-MAINT-LIMIT"}, {"op": "insert_phase", "phase": "MAINTAIN", "rung_expr": "null", "weeks_expr": "p('maint.max_weeks')"}]}}
 {"id": "PHS-010", "condition": "plan.W <= p('phs.sharpen_max_weeks')", "on_unknown": "skip", "action": {"op": "set", "target": "plan.phase_sequence", "expr": "['SHARPEN', 'TAPER']", "then": [{"op": "cap", "target": "week.planned_time_s", "expr": "state.V28_week_s"}]}}
 {"id": "PHS-011", "condition": "plan.W <= p('phs.sharpen_max_weeks') && !demand.met_by_current_state", "on_unknown": "fire", "action": {"op": "fail_closed", "reasons_expr": "['PHASES_DO_NOT_FIT']", "then": [{"op": "generate_options", "order": ["move_date", "lower_goal", "shorter_distance", "base_plan"]}]}}
 ```
