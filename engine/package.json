@@ -1,0 +1,21 @@
+{
+  "name": "running-method-engine",
+  "version": "0.1.0",
+  "description": "Plan generator, validator and rule engine for spec v5.2 (pure functions; Node and browser).",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "build": "tsc -p tsconfig.build.json",
+    "generate": "node cli.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^22.15.0"
+  }
+}
