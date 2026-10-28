@@ -73,7 +73,7 @@ export function planToResult(p: PlanExp, input: Input): Result {
     };
   });
   return {
-    schema_version: 'v5.2', kind: 'plan', ruleset_version: 'v5.2', registry_version: 'v5.2', today: input.today, messages: [], fired_rules: [], engine_state: {}, flags: [],
+    schema_version: 'v5.3', kind: 'plan', ruleset_version: 'v5.2', registry_version: 'v5.2', today: input.today, messages: [], fired_rules: [], engine_state: {}, flags: [],
     gate: 'proceed',
     feasibility: { goal_id: 'goal-1', verdict: p.verdict as 'feasible', horizon: 'H3', weeks_available: p.day0.length, weeks_needed: p.weeks_needed, slack: p.slack, reasons: p.reasons, labels: p.labels, demand: p.demand, predicted_band: { model_id: 'riegel', point_s: null, p_race_s: p.band.p_race_s, fast_edge_s: p.band.fast_edge_s, slow_edge_s: p.band.slow_edge_s, b_fast: p.band.b_fast, b_slow: p.band.b_slow, confidence: 'measured' } },
     validation: { pass: true, passes_used: 0, violations: [] }, ledger: [],

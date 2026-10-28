@@ -41,4 +41,11 @@ export const KINDS: Record<string, KindExp> = {
   'mvp-10k-time-12wk': { kind: 'plan', verdict: 'feasible', source: 'oracle/plans/mvp-10k-time-12wk.md', status: 'firm' },
   'mvp-hm-time-14wk': { kind: 'plan', verdict: 'feasible', source: 'oracle/plans/mvp-hm-time-14wk.md', status: 'firm' },
   'tst066-c25k': { kind: 'plan', verdict: 'stretch', source: '13 §5 (same structure as P1)', status: 'assumed', oq: 'OQ-19' },
+  // v5.3 advanced personas (proposal v5.3 §6, 14 TST-133). The owner's verdict is the one proposal §1 reports for the
+  // same goal and band (not re-derived here: 'assumed'). The inconsistent runner is cautious; its kind is not fixed.
+  'v53-clem': { kind: 'plan', verdict: 'stretch', source: 'proposal v5.3 §1 (stretch, target inside the fast band)', status: 'assumed' },
+  'v53-clem-confirmed': { kind: 'plan', verdict: 'stretch', source: 'proposal v5.3 §1; 03 §3 (a declared anchor counts as estimated for prediction, INP-005)', status: 'assumed' },
+  'v53-marathon-3h': { kind: 'plan', source: 'oracle v5.3 persona (14 TST-133)', status: 'firm' },
+  'v53-5k-19min-5runs': { kind: 'plan', source: 'oracle v5.3 persona (14 TST-133)', status: 'firm' },
+  'v53-masters-55-ag70': { kind: 'plan', source: 'oracle v5.3 persona (14 TST-133)', status: 'firm' },
 };

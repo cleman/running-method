@@ -10,7 +10,11 @@ export interface Segment {
   duration_s?: number;
   distance_m?: number;
   repeats: number;
-  recovery?: { effort: Effort; duration_s: number };
+  recovery?: { effort: Effort; duration_s: number; show_distance_m?: number };
+  /** v5.3 SES-032: card distance of each repeat (duration_s stays the prescription). */
+  show_distance_m?: number;
+  /** v5.3 SES-032: rounding outside ses.dist_round_tol_pct; time form kept with "about" this many metres. */
+  show_about_m?: number;
 }
 
 export interface Session {
@@ -34,6 +38,8 @@ export interface Session {
   effort_target: Effort;
   segments: Segment[];
   dose_step?: number | null;
+  /** v5.3 SES-031 */
+  prescription_form?: 'time' | 'distance' | 'both';
   prescription?: 'time' | 'distance' | 'ladder';
   planned_duration_s: number;
   planned_distance_m: number | null;
@@ -57,6 +63,10 @@ export interface Week {
   load_kind: string;
   load_ordinal: number;
   is_deload: boolean;
+  /** v5.3 EXP-003 */
+  is_calibration?: boolean;
+  /** v5.3 SES-026 */
+  long_run_form?: 'a' | 'b' | null;
   taper_k: number | null;
   is_race_week: boolean;
   planned_time_s: number;

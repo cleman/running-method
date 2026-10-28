@@ -10,6 +10,7 @@
 import { P } from './params.js';
 import { addDays, ageHigh, ageLow, daysBetween, weekday } from './dates.js';
 import type { Effort, Input, LogEntry, Plan, Result, Segment, Session, Week } from './types.js';
+import { anchorConfidence, deriveExp } from './v53.js';
 
 export type Severity = 'violation' | 'warning' | 'not_checked';
 export interface Finding {
@@ -73,7 +74,10 @@ export function claimL30(input: Input): { time_s: number | null; dist_m: number 
     const ratio = (c.runs_per_week ?? 2) <= 1 ? 1.0 : P['claim.l30_week_ratio_max'];
     d = Math.min(d, Math.floor(ratio * c.weekly_distance_m));
   }
-  if (t != null) {
+  if (t != null && deriveExp(input).experienced) {
+    // v5.3 GEN-011 on the experienced path: exp.l30_discount × claim, no TOL cap
+    t = Math.max(loggedT, Math.floor(0.9 * c.L30_duration_s));
+  } else if (t != null) {
     // TOL from claims, capped at cmp.self_report_level_cap[TOL] = 2 (CMP-004)  — SPEC-QUESTION OQ-07
     const tol = Math.min(2, tolFrom((c.weekly_time_s ?? 0) / 60, t / 60));
     const cap = (P['claim.l30_cap_by_tol'] as Record<number, number>)[tol];
@@ -133,7 +137,9 @@ export function effortTimes(s: Session): { hard: number; e2: number; easy: numbe
   }
   return { hard, e2, easy, known };
 }
-const hasHardSegment = (s: Session) => s.segments.some((g) => g.effort === 'E3' || g.effort === 'E4');
+export const hasHardSegment = (s: Session) => s.segments.some((g) => g.effort === 'E3' || g.effort === 'E4');
+/** v5.3: a long run that is not all-E1 (E0 walk breaks allowed) holds quality (SES-004, SES-026 form b). */
+export const hasQualityLongSegment = (s: Session) => s.segments.some((g) => effortRank(g.effort) >= 2);
 
 // ---------- the checks ----------
 
@@ -175,6 +181,8 @@ export function checkPlan(input: Input, result: Result, plan: Plan): Finding[] {
   const byDate = new Map<string, Session[]>();
   for (const s of sessions) byDate.set(s.date, [...(byDate.get(s.date) ?? []), s]);
   const prof = input.profile;
+  // v5.3 SES-004 / INV-17: on the experienced path an all-E1 long run is not a hard day.
+  const expPath = deriveExp(input).experienced;
   const gap = daysSinceLastRun(input);
   const gapBand = gap != null && gap >= P['gap.reduce_trigger_days'];
 
@@ -208,7 +216,7 @@ export function checkPlan(input: Input, result: Result, plan: Plan): Finding[] {
       const segT = s.segments.reduce((a, g) => { const t = segmentTimes(g); return t ? a + t.work + t.recovery : a; }, 0);
       if (s.is_run && s.segments.every((g) => g.duration_s != null) && s.prescription !== 'distance' && segT !== s.planned_duration_s)
         out.push({ inv: 'INV-11', severity: 'warning', week: w.index, session: s.id, note: `segments sum to ${segT} s, planned_duration_s ${s.planned_duration_s}` });
-      const hardDay = hasHardSegment(s) || s.is_long_run;
+      const hardDay = hasHardSegment(s) || (s.is_long_run && (!expPath || hasQualityLongSegment(s)));
       if (s.is_run && !s.is_goal_race && s.is_hard !== hardDay) v('INV-17', `session ${s.id} is_hard=${s.is_hard} but SES-004 gives ${hardDay}`, { week: w.index, session: s.id });
     }
   }
@@ -303,8 +311,8 @@ export function checkPlan(input: Input, result: Result, plan: Plan): Finding[] {
   }
 
   // --- INV-15 paces only from a measured anchor ≤ anchor.max_age_days ---
-  const measuredAnchors = (input.anchors ?? []).filter((a) => ['race', 'field_test', 'cs_test'].includes(a.kind) && a.distance_m && a.time_s &&
-    Date.parse(a.entered_at) <= Date.parse(`${addDays(a.date, 1)}T00:00:00Z`) + P['log.contemporaneous_window_h'] * 3600e3 + 14 * 3600e3);
+  // v5.3: a declared anchor (INP-005) also sets paces on the experienced path.
+  const measuredAnchors = (input.anchors ?? []).filter((a) => { const c = anchorConfidence(a); return c === 'measured' || (c === 'declared' && expPath); });
   for (const s of sessions) {
     if (!s.pace_range) continue;
     if (plan.pace_mode === 'effort_only') v('INV-15', `${s.id} has a pace range in an effort-only plan`, { session: s.id });
@@ -331,7 +339,7 @@ export function checkPlan(input: Input, result: Result, plan: Plan): Finding[] {
   } else nc('INV-16', 'progression profile not reported in result.state; ceiling unknown');
 
   // --- INV-17 no two hard days back to back (method_default declares none allowed) ---
-  const hardDates = [...new Set(sessions.filter((s) => s.is_run && !s.is_goal_race && (hasHardSegment(s) || s.is_long_run)).map((s) => s.date))].sort();
+  const hardDates = [...new Set(sessions.filter((s) => s.is_run && !s.is_goal_race && (hasHardSegment(s) || (s.is_long_run && (!expPath || hasQualityLongSegment(s))))).map((s) => s.date))].sort();
   for (let i = 1; i < hardDates.length; i++)
     if (daysBetween(hardDates[i - 1], hardDates[i]) === 1 && plan.preset_id === 'method_default')
       v('INV-17', `hard days on ${hardDates[i - 1]} and ${hardDates[i]}`);

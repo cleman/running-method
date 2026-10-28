@@ -1,4 +1,4 @@
-# Spec questions found while writing the oracle (v5.2)
+# Spec questions found while writing the oracle (v5.2; v5.3 additions OQ-27 … OQ-42)
 
 Each item names where the spec is too vague or contradicts itself for a check, what the oracle **assumed**,
 and where the assumption is used (`oq` in `src/expected/*.ts`, notes in `src/invariants.ts` /
@@ -133,6 +133,79 @@ projected into future weeks of the day-0 plan, so module choice in the day-0 pla
   (ladder or effort-only); reported `not_checked`.
 - **OQ-26** Inputs `profile.training_age_years` take band values only (0, 0.15, 0.6, 2, 5, 12); the oracle's grid
   "novice" uses 0.15.
+
+## v5.3 (experienced path, plan quality, distance forms) — added 28 Oct 2026
+
+Found while writing the five advanced personas, the TST-133/134 checks (`src/quality.ts`) and the owner's hand plan
+(`plans/v53-clem-experienced.md`). Where two readings exist the checks accept both unless said otherwise.
+
+### High
+
+#### OQ-30 — "Long run never below 0.8 × the habitual long run outside taper" fails in every deload week (decision)
+- **Spec:** proposal §6 / 14 TST-133 exclude only the taper. LOD-040 cuts the deload long run by 25 %: the owner's 149-min
+  long run becomes 111 min < 0.8 × 166 = 133 min in weeks 4, 8, 12, 16. Either the property or the deload cut is wrong
+  for experienced runners.
+- **Assumed:** a deload week below the line is a **warning**, any other week a violation. **Recommended:** exclude deload
+  weeks from the property in TST-133 (a 25 % lighter long run every fourth week is ordinary practice).
+
+#### OQ-34 — How many runs does a week plan? (decision; SES-007's three-key condition depends on it)
+- **Spec:** SES-007 gives 3 key sessions "when the week plans ≥ 6 runs (long run included)"; 12 §2b.4 places easy runs
+  "up to the week's run count"; no rule sets that count below `max_runs_per_week` (the owner: ≤ 12 runs, 7 days, 7
+  claimed runs). The 3-key condition is therefore not decidable from the text.
+- **Assumed:** one run per available day, at most `max_runs_per_week` (the owner: 7; the marathoner and the masters
+  runner: 6; the 5K runner: 5). **Recommended:** state the run count (e.g. min(max_runs_per_week, available days,
+  max(claimed runs, runs_req))) in 05 §5.
+
+#### OQ-35 — "At least two different hard-session families every 2 weeks": which families, which weeks? (decision)
+- **Spec:** proposal §6 has no definition; 06 §2d defines only two rotation families (`ses.family` THR, VO2); proposal §4
+  B3 lists eight (threshold, VO2 long reps, short reps, hills, fartlek, race pace, combination, long-run variants).
+  BASE weeks hold one key session (SES-007), so two BASE weeks of SES-M-008 always fail (owner: weeks 5–7; Q-E34).
+- **Assumed:** the eight B3 families; every pair of consecutive loading weeks with key sessions; a failing pair inside
+  BASE is a warning, in BUILD/SPECIFIC a violation. **Recommended:** name the families in 06 §2d and limit the property
+  to BUILD and SPECIFIC (or give BASE two keys on the experienced path, Q-E34).
+
+### Medium
+
+- **OQ-27 — Widening a declared pace range.** 03 §3b: "slow s/km × 1.02, rounded up to `pace.round_s`". Reading A widens
+  the already-rounded slow edge (owner E3 240 → 244.8 → **245**), reading B the raw edge (241.3 → 246.1 → **250**); E4
+  220 vs 225. Both accepted; the hand plan's cards use A. The track distances of the owner's plan are the same under both.
+- **OQ-28 — "Midpoint speed" of a range** (SES-032): of the rounded and widened range shown on the card, or of the raw
+  range; mean of the two edge speeds or speed of the mean pace. Assumed: mean of the edge speeds of the shown range; the
+  checker allows ± 2 % on the exact distance for the other readings.
+- **OQ-29 — Key session of a deload week on the experienced path.** SES-016: "each at its dose start". For a runner whose
+  first instance starts at the entry rung (SES-027), is the start the entry rung (owner: 5 × 8 min) or index 0
+  (3 × 5 min)? Assumed entry rung; index 0 accepted.
+- **OQ-31 — Masters ≥ 50 on the experienced path.** 05 §2 lists "masters ≥ 50" among the slow-profile triggers; v5.3 lifts
+  the slow profile only through GEN-014 and CTX-007. Is a 55-year-old experienced runner on the standard or the slow
+  profile? (Persona `v53-masters-55-ag70`; also deload every 3 weeks by CTX-004.) The oracle reads the profile the
+  result reports (INV-16) and does not decide it. Recommended: say it in 05 §2.
+- **OQ-32 — The previous week's long run in week 1.** SES-004 v5.3 counts "the previous week's long run" in the gap score.
+  In plan week 1 there is no previous plan week; the claim's last run (Sunday 1 Nov) is not said to be a long run.
+  Assumed: not counted (owner week 1 keys Mon/Thu); counted gives Tue/Thu; both accepted.
+- **OQ-33 — The volume baseline of QC-01.** Proposal: "confirmed history"; TST-133: "claimed history". Assumed the
+  claimed weekly time, outside deload, taper, race and transition weeks.
+- **OQ-37 — "The planned dose path rises over BUILD".** With rotation a module appears every 3–4 weeks, and the THR 3 top
+  rung of SES-M-008 is reached in BASE. Assumed: per module, the work of its BUILD loading instances never falls, and
+  at least one module grows over BUILD. A plan whose every module starts at its top rung would fail.
+- **OQ-38 — "The race's distance family = the goal's family"** (EXP-002, MSP): 09 families (5K and 10K are both
+  "short") or the same distance? Assumed 09 families. None of the five personas depends on it.
+- **OQ-39 — How much race-pace work in SPECIFIC (QC-04)?** Assumed at least one SES-M-011 or SES-M-005 in the phase. DST-018
+  asks for one every `dst.msp_every_weeks` (2); with the owner's paces ending in week 17 (Q-E36) race-pace sessions are
+  written by time only.
+- **OQ-40 — Injury answer not asked.** EXP-001: "injury_last_12m ≠ true, or injury_last_12w = false". With
+  `injury_last_12m = true` and `injury_last_12w = null` (not asked) the runner is assumed **not** eligible.
+
+### Low
+
+- **OQ-36 — The owner's training age.** `docs/v5.3-case/clem.json` holds `training_age_years: 10`, which is not a band
+  value of the schema (0, 0.15, 0.6, 2, 5, 12) and fails validation. "About 10 years" falls in the band "3–10 years" →
+  5 in the oracle fixtures. Either band gives the same plan (≥ `exp.training_age_min` 2).
+- **OQ-41 — Three key sessions that the budget or the placement cannot hold.** TST-133 says "3 when SES-007's conditions
+  hold"; SES-006 may still drop one (TID budget, placement). Assumed: fewer than SES-007 allows is a warning, fewer than
+  min(2, runner ceiling) a violation, more than allowed a violation.
+- **OQ-42 — GEN-022 inside EXP-001.** EXP-001 requires "no GEN-022 inconsistency"; GEN-022 lists a claimed result with
+  age-grade ≥ `claim.agegrade_confirm_pct` (80 %) as an inconsistency to confirm. Read literally, every runner at ≥ 80 %
+  is kept off the experienced path. Assumed: only GEN-022's volume clauses count (L30 > weekly distance); see Q-E38.
 
 ## Invariants the oracle cannot evaluate from one result
 

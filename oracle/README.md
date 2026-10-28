@@ -20,7 +20,7 @@
 | (c) metamorphic relations | `src/metamorphic.ts` — M-1…M-8 and TST-042a–h, each an input transformation + expected relation |
 | (d) hand values | `src/expected/hand-values.ts` (13, 14 §10e: Tom, Lea, Karim, Maya, red-team, Raj, Mia, Rose, Ben, Ana), `src/expected/kinds.ts` (result kind per persona) |
 | (e) two MVP plans | `plans/mvp-10k-time-12wk.md`, `plans/mvp-hm-time-14wk.md` (derivations) and `src/expected/mvp-plans.ts` (checkable) |
-| open questions | `SPEC-QUESTIONS.md` (OQ-01 … OQ-26) |
+| open questions | `SPEC-QUESTIONS.md` (OQ-01 … OQ-26; v5.3: OQ-27 … OQ-42) |
 
 Statuses on every expectation: **firm** (one reading), **conflict** (13 and the module text differ; both
 accepted, the report says which the engine took), **assumed** (depends on a named OQ).
@@ -59,6 +59,24 @@ ORACLE_ENGINE=engine/src/index.ts npx vitest run # against the generator (path r
 | `12-mvp-plans` | engine (replay: live) | the two hand plans, day-0 and as published each Monday |
 | `13-metamorphic` | live engine | TST-091 / TST-042 |
 | `14-grid` | live engine | TST-051 |
+
+## v5.3 additions (28 Oct 2026, Oracle session; `engine/` still never opened)
+
+| Task (handoff 7) | Where |
+|---|---|
+| Five advanced personas (TST-133) | `fixtures/v53-clem.json` (owner as typed: "official result?" unanswered → cautious + MSG-EXP-CONFIRM-Q), `v53-clem-confirmed.json` (the same, answered yes), `v53-marathon-3h.json`, `v53-5k-19min-5runs.json`, `v53-masters-55-ag70.json`, `v53-inconsistent-claims.json` (must stay cautious) |
+| Oracle's own v5.3 derivations | `src/v53.ts` (qualifying race, age-grade, EXP-001/002/006, pace ranges with the declared widening, track rounding), `src/v53-params.ts` (hand transcription of `parameters.md` §15b and the 06 §2d ladders; 34 items diffed against the registry, 0 differences on 28 Oct) |
+| Coach-quality and rendering checks | `src/quality.ts`: QC-01 … QC-08 (proposal §6, as restated by 14 TST-133), RD-01 … RD-04 (TST-134: track-friendly rounding, time stays the controlling quantity, effort-only → time, recoveries), EXP-P / EXP-002 / EXP-003 (path, levels, calibration) |
+| Hand-computed owner plan | `plans/v53-clem-experienced.md` (weeks 1–6 and BUILD week 9, arithmetic shown) and `src/expected/v53-clem-plan.ts` |
+| Invariants updated for v5.3 | `src/invariants.ts`: INV-17 (an all-E1 long run is not a hard day on the experienced path), INV-15 (declared anchors set paces there), GEN-011 (no TOL cap on L30_eff there) |
+
+| Test file | Needs | Checks |
+|---|---|---|
+| `04-v53-arithmetic` | — | parameter transcription; path, age-grade and levels of the six fixtures; owner paces and track distances under both readings; hand-plan sums; the v5.3 checker silent on the hand plan and firing on broken copies (one defect each) |
+| `15-v53-quality` | engine | every v5.3 persona: path + QC + RD properties; owner day-0 plan vs the hand plan, week by week (structure, then easy fill separately) |
+
+Severity: a property the spec contradicts itself on (QC-05 in deload weeks, QC-03 in BASE, QC-02 below the SES-007
+count) is a **warning**, so the report shows it without failing; see OQ-30, OQ-35, OQ-41.
 
 ## Week-by-week replay
 
