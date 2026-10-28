@@ -8,7 +8,7 @@ import { EFFORT_RANK } from '../rules/helpers.ts';
 import { type Spec, evalContext, openRecord, pnum, pval, roundDown } from '../context.ts';
 import { addDays, daysBetween, isoWeek, toDays, weekday, weekdayIndex, WEEKDAYS, type ISODate } from '../util/dates.ts';
 import { MODULES, type ModuleDef } from './modules.ts';
-import type { DerivedState } from './state.ts';
+import { l30PlanSources, type DerivedState } from './state.ts';
 import type { GateResult, FiredRule } from './gate.ts';
 import type { Feasibility, Layout, Availability } from './feasibility.ts';
 import { paceRange, type Demand } from './demand.ts';
@@ -67,7 +67,7 @@ export function keySegments(spec: Spec, mid: string, step: number, demand: Deman
   if (!Array.isArray(steps) || !steps.length) return null;
   const st = steps[Math.min(step, steps.length - 1)];
   if (mid === 'SES-M-012') {
-    const T = st.total_s!; const e3 = roundDown(T * (st.shares!.E3 ?? 0), 60), e2 = roundDown(T * (st.shares!.E2 ?? 0), 60);
+    const T = st.total_s!; const e3 = Math.round(T * (st.shares!.E3 ?? 0)), e2 = Math.round(T * (st.shares!.E2 ?? 0));   // 06 §2c: exact shares, no rounding stated
     return [{ effort: 'E1', role: 'main', duration_s: T - e3 - e2, repeats: 1 }, { effort: 'E2', role: 'work', duration_s: e2, repeats: 1 }, { effort: 'E3', role: 'work', duration_s: e3, repeats: 1 }];
   }
   if (mid === 'SES-M-011') {
@@ -91,7 +91,7 @@ function durationOf(segs: Segment[], speed: number): number {
   return segs.reduce((a, s) => a + (s.distance_m ? Math.ceil(s.distance_m / speed / 60) * 60 : segTime(s)), 0);
 }
 
-interface Slot { module: string; node: Node | null; rank: number; segments: Segment[]; step: number | null; isTest: boolean; strides: boolean; touch: boolean; ruleIds: string[] }
+interface Slot { module: string; node: Node | null; rank: number; segments: Segment[]; step: number | null; isTest: boolean; testFor?: { node: Node; level: number }; strides: boolean; touch: boolean; ruleIds: string[] }
 
 /** place_in_order key-day search (12 §2b.4): maximise the smallest gap between hard days, no consecutive hard days. */
 function chooseKeyDays(days: number[], lrDay: number | null, k: number, prevHard: number | null): number[] | null {
@@ -100,9 +100,11 @@ function chooseKeyDays(days: number[], lrDay: number | null, k: number, prevHard
   const combos = (arr: number[], n: number, start = 0, acc: number[] = []): number[][] => (n === 0 ? [acc] : arr.slice(start).flatMap((x, i) => combos(arr, n - 1, start + i + 1, [...acc, x])));
   for (const set of combos(cand, k)) {
     const hard = [...set, ...(lrDay !== null ? [lrDay] : [])].sort((a, b) => a - b);
-    const seq = prevHard !== null ? [prevHard - 7, ...hard] : hard;
+    // no two hard days on consecutive dates, also across the week boundary (SES-004)
+    if (prevHard !== null && hard.length && hard[0] - (prevHard - 7) <= 1) continue;
+    // the smallest gap is measured inside the Monday–Sunday week (12 §2b.4 place_in_order)
     let minGap = Infinity;
-    for (let i = 1; i < seq.length; i++) minGap = Math.min(minGap, seq[i] - seq[i - 1]);
+    for (let i = 1; i < hard.length; i++) minGap = Math.min(minGap, hard[i] - hard[i - 1]);
     if (minGap <= 1) continue;
     const score = minGap === Infinity ? 99 : minGap;
     if (score > bestScore) { best = set; bestScore = score; }
@@ -132,11 +134,10 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
   // history of planned runs for l30_time (LOD-011): claim/log sources plus every planned run, as day offsets from today
   const runs: { day: number; s: number; pre?: boolean }[] = [];
   const preUntil = st.gap_band ? daysBetween(input.today, L.planStart) + 7 : Infinity;   // Q-E24
-  if (st.L30_source === 'claim') runs.push({ day: -1, s: st.L30_eff_time_s, pre: true });     // Q-E19
+  for (const r of l30PlanSources(spec, st)) runs.push({ ...r, pre: true });
   // SPEC-QUESTION Q-E21: with L30 undefined (GEN-012) the first return-ladder rung has no denominator; its session time is
   // taken as the reference (dated the day before the plan), so the later rungs are bound by INV-02 against it.
   if (st.L30_source === 'undefined_rtr' && L.ladder.length) runs.push({ day: -1, s: L.ladder[0].total_s });
-  if (st.L30_source === 'log') for (const e of st.entries) if (e.is_run && e.measured && !e.flagged) runs.push({ day: -daysBetween(e.date, input.today), s: e.duration_s, pre: true });
   const dayOf = (d: ISODate) => daysBetween(input.today, d);
   const l30 = (d: ISODate) => { const x = dayOf(d); return Math.max(0, ...runs.filter(r => x - r.day >= 1 && x - r.day <= 30 && !(r.pre && x >= preUntil)).map(r => r.s)); };
 
@@ -144,11 +145,14 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
   let prevHard: number | null = null;
   let prevLR: { date: ISODate; s: number } | null = null;
   let pre_taper_had_e3 = false, pre_taper_runs = 0;
+  // a re-plan that starts inside the taper keeps the parent's pre-taper reference (SES-015, INV-08)
+  if (L.phases[0] === 'TAPER' && input.parent_plan) { pre_taper_had_e3 = input.parent_plan.pre_taper_had_e3; pre_taper_runs = input.parent_plan.pre_taper_runs ?? 0; }
   let lastKeyModule: string | null = null;
   let ladderIdx = 0;
   const phaseLen = (i: number) => { let a = i, b = i; while (a > 0 && L.phases[a - 1] === L.phases[i]) a--; while (b + 1 < L.phases.length && L.phases[b + 1] === L.phases[i]) b++; return { a, b, n: b - a + 1, pos: i - a + 1 }; };
   const onboardEnd = L.phases.lastIndexOf('ONBOARD');
   let ftScheduled = false;
+  const testsPlaced = new Set<string>();
   const fuelRequired = demand.expected_duration_s > 60 * P('fuel.required_above_min');
   const testsOff = input.profile.level_tests_opt_out === true;
 
@@ -197,7 +201,8 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
           why_message: { id: 'MSG-SES-RW' }, rule_ids: [ph === 'RTR' ? 'GEN-012' : 'SAF-086', 'SES-009'], effort_target: 'E1' });
         sessions.push(s);
       }
-      weeks.push(finishWeek(w, start, ph, cw, sessions, 0, isRaceWeek, P));
+      sessions.forEach((s, i) => { s.id = `w${w + 1 + L.indexOffset}-${i + 1}`; });
+      weeks.push(finishWeek(w + L.indexOffset, start, ph, cw, sessions, 0, isRaceWeek, P));
       for (const s of sessions) runs.push({ day: dayOf(s.date), s: s.planned_duration_s });
       continue;
     }
@@ -212,7 +217,7 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
     weekRoot.method_default_count = typeof mdc === 'number' ? mdc : 0;
     const r6 = runRecords([spec.rules.get('SES-006')], evalContext(spec, { ...ctx.roots, week: weekRoot as unknown as Value }, gate.overrides));
     let k = Number(composeTarget('week.quality_max', 9, r6.effects).value ?? 0);
-    for (const e of [...r7.effects, ...r6.effects]) c.fired.push({ stage: 'S7.1', rule_id: e.ruleId, binding: `week:${w + 1}`, op: e.op, target: e.target, value: typeof e.value === 'number' ? e.value : undefined });
+    for (const e of [...r7.effects, ...r6.effects]) c.fired.push({ stage: 'S7.1', rule_id: e.ruleId, binding: `week:${w + 1 + L.indexOffset}`, op: e.op, target: e.target, value: typeof e.value === 'number' ? e.value : undefined });
     if (['ONBOARD', 'RTR', 'TRANSITION'].includes(ph) || gate.gate === 'proceed_restricted') { k = 0; ruleIds.add('LOD-034'); }
     if (isDeload) { k = Math.min(k, P('deload.quality_max')); ruleIds.add('SES-016'); }
     if (typeof gate.overrides['quality.per_week.cap'] === 'number') k = Math.min(k, gate.overrides['quality.per_week.cap'] as number);
@@ -286,17 +291,35 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
       }
     }
 
+    // SES-012: a due level test replaces its module's instance in the first week that is not a deload, TAPER, RACE or
+    // TRANSITION week and holds no field test (one test a week); the long-run DUR test is the week's long run (OQ-15 reading)
+    const testWeekOk = !isDeload && !isRaceWeek && ph !== 'TAPER' && ph !== 'TRANSITION';
+    if (testWeekOk && !slots.some(x => x.isTest)) {
+      for (const sl of slots) {
+        const due = st.tests_due.find(t => t.node !== 'DUR' && t.module === sl.module && !testsPlaced.has(t.node + t.level));
+        if (!due || sl.strides || sl.touch) continue;
+        const def = pval<Record<string, Record<string, { segments: { effort: Effort; duration_s: number; repeats: number; recovery_s?: number }[] }>>>(spec, 'ses.exit_test.<node>.<level>')[due.node]?.[String(due.level)];
+        const seg = def?.segments?.[0];
+        if (!seg) continue;
+        sl.isTest = true; sl.testFor = { node: due.node, level: due.level };
+        sl.segments = intervalSegments({ reps: seg.repeats, rep_s: seg.duration_s, rec_s: seg.recovery_s ?? 0 } as DoseStep, seg.effort);
+        sl.ruleIds.push('SES-012');
+        testsPlaced.add(due.node + due.level);
+        break;
+      }
+    }
+
     // ---------------- S7.5 dose (projection: start dose for every module, 07 §2b) and TID budget (LOD-033 / SES-006)
     // LOD-003/007 on realised volumes: when earlier weeks came out below their curve value (easy runs under lod.min_run_s
     // become rest), this week's growth is measured from what those weeks actually hold (INV-16 baseline)
     let V = cw.V;
     if (!isDeload && !cw.taper_k && ph !== 'SHARPEN') {
       const G = L.growth;
-      const nd = weeks.filter(x => !x.is_deload && !x.taper_k);
+      const nd = [...G.history.filter(h => !h.deload).map(h => ({ planned_time_s: h.V })), ...weeks.filter(x => !x.is_deload && !x.taper_k)];
       const base = nd.at(-1)?.planned_time_s ?? G.V_hold, two = nd.at(-2)?.planned_time_s ?? G.V_hold;
       const [wk, w2] = cw.profile === 'slow' ? G.prog.slow : G.prog.standard;
       let cap = Math.min((1 + wk) * base, (1 + w2) * two);
-      if (w < G.confirmedFrom) { const rec = [...G.preWeeks, ...weeks.map(x => x.planned_time_s)].slice(-G.prog.window); cap = Math.min(cap, (1 + G.prog.est) * (rec.length ? Math.max(...rec) : G.V_hold)); }
+      if (w < G.confirmedFrom) { const rec = [...G.preWeeks, ...weeks.map(x => x.planned_time_s as number)].slice(-G.prog.window); cap = Math.min(cap, (1 + G.prog.est) * (rec.length ? Math.max(...rec) : G.V_hold)); }
       if (base > 0 && roundDown(cap, G.step) < V) { V = Math.max(roundDown(cap, G.step), Math.min(cw.V, G.V_hold)); ruleIds.add('LOD-003'); }
     }
     let hardLeft = Math.floor(hardShare * V), e2Left = Math.floor(e2Share * V);
@@ -304,16 +327,23 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
     const keySlots: Slot[] = [];
     for (const s of slots) {
       if (s.strides || s.touch) { keySlots.push(s); continue; }
-      const step0 = 0;
-      let segs: Segment[] | null;
-      if (s.module === 'SES-M-018') segs = [{ effort: 'E1', role: 'main', duration_s: 60 * P('ses.ft0_min'), repeats: 1 }];
-      else segs = keySegments(spec, s.module, step0, demand, g);
-      if (!segs) { c.fired.push({ stage: 'S7.5', rule_id: 'SES-006', binding: `week:${w + 1}`, op: 'drop_slot', target: s.module }); continue; }
-      const et = effortTimes(segs);
+      // SES-011: one step above the last logged instance (never compounded, 07 §2b); SES-016 start size in a deload;
+      // a step that does not fit the week's budgets falls back step by step to the start dose (dose_fit)
+      const nSteps = (() => { const x = pval<DoseStep[]>(spec, `ses.dose.${s.module}.steps`); return Array.isArray(x) ? x.length : 1; })();
+      let step0 = s.isTest || isDeload ? 0 : Math.min(st.module_next_step[s.module] ?? 0, nSteps - 1);
       const capS = roundDown(1.1 * l30(dateOf(D[0] ?? 0)), step);
-      const dur = durationOf(segs, speed);
-      if (et.hard > hardLeft || et.e2 > e2Left || (capS > 0 && dur > capS) || dur > timeLeft) {
-        c.fired.push({ stage: 'S7.5', rule_id: et.hard > hardLeft || et.e2 > e2Left ? 'LOD-033' : 'LOD-010', binding: `week:${w + 1}`, op: 'drop_slot', target: s.module });
+      const sized = (k: number) => {
+        const sg = s.module === 'SES-M-018' ? [{ effort: 'E1' as Effort, role: 'main' as const, duration_s: 60 * P('ses.ft0_min'), repeats: 1 }] : keySegments(spec, s.module, k, demand, g);
+        if (!sg) return null;
+        return { sg, et: effortTimes(sg), dur: durationOf(sg, speed) };
+      };
+      const fits = (z: { et: { hard: number; e2: number }; dur: number }) => !(z.et.hard > hardLeft || z.et.e2 > e2Left || (capS > 0 && z.dur > capS) || z.dur > timeLeft);
+      let z = s.testFor ? { sg: s.segments, et: effortTimes(s.segments), dur: durationOf(s.segments, speed) } : sized(step0);
+      while (z && step0 > 0 && !fits(z)) { step0--; z = sized(step0); }
+      if (!z) { c.fired.push({ stage: 'S7.5', rule_id: 'SES-006', binding: `week:${w + 1 + L.indexOffset}`, op: 'drop_slot', target: s.module }); continue; }
+      const segs = z.sg, et = z.et, dur = z.dur;
+      if (!fits(z)) {
+        c.fired.push({ stage: 'S7.5', rule_id: et.hard > hardLeft || et.e2 > e2Left ? 'LOD-033' : 'LOD-010', binding: `week:${w + 1 + L.indexOffset}`, op: 'drop_slot', target: s.module });
         continue;
       }
       hardLeft -= et.hard; e2Left -= et.e2; timeLeft -= dur;
@@ -332,7 +362,7 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
       kk--;
     }
     const placedHard = hardSlots.slice(0, kk);
-    for (const s of hardSlots.slice(kk)) c.fired.push({ stage: 'S7.4', rule_id: 'SES-006', binding: `week:${w + 1}`, op: 'drop_slot', target: s.module });
+    for (const s of hardSlots.slice(kk)) c.fired.push({ stage: 'S7.4', rule_id: 'SES-006', binding: `week:${w + 1 + L.indexOffset}`, op: 'drop_slot', target: s.module });
     keyDays = (keyDays ?? []).sort((a, b) => a - b);
     // rank order onto days: highest-ranked slot on the earliest chosen day
     placedHard.forEach((s, i) => {
@@ -340,7 +370,7 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
       const dur = durationOf(s.segments, speed);
       const m = MODULES[s.module];
       const sess = mkSession({ date: dateOf(day), module_id: s.module, kind: s.isTest ? 'test' : 'key', segments: s.segments, planned_duration_s: dur,
-        is_key: true, is_test: s.isTest, is_hard: s.segments.some(x => hardEffort(x.effort)), dose_step: s.step, rule_ids: s.ruleIds,
+        is_key: true, is_test: s.isTest, test_for: s.testFor ?? null, is_hard: s.segments.some(x => hardEffort(x.effort)), dose_step: s.step, rule_ids: s.ruleIds,
         effort_target: (s.segments.find(x => x.role === 'work')?.effort ?? m.effort_profile) as Effort,
         prescription: s.segments.some(x => x.distance_m) ? 'distance' : 'time', planned_distance_m: s.segments.find(x => x.distance_m)?.distance_m ?? null,
         why_message: { id: s.isTest ? 'MSG-SES-TEST' : m.why } });
@@ -364,13 +394,20 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
     let lrSession: Session | null = null;
     if (lrDay !== null && cw.LR > 0) {
       const fuelAllowed = fuelRequired && !isRaceWeek && MODULES['SES-M-004'].prereqs.every(q => (c.levels[q.node] ?? 0) >= q.level) && (ph === 'BUILD' || ph === 'SPECIFIC' || ph === 'TAPER' || (ph === 'BASE' && part.baseLate)) && cw.LR >= 60 * P('fuel.practice_min_duration_min');
-      const fuel = fuelAllowed && !input.profile.nutrition_referral_flag ? P('fuel.start_g_h') : null;
+      // NUT-010/011: the current step, up to the upper edge of the required FUEL level's band
+      const band = pval<Record<string, [number, number | null]>>(spec, 'fuel.level_band')[String(demand.required_levels.FUEL ?? 1)];
+      const fuel = fuelAllowed && !input.profile.nutrition_referral_flag ? Math.min(st.fuel_step_g_h, band?.[1] ?? P('fuel.max_default_g_h')) : null;
       const ldate = dateOf(lrDay);
       const distStop = st.L30_eff_dist_m ? roundDown(Math.min(1.1 * Math.max(st.L30_eff_dist_m, 0), demand.dist_stop_m ?? Infinity), P('load.round_down_m')) : null;
       lrSession = mkSession({ date: ldate, module_id: fuelAllowed ? 'SES-M-004' : 'SES-M-003', kind: 'long', segments: [{ effort: 'E1', role: 'main', duration_s: cw.LR, repeats: 1 }],
         planned_duration_s: cw.LR, is_long_run: true, is_hard: true, is_peak_long_run: !isDeload && !cw.taper_k, fuel_target_g_h: fuel, effort_target: 'E1',
         planned_distance_m: null, why_message: { id: 'MSG-SES-LONG' }, rule_ids: ['SES-005', 'LOD-010', 'LOD-020', ...(demand.family === 'short' ? ['DST-005'] : []), ...(fuel ? ['NUT-010'] : [])] });
       void distStop;
+      const durDue = st.tests_due.find(t => t.node === 'DUR' && !testsPlaced.has(t.node + t.level));
+      if (durDue && testWeekOk && cw.LR >= (durDue.lr_min_s ?? Infinity)) {
+        lrSession.is_test = true; lrSession.test_for = { node: 'DUR', level: durDue.level }; lrSession.rule_ids.push('SES-012');
+        testsPlaced.add('DUR' + durDue.level);
+      }
     }
 
     // ---------------- S7.6 easy fill (water_fill, LOD-031 / LOD-013 / LOD-016)
@@ -404,31 +441,50 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
         for (let it = 0; it < 60; it++) { const mid = (lo + hi) / 2; if (caps.reduce((a, cp) => a + Math.min(cp, mid), 0) <= rem) lo = mid; else hi = mid; }
         const vals = caps.map(cp => roundDown(Math.min(cp, lo), step));
         let left = rem - vals.reduce((a, b) => a + b, 0);
-        for (let i = 0; i < vals.length && left >= step; i++) while (left >= step && vals[i] + step <= caps[i]) { vals[i] += step; left -= step; }
+        for (let moved = true; moved && left >= step;) { moved = false; for (let i = 0; i < vals.length && left >= step; i++) if (vals[i] + step <= caps[i]) { vals[i] += step; left -= step; moved = true; } }   // one step per day, earliest first
         const drop = vals.findIndex(v => v < minRun);
         if (drop >= 0) { days = days.filter((_, i) => i !== drop); continue; }
         return { out: days.map((d, i) => ({ d, s: vals[i] })), left, allAtCap: vals.every((v, i) => v + step > caps[i]) };
       }
       return { out: [], left: target - lrNow - keyTime, allAtCap: true };
     };
+    // SPEC-QUESTION Q-E23: time the easy days cannot hold goes, in equal steps, to the easy (E1) cool-down of the week's key
+    // and test sessions, under the same per-run caps (≤ LR, ≤ spike.warn_ratio × l30_time), before it is dropped (LOD-031):
+    // the key work then sits inside an easy run, as 13 §3/§6 count the week. Then LOD-020 is re-checked on the realised week.
+    const carrierSeg = (x: Session) => x.segments.find(g => g.role === 'cooldown') ?? x.segments.find(g => g.role === 'main' && g.effort === 'E1');
+    const carriers = sessions.filter(x => !!carrierSeg(x));
+    const carryFor = (left0: number, lrNow: number) => {
+      const room = carriers.map(x => roundDown(Math.max(0, Math.min(lrNow > 0 ? lrNow : Infinity, roundDown(1.1 * l30(x.date), step) || Infinity) - x.planned_duration_s), step));
+      const add = carriers.map(() => 0);
+      let left = roundDown(left0, step);
+      for (let moved = true; moved && left >= step;) { moved = false; for (let i = 0; i < add.length && left >= step; i++) if (add[i] + step <= room[i]) { add[i] += step; left -= step; moved = true; } }
+      return { add, left };
+    };
     let res = doFill(LR);
     if (lrSession && res.left >= step && res.allAtCap && target < Math.max(demand.V_req_time_s, st.V_hold_s) + 1 && !isDeload && !cw.taper_k) {
       const raised = Math.min(roundDown(1.1 * l30(lrSession.date), step), roundDown(L.lrCap(V), step), LR + res.left);   // LOD-016
       if (raised > LR) { LR = raised; lrSession.planned_duration_s = LR; lrSession.expected_duration_s = LR; lrSession.segments = [{ effort: 'E1', role: 'main', duration_s: LR, repeats: 1 }]; lrSession.rule_ids.push('LOD-016'); res = doFill(LR); }
     }
-    fill = res.out;
-    // SPEC-QUESTION Q-E23: in a field-test week the test replaces an easy run; time the easy days cannot hold goes to the
-    // test's cool-down (E1), under the same per-run caps (≤ LR, ≤ spike.warn_ratio × l30_time), before it is dropped (LOD-031).
-    let left = res.left;
-    for (const s of sessions.filter(x => x.is_test)) {
-      if (left < step) break;
-      const cap = Math.min(lrSession ? LR : Infinity, roundDown(1.1 * l30(s.date), step) || Infinity);
-      const room = roundDown(Math.max(0, cap - s.planned_duration_s), step);
-      const add = Math.min(room, roundDown(left, step));
-      const cd = s.segments.find(x => x.role === 'cooldown');
-      if (add <= 0 || !cd) continue;
-      cd.duration_s = (cd.duration_s ?? 0) + add; s.planned_duration_s += add; left -= add; s.rule_ids.push('LOD-031');
+    let carry = carryFor(res.left, LR);
+    for (let it = 0; it < 4 && lrSession && !cw.taper_k; it++) {
+      const Vfinal = LR + keyTime + res.out.reduce((a, f) => a + f.s, 0) + carry.add.reduce((a, b) => a + b, 0);
+      const allowed = Math.max(roundDown(L.lrCap(Vfinal), step), st.L_hold_s);
+      if (LR <= allowed) break;
+      LR = allowed; lrSession.planned_duration_s = LR; lrSession.expected_duration_s = LR; lrSession.segments = [{ effort: 'E1', role: 'main', duration_s: LR, repeats: 1 }]; lrSession.rule_ids.push('LOD-020');
+      res = doFill(LR); carry = carryFor(res.left, LR);
     }
+    fill = res.out;
+    carriers.forEach((x, i) => {
+      if (!carry.add[i]) return;
+      const cd = carrierSeg(x)!;
+      cd.duration_s = (cd.duration_s ?? 0) + carry.add[i]; x.planned_duration_s += carry.add[i]; x.rule_ids.push('LOD-031');
+    });
+    // a key session sized in half minutes (SES-M-011 reps) leaves the week a sub-minute remainder that whole-minute easy runs
+    // cannot hold; it goes to that session's cool-down, so the week keeps its planned volume (INV-11, INV-27)
+    const frac = res.left - roundDown(res.left, step);
+    const odd = carriers.find(x => x.planned_duration_s % step !== 0) ?? carriers[0];
+    if (frac > 0 && odd) { const cd = carrierSeg(odd)!; cd.duration_s = (cd.duration_s ?? 0) + frac; odd.planned_duration_s += frac; }
+    const left = carry.left;
     if (left >= step) ruleIds.add('LOD-031');
     const easySessions = fill.map(f => mkSession({ date: dateOf(f.d), module_id: 'SES-M-001', kind: 'easy', segments: [{ effort: 'E1', role: 'main', duration_s: f.s, repeats: 1 }],
       planned_duration_s: f.s, effort_target: 'E1', why_message: { id: 'MSG-SES-EASY' }, rule_ids: ['LOD-031', ...(lrDay !== null && Math.abs(f.d - lrDay) === 1 ? ['LOD-013'] : [])] }));
@@ -456,6 +512,21 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
     const touchDay = order.find(touchOk);
     if (touchSlot && touchDay) {
       const work = touchSlot.segments.find(x => x.role === 'work')!;
+      // SES-015 touch on a short easy run: move whole minutes from the other easy runs (each kept ≥ lod.min_run_s) so the
+      // run holds the touch plus 10 min easy; the week total is unchanged (LOD-011 time-based)
+      let need = segTime(work) + 600 - touchDay.planned_duration_s;
+      const donors = order.filter(x => x !== touchDay).sort((a, b) => b.planned_duration_s - a.planned_duration_s || (a.date < b.date ? -1 : 1));
+      const spare = donors.reduce((a, x) => a + Math.max(0, roundDown(x.planned_duration_s - P('lod.min_run_s'), 60)), 0);
+      if (need > 0 && spare >= need) {
+        for (const d of donors) {
+          if (need <= 0) break;
+          const take = Math.min(Math.ceil(need / 60) * 60, Math.max(0, roundDown(d.planned_duration_s - P('lod.min_run_s'), 60)));
+          if (!take) continue;
+          d.planned_duration_s -= take; d.segments = [{ effort: 'E1', role: 'main', duration_s: d.planned_duration_s, repeats: 1 }];
+          touchDay.planned_duration_s += take; touchDay.segments = [{ effort: 'E1', role: 'main', duration_s: touchDay.planned_duration_s, repeats: 1 }];
+          need -= take;
+        }
+      }
       if (attach(touchDay, { ...work }, 'SES-M-024', 'MSG-SES-THR', 'SES-015')) order = order.filter(x => x !== touchDay);
     }
     const stridesWanted = strides_allowed ? Math.min(P('ses.strides_per_week'), order.length) : 0;
@@ -472,7 +543,7 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
 
     // ---------------- assemble, S7.8 render (effort first; paces only through FEA-014 / INV-15; run-walk SES-009)
     const all = [...sessions, ...easySessions, ...(lrSession ? [lrSession] : []), ...(raceSession ? [raceSession] : [])].sort((a, b) => a.date.localeCompare(b.date));
-    all.forEach((s, i) => { s.id = `w${w + 1}-${i + 1}`; });
+    all.forEach((s, i) => { s.id = `w${w + 1 + L.indexOffset}-${i + 1}`; });
     for (const s of all) {
       s.expected_duration_s = s.planned_duration_s;
       const eff = s.effort_target;
@@ -480,7 +551,7 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
         const pr = paceRange(spec, anchorMeasured, eff);
         if (pr) { s.pace_range = { ...pr, effort: eff }; s.rule_ids.push('FEA-014'); }
       }
-      const runWalk = !st.levels.HAB || st.levels.HAB < 2 || input.profile.run_walk_preference_explicit === true || s.expected_duration_s > 60 * P('lr.long_guard_min');
+      const runWalk = !st.levels.HAB || st.levels.HAB < 2 || (input.profile.run_walk_preference === true && input.profile.run_walk_preference_explicit === true) || s.expected_duration_s > 60 * P('lr.long_guard_min');
       if (runWalk && s.kind !== 'ladder' && s.is_run && !s.is_goal_race) {
         const ladderRW = pval<(number[] | string)[]>(spec, 'ses.runwalk.ladder');
         const rungIdx = input.engine_state?.runwalk_rung ?? (input.profile.run_walk_preference ? pval<Record<string, number>>(spec, 'ses.runwalk.entry_rung').preference : pval<Record<string, number>>(spec, 'ses.runwalk.entry_rung').hab_low);
@@ -490,18 +561,20 @@ export function buildWeeks(c: BuildCtx): { weeks: Week[]; pre_taper_had_e3: bool
       s.rule_ids = [...new Set(s.rule_ids)].sort();
       s.messages.push({ id: 'MSG-INP-PAIN-TAP', rule_id: 'INP-022' } as MessageInstance);
     }
-    const wk = finishWeek(w, start, ph, cw, all, quality_max, isRaceWeek, P);
-    for (const r of ruleIds) c.fired.push({ stage: 'S7', rule_id: r, binding: `week:${w + 1}`, op: 'apply' });
+    const wk = finishWeek(w + L.indexOffset, start, ph, cw, all, quality_max, isRaceWeek, P);
+    for (const r of ruleIds) c.fired.push({ stage: 'S7', rule_id: r, binding: `week:${w + 1 + L.indexOffset}`, op: 'apply' });
     weeks.push(wk);
     for (const s of all) if (!s.is_goal_race) runs.push({ day: dayOf(s.date), s: s.planned_duration_s });
     const lrS = all.find(s => s.is_long_run);
     prevLR = lrS ? { date: lrS.date, s: lrS.planned_duration_s } : null;
     const hardDays = all.filter(s => s.is_hard).map(s => weekdayIndex(s.date));
     prevHard = hardDays.length ? Math.max(...hardDays) : null;
-    if (taperStart < 0 || w < taperStart) {
-      if (!isDeload) { pre_taper_runs = wk.runs; }
-      if (w === taperStart - 1 || taperStart < 0) pre_taper_had_e3 = pre_taper_had_e3 || wk.has_e3_touch;
-      if (wk.has_e3_touch && !isDeload) pre_taper_had_e3 = true;
+    // SPEC-QUESTION Q-E28: the "pre-taper block" of INV-08 / LOD-051 is the 3 weeks before the taper: runs/week = floor of
+    // their mean, and it "had an E3+ touch" when any of them holds an E3 or E4 segment
+    if (w === taperStart - 1 || (taperStart < 0 && w === L.phases.length - 1)) {
+      const pre = weeks.slice(-3);
+      pre_taper_runs = Math.floor(pre.reduce((a, x) => a + x.runs, 0) / pre.length);
+      pre_taper_had_e3 = pre.some(x => x.has_e3_touch);
     }
   }
   void T; void testsOff; void toDays; void isoWeek;

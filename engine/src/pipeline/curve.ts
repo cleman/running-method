@@ -22,9 +22,15 @@ export interface CurveInputs {
   lrCap: (V: number) => number;        // LOD-020
   prog: { slow: [number, number]; standard: [number, number]; est: number; window: number };
   deloadCut: number; taperCut: number; taperProfile: number[];
+  /** taper week number of the plan's first TAPER week (re-plans inside the taper) and the taper length */
+  taperK0?: number; taperT?: number;
   ladder: { V: number; LR: number; sessions: number[] }[];   // fixed ladder weeks at the front
   gap?: { vol: number; long: number; V7: number; L30: number } | null;    // GEN-013 first-week factors on the pre-gap values
   step: number;                        // load.round_down_s
+  /** re-plans: completed weeks before plan start (oldest first), as logged; seed the LOD-003/004 baselines and the taper reference */
+  history?: { V: number; LR: number; deload: boolean }[];
+  /** baseline for weeks before the plan and its history (LOD-003 fallback): the starting V28 */
+  V_base0?: number;
 }
 
 export interface CurveWeek {
@@ -36,7 +42,8 @@ export function buildCurve(x: CurveInputs): CurveWeek[] {
   const out: CurveWeek[] = [];
   const rd = (v: number) => roundDown(v, x.step);
   const runs: { day: number; s: number; pre?: boolean }[] = x.l30Sources.map(r => ({ ...r, pre: true }));
-  const nonDeload: number[] = [];      // indices of loading weeks (incl. ladder) for LOD-003 baseline
+  // values of the non-deload weeks so far (completed weeks first, then plan weeks): LOD-003 baselines, deload base, taper ref
+  const nd: { V: number; LR: number; w: number }[] = (x.history ?? []).filter(h => !h.deload).map((h, i, a) => ({ V: h.V, LR: h.LR, w: i - a.length }));
   const T = x.phases.filter(p => p === 'TAPER').length;
   const taperStart = x.phases.indexOf('TAPER');
   const l30At = (day: number) => Math.max(0, ...runs.filter(r => day - r.day >= 1 && day - r.day <= 30 && !(r.pre && x.sourcesUntil !== undefined && day >= x.sourcesUntil)).map(r => r.s));
@@ -49,19 +56,19 @@ export function buildCurve(x: CurveInputs): CurveWeek[] {
       const L = x.ladder[w];
       const wk: CurveWeek = { V: L.V, LR: L.LR, profile: null, is_deload: false, taper_k: null, is_race_week: false, capsHit, l30: l30At(lrDay) };
       L.sessions.forEach((s, i) => runs.push({ day: x.startOffset + 7 * w + i * 2, s }));
-      out.push(wk); nonDeload.push(w); continue;
+      out.push(wk); nd.push({ V: wk.V, LR: wk.LR, w }); continue;
     }
     const l30 = l30At(lrDay);
     if (ph === 'TAPER') {
-      const k = w - taperStart + 1;
-      const ref = nonDeload.filter(i => i < taperStart).at(-1);
-      const Vref = ref !== undefined ? out[ref].V : x.V_hold, LRref = ref !== undefined ? out[ref].LR : x.L_hold;
+      const k = w - taperStart + (x.taperK0 ?? 1);
+      const ref = nd.filter(e => e.w < taperStart).at(-1);
+      const Vref = ref ? ref.V : x.V_hold, LRref = ref ? ref.LR : x.L_hold;
       const cut = x.taperCut * (x.taperProfile[k - 1] ?? 1);
       let V = rd(Vref * (1 - cut));
-      let LR = k === T ? 0 : rd(LRref * (1 - cut));
+      let LR = k === (x.taperT ?? T) ? 0 : rd(LRref * (1 - cut));
       if (w > 0 && out[w - 1].taper_k) { V = Math.min(V, out[w - 1].V); LR = Math.min(LR, out[w - 1].LR); } // LOD-052
       LR = Math.min(LR, rd(1.1 * l30) || LR);
-      out.push({ V, LR, profile: null, is_deload: false, taper_k: k, is_race_week: k === T, capsHit: ['LOD-050'], l30 });
+      out.push({ V, LR, profile: null, is_deload: false, taper_k: k, is_race_week: k === (x.taperT ?? T), capsHit: ['LOD-050'], l30 });
       if (LR) runs.push({ day: lrDay, s: LR });
       continue;
     }
@@ -71,12 +78,12 @@ export function buildCurve(x: CurveInputs): CurveWeek[] {
       const LR = Math.min(x.L_hold, rd(1.1 * l30) || x.L_hold);
       out.push({ V, LR, profile: x.slowWeeks(w) ? 'slow' : 'standard', is_deload: false, taper_k: null, is_race_week: false, capsHit: ['LOD-056'], l30 });
       runs.push({ day: lrDay, s: LR });
-      nonDeload.push(w);
+      nd.push({ V, LR, w });
       continue;
     }
-    const lastND = nonDeload.at(-1), prevND = nonDeload.at(-2);
+    const lastND = nd.at(-1), prevND = nd.at(-2);
     if (x.deloads.has(w)) {
-      const bV = lastND !== undefined ? out[lastND].V : x.V_hold, bL = lastND !== undefined ? out[lastND].LR : x.L_hold;
+      const bV = lastND ? lastND.V : x.V_hold, bL = lastND ? lastND.LR : x.L_hold;
       const V = rd((1 - x.deloadCut) * bV);
       const LR = Math.min(rd((1 - x.deloadCut) * bL), rd(1.1 * l30));
       out.push({ V, LR, profile: x.slowWeeks(w) ? 'slow' : 'standard', is_deload: true, taper_k: null, is_race_week: false, capsHit: ['LOD-040'], l30 });
@@ -86,8 +93,8 @@ export function buildCurve(x: CurveInputs): CurveWeek[] {
     // loading week
     const slow = x.slowWeeks(w);
     const [wk, w2] = slow ? x.prog.slow : x.prog.standard;
-    const base = lastND !== undefined ? out[lastND].V : x.V_hold;
-    const two = prevND !== undefined ? out[prevND].V : x.V_hold;
+    const base = lastND ? lastND.V : (x.V_base0 ?? x.V_hold);
+    const two = prevND ? prevND.V : (x.V_base0 ?? x.V_hold);
     let cap = Math.min((1 + wk) * base, (1 + w2) * two);                                   // LOD-003
     if (w < x.confirmedFrom) {                                                              // LOD-007 (T2)
       const recent = [...x.preWeeks, ...out.map(o => o.V)].slice(-x.prog.window);
@@ -104,7 +111,7 @@ export function buildCurve(x: CurveInputs): CurveWeek[] {
     if (w === 0 && x.gap) LR = Math.min(LR, rd(x.gap.long * x.gap.L30));
     out.push({ V, LR, profile: slow ? 'slow' : 'standard', is_deload: false, taper_k: null, is_race_week: false, capsHit, l30 });
     runs.push({ day: lrDay, s: LR });
-    nonDeload.push(w);
+    nd.push({ V, LR, w });
   }
   return out;
 }

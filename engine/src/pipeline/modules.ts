@@ -13,7 +13,10 @@ export const MODULES: Record<string, ModuleDef> = {
   'SES-M-001': { id: 'SES-M-001', name: 'Easy run', trains: [...t('AER', 1, 2, 3, 4, 5), ...t('HAB', 2, 3, 4)], prereqs: t('HAB', 1), effort_profile: 'E1', allowed_phases: ALL_RUN, presets: 'all', why: 'MSG-SES-EASY' },
   'SES-M-002': { id: 'SES-M-002', name: 'Run-walk', trains: [...t('HAB', 1, 2), ...t('AER', 1)], prereqs: [], effort_profile: 'E1', allowed_phases: ALL_RUN, presets: 'all', why: 'MSG-SES-RW' },
   'SES-M-003': { id: 'SES-M-003', name: 'Long run', trains: [...t('DUR', 1, 2, 3, 4)], prereqs: [], effort_profile: 'E1', allowed_phases: ['ONBOARD', 'BASE', 'BUILD', 'SPECIFIC', 'SHARPEN', 'TAPER', 'MAINTAIN'], presets: 'all', why: 'MSG-SES-LONG', long: true },
-  'SES-M-004': { id: 'SES-M-004', name: 'Fuelled long run', trains: [...t('FUEL', 1, 2, 3)], prereqs: t('DUR', 1), effort_profile: 'E1', allowed_phases: ['BASE_LATE', 'BUILD', 'SPECIFIC', 'TAPER'], presets: 'all', why: 'MSG-SES-LONG', long: true },
+  // SPEC-QUESTION Q-E31: 06 lists SES-M-004's prerequisite as "DUR L1 (FUEL edges, 02)"; 02 'scheduling vs attaining' says
+  // those edges gate attaining FUEL L1, not the session that trains it. The engine schedules the fuelled long run without
+  // DUR L1 and checks DUR L1 when FUEL L1 is attained (state.ts).
+  'SES-M-004': { id: 'SES-M-004', name: 'Fuelled long run', trains: [...t('FUEL', 1, 2, 3)], prereqs: [], effort_profile: 'E1', allowed_phases: ['BASE_LATE', 'BUILD', 'SPECIFIC', 'TAPER'], presets: 'all', why: 'MSG-SES-LONG', long: true },
   'SES-M-005': { id: 'SES-M-005', name: 'Race-effort long run', trains: [...t('MSP', 1, 2, 3)], prereqs: [...t('THR', 1), ...t('DUR', 2)], effort_profile: 'E3', allowed_phases: ['SPECIFIC'], presets: 'all', why: 'MSG-SES-RACE', long: true },
   'SES-M-006': { id: 'SES-M-006', name: 'Strides', trains: [...t('VO2', 1), ...t('ECO', 1)], prereqs: t('HAB', 1), effort_profile: 'E5', allowed_phases: ['ONBOARD', 'BASE', 'BUILD', 'SPECIFIC', 'SHARPEN', 'TAPER', 'RACE', 'MAINTAIN'], presets: 'all', why: 'MSG-SES-STRIDES-SLOT' },
   'SES-M-007': { id: 'SES-M-007', name: 'Short hill sprints', trains: [...t('VO2', 1), ...t('ECO', 1)], prereqs: [...t('HAB', 2), ...t('TOL', 1)], effort_profile: 'E5', allowed_phases: ['BASE', 'BUILD'], presets: 'all', why: 'MSG-SES-STRIDES-SLOT' },

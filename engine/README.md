@@ -84,21 +84,43 @@ The spec allows procedures (12 §2b.4). Here is where each kind of rule runs:
   - **Every MVP plan validated with zero repairs** (the parity property of 07 §5, TST-092), as far as these 47 inputs go.
 - `tsc --noEmit` is clean. `src/` imports nothing from Node, and `tsc` compiles it to ES modules. **It has not been run in a browser.**
 
-None of this is an independent check. The S-group invariants are only as right as this engine's reading of the spec until the oracle (TST-110…112) agrees.
+Re-run on 28 Oct 2026 after the oracle fixes: 43/43 tests pass; all 66 inputs again ran twice with byte-identical
+output and no crash (30 plans, 27 fail-closed with options, 7 safety stops, 2 holds, over all releases); no plan needed
+a repair pass.
+
+None of the above is an independent check on its own.
+
+## Oracle run (28 Oct 2026)
+
+The independent oracle (`oracle/`, written by another session) was run against this engine through `node-entry.ts`
+(`ORACLE_ENGINE=engine/node-entry.ts npx vitest run` from `oracle/`). **1 922 of 1 958 oracle tests pass; 36 fail.**
+Every failure is either a disagreement written up in `docs/disagreements.md` or a feature listed below as not done.
+Full numbers, and what is still not covered: `docs/test-report.md`. Week-by-week plans of five personas, replayed
+with the oracle's "as planned" runner: `docs/persona-plans/`.
 
 ## Not done yet (MVP rules or features that are missing or partial)
 
-- **Adaptation (08):** events after the first plan (missed sessions, pain, illness, results, re-plans, the published window ADP-014, degraded completion FEA-043) are not processed. A re-plan input with `parent_plan` is accepted and INV-04 is checked, but no ADP rule runs. TST-105a/b, which are race-week re-plans, therefore fail closed with options.
-- **Level tests (SES-012/024/025):** they depend on logged instances, so a day-0 plan never schedules one. The anchor field test of ONBOARD (SES-014) is scheduled. `level_tests_opt_out` has no effect yet.
-- **Projection:** following 07 §2b, a day-0 plan keeps today's levels and start doses for every week. 13's per-Monday week rows (e.g. Ana's two key sessions from week 7) need weekly re-plans with a log.
-- **DST-006** (race-effort segment in half-marathon long runs for time goals), **NUT-020** (race-day fuelling: `race_fuel_g_h` stays null), NUT-011/012 fuelling steps (start step only), FEA-038 interim field tests, SES-020 strength (Q-E17).
-- **Presets:** only `method_default`. A preference for another preset is logged in the ledger (LOD-021). There is no `alternative_preset` option.
-- **Repairs:** REP-002/005/006 need a re-run of S4–S7. They are treated as "cannot change anything", so such a plan goes to S9.
-- **Messages:** results carry message ids from messages.md, with placeholders only for the prediction band. No text is rendered (that is the display layer's job).
+- **Adaptation (08):** weekly re-plans of a runner who logs as planned work end to end: dose steps (SES-011), level
+  tests (SES-012/024, CMP-002), ladder progress (SAF-082/083), fuelling steps, frozen season layout, and degraded
+  completion (FEA-043 a). Not processed: events such as missed sessions, pain, illness, results and goal edits (the
+  ADP rules), the published window (ADP-014), and **FEA-043 (b) LADDER_RUNWALK** (TST-105b fails closed).
+- **Level tests:** THR, VO2 and DUR tests are scheduled and judged. MSP tests and the HAB L2 benchmark are not.
+  SES-013 failed tests block a retest for 3 weeks, but the module dose is not frozen. SES-025 (`level_tests_opt_out`)
+  has no effect. Level decay (CMP-003) is not applied.
+- **Pregnancy maintenance mode (SAF-051):** not built. The engine keeps the pause even after the MSG-SAF-031
+  attestation, so it fails safe (TST-050-P06).
+- **DST-006** (race-effort segment in half-marathon long runs for time goals), **NUT-020** (race-day fuelling:
+  `race_fuel_g_h` stays null), FEA-038 interim field tests, SES-020 strength (Q-E17).
+- **Presets:** only `method_default`. A preference for another preset is logged in the ledger (LOD-021). There is no
+  `alternative_preset` option.
+- **Repairs:** REP-002/005/006 need a re-run of S4–S7. They are treated as "cannot change anything", so such a plan
+  goes to S9.
+- **Messages:** results carry message ids from messages.md, with placeholders only for the prediction band. No text
+  is rendered (that is the display layer's job).
 - **Fired-rule log:** complete for engine-evaluated rules, partial for native stages.
-- **Speed:** most calls take under 0.2 s. Some fail-closed marathon goals (R2, not MVP) take up to about 50 s, because every option candidate is a full nested run; MVP calls take at most about 8 s.
-- **Marathon and ultra (R2/R3):** their rules load, and Ana's marathon plan reproduces 13 §3. Many marathon and ultra rules are text-only or not applied, so their results are not claimed.
+- **Marathon and ultra (R2/R3):** Ana's and P4's marathons run end to end. Ultras (50K, 100K) do not produce
+  plans (R3); their results are not claimed.
 
 ## Spec questions
 
-Every place where the spec was not precise enough is listed in `docs/questions.md` (Q-E1…Q-E26, with the default in force) and marked `// SPEC-QUESTION Q-En` in the code. Where the engine and a value of 13 may disagree, the reading is listed there too ("Readings for the oracle"); nothing was changed to match 13 by hand.
+Every place where the spec was not precise enough is listed in `docs/questions.md` (Q-E1…Q-E32, with the default in force) and marked `// SPEC-QUESTION Q-En` in the code. Where the engine and a value of 13 may disagree, the reading is listed there too ("Readings for the oracle"); nothing was changed to match 13 by hand.

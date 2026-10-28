@@ -165,6 +165,8 @@ export function runGate(spec: Spec, rawInput: GeneratorInput, st: DerivedState, 
       effects.push(e);
       const msg = (e.raw as unknown as { msg?: string }).msg ?? (typeof (e as any).msg_expr === 'string' ? (e as any).msg_expr : undefined);
       if (msg && e.op !== 'set') messages.push({ id: msg, rule_id: e.ruleId });
+      // NOT BUILT: a gate's `until` (SAF-051: lifted by the MSG-SAF-031 attestation, then pregnancy maintenance mode) is not
+      // evaluated; maintenance mode is not built, so the engine keeps the pause (fail closed) — see docs/test-report.md
       if (e.op === 'gate') gates.push(String((e.raw as unknown as { outcome: string }).outcome));
       if (e.op === 'raise_flag') { const o = (e.raw as unknown as { outcome?: string }).outcome; if (o === 'pause_until_clearance' || o === 'no_running') gates.push('pause_until_clearance'); }
       if (e.op === 'add_reason') reasons.push(String((e.raw as unknown as { code: string }).code));

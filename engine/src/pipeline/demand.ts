@@ -17,7 +17,7 @@ export interface Demand {
   L_req_time_s: number; L_ratio_time_s: number; floor_dist_m: number; time_cap_s: number; time_capped: boolean;
   floor_time_ok: boolean; abs_cap_ok: boolean; met_by_logged_distance: boolean;
   V_req_time_s: number; runs_req: number; required_levels: Record<string, number>; expected_duration_s: number;
-  dist_stop_m: number | null;
+  dist_stop_m: number | null; credited: boolean;
 }
 
 export function runsBucket(runs: number): string { return runs >= 5 ? '5+' : String(Math.max(2, runs)); }
@@ -109,7 +109,7 @@ export function computeDemand(spec: Spec, input: GeneratorInput, st: DerivedStat
   }
   // H0 base plans (05 §3): L_target = max(L_hold, dur_time(next DUR level))
   if (family === 'base') L_req = 60 * DUR_MIN[Math.min(4, (st.levels.DUR ?? 0) + 1)];
-  L_req = roundDown(L_req, 60) === L_req ? L_req : Math.ceil(L_req / 60) * 60; // demand in whole minutes (rounded up: errs on the safe side)
+  L_req = Math.round(L_req);   // whole seconds; the spec rounds no demand (tolerance load.round_down_s applies when comparing)
 
   // weekly demand (03 §2)
   const floorPeak = pval<Record<string, { time_min?: number; runs?: number; dist_km?: number }>>(spec, 'feas.finish_floor.peak_week')[dist] ?? {};
@@ -118,13 +118,13 @@ export function computeDemand(spec: Spec, input: GeneratorInput, st: DerivedStat
     if (family === 'short') pctTerm = L_req / (pval<Record<string, number>>(spec, 'lr.pct_cap.method_default.short')[runsBucket(runsAvail)]);
     else if (family === 'road_classic') pctTerm = Math.max(Math.min(L_req, capS) / 0.5, L_req / pnum(spec, 'lr.over_cap_pct.road_classic'));
   }
-  const V_req = family === 'base' ? 0 : Math.ceil(Math.max(60 * AER_MIN[levels.AER ?? 0], 60 * TOL_MIN[levels.TOL ?? 0], 60 * (floorPeak.time_min ?? 0), pctTerm) / 60) * 60;
+  const V_req = family === 'base' ? 0 : Math.round(Math.max(60 * AER_MIN[levels.AER ?? 0], 60 * TOL_MIN[levels.TOL ?? 0], 60 * (floorPeak.time_min ?? 0), pctTerm));
   const habRuns = [0, 3, 3, 4, 5][levels.HAB ?? 0] ?? 3;
   const runs_req = Math.max(habRuns, floorPeak.runs ?? 0);
   return {
     preset, family, race_m, L_req_time_s: L_req, L_ratio_time_s: L_ratio, floor_dist_m: floor_dist, time_cap_s: capS, time_capped,
     floor_time_ok, abs_cap_ok, met_by_logged_distance: met_by_logged, V_req_time_s: V_req, runs_req, required_levels: levels,
-    expected_duration_s, dist_stop_m,
+    expected_duration_s, dist_stop_m, credited: false,
   };
 }
 

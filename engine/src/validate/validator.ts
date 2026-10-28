@@ -19,11 +19,11 @@ export interface ValidatorView {
   input: GeneratorInput;
   gate: string;
   state: {
-    L30_eff_time_s: number; L30_eff_dist_m: number | null; L30_source: string; V_hold_s: number; L_hold_s: number; tol_level: number; tol_confidence: string;
+    L30_eff_time_s: number; L30_eff_dist_m: number | null; L30_source: string; claimDate?: string; V_hold_s: number; L_hold_s: number; tol_level: number; tol_confidence: string;
     levels: Record<string, number>; ladderEndDate: string | null; max_tolerated_g_h: number | null; profileByWeek: string[]; age_low: (d: string) => number | null; age_high: (d: string) => number | null;
     logged: { date: string; duration_s: number; distance_m: number | null }[];
   };
-  demand: { L_req_time_s: number; floor_dist_m: number; met_by_logged_distance: boolean; family: string; distance: string; time_cap_s: number; runs: number };
+  demand: { L_req_time_s: number; floor_dist_m: number; met_by_logged_distance: boolean; credited?: boolean; family: string; distance: string; time_cap_s: number; runs: number };
   anchor: { confidence: string; date: string | null } | null;
 }
 
@@ -42,7 +42,7 @@ function helpersFor(spec: Spec, v: ValidatorView, plan: Plan) {
     let m = 0;
     const inWin = (x: string) => { const k = daysBetween(x, d); return k >= 1 && k <= 30; };
     // a claimed L30 is dated the day before today (Q-E19)
-    if (claimDated && inWin(addDays(today, -1))) m = field === 'time' ? v.state.L30_eff_time_s : (v.state.L30_eff_dist_m ?? 0);
+    if (claimDated && inWin(v.state.claimDate ?? addDays(today, -1))) m = field === 'time' ? v.state.L30_eff_time_s : (v.state.L30_eff_dist_m ?? 0);
     for (const e of v.state.logged) if (inWin(e.date)) m = Math.max(m, field === 'time' ? e.duration_s : (e.distance_m ?? 0));
     for (const s of planned) if (inWin(s.date)) m = Math.max(m, field === 'time' ? s.planned_duration_s : (s.planned_distance_m ?? 0));
     return m;
@@ -68,14 +68,24 @@ function helpersFor(spec: Spec, v: ValidatorView, plan: Plan) {
     if (last && idx - last.index <= pnum(spec, 'prog.baseline_max_age_weeks')) return last.planned_time_s;
     if (last) return plan.weeks.find(x => x.index === idx - 1)?.planned_time_s ?? last.planned_time_s;
     const ladderLast = plan.weeks.filter(x => x.index < idx && ['start_ladder', 'rtr'].includes(x.load_kind)).at(-1);
-    return ladderLast ? ladderLast.planned_time_s : v.state.V_hold_s;
+    if (ladderLast) return ladderLast.planned_time_s;
+    // LOD-004: before any plan week, the most recent completed week's logged volume (re-plans), else V_hold
+    // completed weeks: the last non-deload one ≤ prog.baseline_max_age_weeks old (deload flags from the parent version)
+    const maxAge = pnum(spec, 'prog.baseline_max_age_weeks');
+    for (let k = 1; k <= maxAge; k++) {
+      const ws = addDays(plan.plan_start, -7 * k);
+      if (v.input.parent_plan?.weeks.find(x => x.start === ws)?.is_deload || (v.input.engine_state?.dated_events?.deload_weeks ?? []).includes(ws)) continue;
+      const logged = v.state.logged.filter(e => e.date >= ws && e.date < addDays(ws, 7)).reduce((a, e) => a + e.duration_s, 0);
+      if (logged > 0) return Math.max(logged, v.state.V_hold_s);
+    }
+    return v.state.V_hold_s;
   };
   const parent = v.input.parent_plan;
   const parentWeek = (w: Week): Value => {
     if (!parent) return null;
     const kind = (x: Week) => (x.taper_k ? 'taper' : x.is_deload ? 'deload' : 'loading');
     const k = plan.weeks.filter(x => kind(x) === kind(w) && x.index <= w.index).length;
-    const pw = parent.weeks.filter(x => kind(x) === kind(w));
+    const pw = parent.weeks.filter(x => kind(x) === kind(w) && x.start >= plan.plan_start);   // parent weeks still ahead
     return (pw[k - 1] as unknown as Value) ?? null;
   };
   const levelOn = (node: string, d: string | null) => {
@@ -125,7 +135,10 @@ function rootsFor(spec: Spec, v: ValidatorView, plan: Plan): Record<string, Valu
     plan: {
       sessions: sess, long_runs: sess.filter(s => (s as unknown as Session).is_long_run), weeks: plan.weeks as unknown as Value,
       loading_weeks: plan.weeks.filter(isLoading) as unknown as Value, taper_weeks: plan.weeks.filter(w => w.taper_k) as unknown as Value,
-      future_weeks: plan.weeks as unknown as Value, pre_taper_runs: plan.pre_taper_runs, pre_taper_had_e3: plan.pre_taper_had_e3, W: plan.W,
+      future_weeks: plan.weeks as unknown as Value, pre_taper_runs: plan.pre_taper_runs, pre_taper_had_e3: plan.pre_taper_had_e3,
+      // SPEC-QUESTION Q-E30: INV-19's W is the season plan's length; a re-plan that keeps the parent's layout (04 §3 step 7b)
+      // counts its weeks in season numbering, so W is the last week's season index, not the weeks left
+      W: Math.max(plan.W ?? 0, ...plan.weeks.map(w => w.index)),
       peak_lr_s: Math.max(0, ...runs.map(s => s.planned_duration_s)), peak_lr_dist_m: plan.peak_lr_dist_m, race_fuel_g_h: plan.race_fuel_g_h,
       over_guard_runs: sess.filter(s => (s as unknown as Session).expected_duration_s > 60 * pnum(spec, 'lr.long_guard_min') && (s as unknown as Session).is_run && !(s as unknown as Session).is_goal_race),
     } as unknown as Value,
@@ -136,7 +149,7 @@ function rootsFor(spec: Spec, v: ValidatorView, plan: Plan): Record<string, Valu
     } as unknown as Value,
     profile: { ...v.input.profile, special_status: ss ? ss.type : 'none' } as unknown as Value,
     flags: { active: v.input.flags.filter(f => f.status === 'active') } as unknown as Value,
-    demand: { L_req_time_s: v.demand.L_req_time_s, floor_dist_m: v.demand.floor_dist_m, met_by_logged_distance: v.demand.met_by_logged_distance, credited: false } as unknown as Value,
+    demand: { L_req_time_s: v.demand.L_req_time_s, floor_dist_m: v.demand.floor_dist_m, met_by_logged_distance: v.demand.met_by_logged_distance, credited: v.demand.credited ?? false } as unknown as Value,
     anchor: (v.anchor ?? { confidence: 'unknown', date: null }) as unknown as Value,
     preset: { id: plan.preset_id, consecutive_hard_allowed: false } as unknown as Value,
     goal: { ...v.input.goal, edits: (v.input.goal_edits ?? []).map(e => ({ ...e, feasibility_rerun: true })) } as unknown as Value,
@@ -154,7 +167,7 @@ function locate(spec: Spec, rec: RuleRecord, roots: Record<string, Value>, helpe
   if (!Array.isArray(list)) return null;
   for (const el of list) {
     let st = roots.state as Record<string, Value>;
-    if (rec.id === 'INV-16') st = { ...st, progression_profile: v.state.profileByWeek[(el as unknown as Week).index - 1] ?? 'slow' };
+    if (rec.id === 'INV-16') st = { ...st, progression_profile: v.state.profileByWeek[((roots.plan as unknown as { weeks: Week[] }).weeks).findIndex(x => x.start === (el as unknown as Week).start)] ?? 'slow' };
     const r = { ...roots, plan: { ...(roots.plan as object), [m[1]]: [el] } as unknown as Value, state: st as unknown as Value };
     const val = truthy(evalExpr(rec.assert!, evalContext(spec, r, {}, helpers)));
     if (val === false) return 'segments' in (el as object) ? { s: el as unknown as Session } : { w: el as unknown as Week };

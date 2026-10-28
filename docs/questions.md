@@ -1,5 +1,7 @@
 # Open questions (after spec v5.2)
 
+*Q-E27 to Q-E32 were added after the first oracle run (engine session, October 2026). Disagreements with the oracle are in `disagreements.md`.*
+
 Each item has a proposed default; code that relies on it is marked `// SPEC-QUESTION Qn` (CLAUDE.md rule 1). Owner tasks are marked **owner**.
 
 | # | Question | Proposed default (in force) | Who |
@@ -53,6 +55,12 @@ Found while building `engine/`. Each has the default the engine uses now; the co
 | Q-E24 | After a break of 8–29 days, from which values do the baseline holds restart? | From the reduced first week back; older runs leave the 30-day window after that week | spec |
 | Q-E25 | `t0t3_limit(w)` (INV-27) is defined only abstractly | The runner's time, and the run count × 1.10 × the 30-day maximum at the week's start | spec |
 | Q-E26 | Under a restricted gate (efforts ≤ E2 until cleared), at what effort is a time-goal race planned? | At the ceiling (E2) | spec / coaching panel |
+| Q-E27 | The 28-day window of V28 can reach back before the profile was created. Do those weeks count as zero, or at the claimed weekly running? | Weeks before creation **with no logged runs** count at the claimed weekly time, distance and runs (estimated); weeks with logged runs count as logged | spec |
+| Q-E28 | INV-08 / LOD-051 compare taper weeks with "the pre-taper block". Which weeks are that block? | The 3 weeks before the taper: runs a week = floor of their mean; "had an E3 touch" if any of them holds an E3 or E4 segment. A re-plan that starts inside the taper keeps the parent's values | spec / oracle |
+| Q-E29 | On a weekly re-plan, FEA-021 re-counts the key-session weeks still needed with today's levels, so after a few weeks a feasible plan becomes LEVELS_UNREACHABLE (the oracle's OQ-01). How are weeks already trained counted? | Weeks of this season with a logged key session reduce K_key by one each; weeks with a logged fuelling practice run reduce the FUEL weeks the same way (FEA-025 does the same for phase minimums) | spec (council) |
+| Q-E30 | INV-19's W ("no deload when W < deload.min_plan_weeks"): the season's plan length or the weeks left? | The season's length: a re-plan that keeps the parent's layout counts W in season weeks, so a deload placed at day 0 stays valid | spec |
+| Q-E31 | 06 gives SES-M-004 (fuelled long run) the prerequisite "DUR L1 (FUEL edges, 02)"; 02 says those edges gate **attaining** FUEL L1, not scheduling the session that trains it. Can a fuelled long run be planned before DUR L1? | Yes: the fuelled long run is scheduled without DUR L1; FUEL L1 is only attained once DUR L1 holds. (Before v5.2's level tests this did not matter, because DUR came from the log) | spec |
+| Q-E32 | FEA-021's K_all counts HAB weeks for a never-run runner, though the start ladder credits HAB L2 at its exit (02 §2) | The HAB gap is counted from level 2 when a start ladder is in the plan | spec |
 
 ### Readings for the oracle (engine and 13 may disagree; not changed in code)
 

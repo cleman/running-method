@@ -19,8 +19,10 @@ export function allocatePhases(x: PhaseInputs): PhaseLayout {
   }
   if (W <= 4) {
     // PHS-010: SHARPEN + compressed taper (H1)
-    const ph: PhaseType[] = [...Array(Math.max(0, W - T)).fill('SHARPEN'), ...Array(Math.min(T, W)).fill('TAPER')];
-    return { phases: ph, B: 0, U: 0, S: 0, fits: true };
+    // a ladder still running is never compressed (SAF-085): its weeks come first, then SHARPEN, then the taper
+    const lw = x.ladderWeeks;
+    const ph: PhaseType[] = [...Array(Math.min(lw, W)).fill(x.ladderKind ?? 'RTR'), ...Array(Math.max(0, W - T - lw)).fill('SHARPEN'), ...Array(Math.min(T, Math.max(0, W - lw))).fill('TAPER')];
+    return { phases: ph, B: 0, U: 0, S: 0, fits: lw + Math.min(T, W) <= W };
   }
   const rtr = x.ladderWeeks;
   const R = W - T - rtr;

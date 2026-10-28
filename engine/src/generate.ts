@@ -4,7 +4,8 @@ import type { GeneratorInput, Goal, Plan, Phase, Session } from './model/types.t
 import { type Spec, pnum, pval, roundUp } from './context.ts';
 import { canonical } from './util/canonical.ts';
 import { sha256Hex } from './util/sha256.ts';
-import { addDays, daysBetween, WEEKDAYS } from './util/dates.ts';
+import { addDays, daysBetween, mondayOf, WEEKDAYS } from './util/dates.ts';
+import { reasonClass, REASON_ORDER } from './rules/helpers.ts';
 import { deriveState, type DerivedState, NODES } from './pipeline/state.ts';
 import { runGate, scalar, type FiredRule, type GateResult } from './pipeline/gate.ts';
 import { assess, availability, type Availability, type Feasibility } from './pipeline/feasibility.ts';
@@ -53,6 +54,7 @@ function validatorView(spec: Spec, input: GeneratorInput, st: DerivedState, gate
       // Q-E21: an undefined L30 (return ladder) is replaced by the entry rung's session time, dated the day before the plan
       L30_eff_time_s: st.L30_source === 'undefined_rtr' && feas.layout?.ladder.length ? feas.layout.ladder[0].total_s : st.L30_eff_time_s,
       L30_eff_dist_m: st.L30_eff_dist_m, L30_source: st.L30_source === 'undefined_rtr' ? 'claim' : st.L30_source,
+      claimDate: st.L30_source === 'undefined_rtr' ? addDays(input.today, -1) : addDays(input.today, st.claim_day),
       V_hold_s: rtrExit(feas).V ?? st.V_hold_s, L_hold_s: rtrExit(feas).L ?? st.L_hold_s,
       tol_level: st.levels.TOL, tol_confidence: st.level_confidence.TOL, levels: { ...st.levels },
       ladderEndDate: ladderWeeks ? addDays(plan.plan_start, 7 * ladderWeeks) : null, max_tolerated_g_h: null,
@@ -60,14 +62,16 @@ function validatorView(spec: Spec, input: GeneratorInput, st: DerivedState, gate
       logged: st.entries.filter(e => e.is_run && e.measured && !e.flagged).map(e => ({ date: e.date, duration_s: e.duration_s, distance_m: e.distance_m ?? null })),
     },
     // INV-25 binds a goal race's long-run demand; a goal-free H0 plan has none
-    demand: { L_req_time_s: feas.demand.family === 'base' ? 0 : feas.demand.L_req_time_s, floor_dist_m: feas.demand.floor_dist_m, met_by_logged_distance: feas.demand.met_by_logged_distance, family: feas.demand.family, distance: input.goal.distance, time_cap_s: feas.demand.time_cap_s, runs },
+    demand: { L_req_time_s: feas.demand.family === 'base' ? 0 : feas.demand.L_req_time_s, floor_dist_m: feas.demand.floor_dist_m, met_by_logged_distance: feas.demand.met_by_logged_distance, credited: feas.demand.credited, family: feas.demand.family, distance: input.goal.distance, time_cap_s: feas.demand.time_cap_s, runs },
     anchor: st.anchor ? { confidence: st.anchor.confidence, date: st.anchor.date } : null,
   };
   void pnum;
 }
 
 /** S0–S8r for one goal (also the nested run of each S9 option, 12 §3.7 step 5). */
-function core(spec: Spec, input: GeneratorInput, nested: boolean): Core {
+const GROWTH_REASONS = new Set(['PHASES_DO_NOT_FIT', 'AVAILABILITY_TIME', 'LEVELS_UNREACHABLE']);
+
+function core(spec: Spec, input: GeneratorInput, nested: boolean, degraded = false): Core {
   const fired: FiredRule[] = [];
   const messages: MessageInstance[] = [];
   const ledger: LedgerEntry[] = [];
@@ -93,9 +97,13 @@ function core(spec: Spec, input: GeneratorInput, nested: boolean): Core {
   }
   // ---- S3/S4: feasibility, phases (dry run)
   let feas = assess(spec, input, st, gate, av);
+  // FEA-043: a degraded completion builds from the current state; the growth reasons that triggered it do not block it
+  if (degraded) { feas.reasons = feas.reasons.filter(r => !GROWTH_REASONS.has(r)); if (feas.layout && !feas.reasons.some(r => reasonClass(r) === 'infeasible')) feas.verdict = 'stretch'; }
   fired.push(...feas.fired);
   for (const m of feas.messages) messages.push({ id: m.id, rule_id: m.rule_id });
   if (feas.verdict === 'infeasible' || !feas.layout) {
+    const dc = nested ? null : degradedCompletion(spec, input, st, feas);
+    if (dc) return dc;
     fired.push({ stage: 'S9', rule_id: 'GEN-003', op: 'fail_closed' });
     return { kind: 'fail_closed', gate, st, feas, ledger, fired, messages };
   }
@@ -144,13 +152,37 @@ function core(spec: Spec, input: GeneratorInput, nested: boolean): Core {
   return { kind: 'plan', gate, st, feas, plan, validation: report, ledger, fired, messages };
 }
 
+/**
+ * FEA-042/043 (a): a re-plan that turned infeasible only for growth reasons (PHASES_DO_NOT_FIT, AVAILABILITY_TIME,
+ * LEVELS_UNREACHABLE), with the goal race's long-run demand met or credited (FEA-025) and the taper still ahead, keeps the
+ * goal as a finish goal, builds the remaining weeks under every cap and reports stretch with DEGRADED_COMPLETION.
+ * Branch (b) LADDER_RUNWALK (5K finish on the start ladder) is not built yet.
+ */
+function degradedCompletion(spec: Spec, input: GeneratorInput, st: DerivedState, feas: Feasibility): Core | null {
+  if (!input.parent_plan || !feas.demand || input.goal.goal_type !== 'time' || !input.goal.race_date) return null;
+  const inf = feas.reasons.filter(r => reasonClass(r) === 'infeasible');
+  if (!inf.length || !inf.every(r => GROWTH_REASONS.has(r))) return null;
+  const met = feas.demand.credited || st.L30_eff_time_s >= feas.demand.L_req_time_s - pnum(spec, 'load.round_down_s');
+  const weeksLeft = Math.floor(daysBetween(mondayOf(input.today), mondayOf(input.goal.race_date)) / 7) + 1;
+  const taperLeft = input.parent_plan.weeks.filter(w => w.taper_k && w.start >= mondayOf(input.today)).length || Math.max(1, input.parent_plan.taper_weeks_n ?? 1);
+  if (!met || weeksLeft < taperLeft) return null;
+  const inner = core(spec, { ...input, goal: { ...input.goal, goal_type: 'finish', target_time_s: null } }, true, true);
+  if (inner.kind !== 'plan' || !inner.feas || !inner.plan) return null;
+  inner.feas.reasons = [...new Set([...inner.feas.reasons, 'DEGRADED_COMPLETION'])].sort((a, b) => REASON_ORDER.indexOf(a) - REASON_ORDER.indexOf(b));
+  inner.feas.verdict = 'stretch';
+  inner.plan.degraded = true;
+  inner.fired.push({ stage: 'S3', rule_id: 'FEA-043', op: 'degraded_completion', value: inf.join(',') });
+  inner.messages.push({ id: 'MSG-FEA-DEGRADED', layer: 'card', rule_id: 'FEA-043' } as MessageInstance);
+  return inner;
+}
+
 /** Helper bundle the repair methods use (validator-side definitions, 07 §5a). */
 function validatorHelpers(spec: Spec, v: ValidatorView, plan: Plan) {
   const planned = () => plan.weeks.flatMap(w => w.sessions).filter(s => s.is_run && !s.is_goal_race);
   const l30 = (d: string, f: 'time' | 'dist') => {
     let m = 0;
     const win = (x: string) => { const k = daysBetween(x, d); return k >= 1 && k <= 30; };
-    if (v.state.L30_source === 'claim' && win(addDays(v.input.today, -1))) m = f === 'time' ? v.state.L30_eff_time_s : (v.state.L30_eff_dist_m ?? 0);
+    if (v.state.L30_source === 'claim' && win(v.state.claimDate ?? addDays(v.input.today, -1))) m = f === 'time' ? v.state.L30_eff_time_s : (v.state.L30_eff_dist_m ?? 0);
     for (const e of v.state.logged) if (win(e.date)) m = Math.max(m, f === 'time' ? e.duration_s : (e.distance_m ?? 0));
     for (const s of planned()) if (win(s.date)) m = Math.max(m, f === 'time' ? s.planned_duration_s : (s.planned_distance_m ?? 0));
     return m;
@@ -185,8 +217,10 @@ function build(spec: Spec, input: GeneratorInput, st: DerivedState, gate: GateRe
     id: '', version: (input.parent_plan?.version ?? 0) + 1, parent_plan_id: input.parent_plan?.id ?? null, goal_id: g.id, preset_id: 'method_default',
     status: 'active', degraded: false, pace_mode: sessions.some(s => s.pace_range) ? 'paced' : 'effort_only', plan_start: L.planStart,
     race_date: g.race_date ?? null, W: feas.W ?? L.phases.length, horizon: feas.horizon, published_until: addDays(input.today, pnum(spec, 'replan.published_days')),
-    phases: phasesOf(L.phases), taper_weeks_n: L.phases.filter(p => p === 'TAPER').length, v_ref_s: ref?.planned_time_s ?? null, lr_ref_s: ref?.lr_s ?? null,
-    pre_taper_runs: b.pre_taper_runs || null, pre_taper_had_e3: b.pre_taper_had_e3, peak_lr_s: Math.max(0, ...runs.map(s => s.planned_duration_s)),
+    phases: phasesOf(L.phases), taper_weeks_n: Math.max(L.phases.filter(p => p === 'TAPER').length, ...L.curve.map(c => c.taper_k ?? 0)), v_ref_s: ref?.planned_time_s ?? null, lr_ref_s: ref?.lr_s ?? null,
+    // a re-plan that starts inside the taper keeps the parent's pre-taper reference (INV-08)
+    pre_taper_runs: (L.phases[0] === 'TAPER' && input.parent_plan ? input.parent_plan.pre_taper_runs : b.pre_taper_runs) || null,
+    pre_taper_had_e3: L.phases[0] === 'TAPER' && input.parent_plan ? input.parent_plan.pre_taper_had_e3 : b.pre_taper_had_e3, peak_lr_s: Math.max(0, ...runs.filter(s => s.is_long_run && !s.is_extension).map(s => s.planned_duration_s)),
     peak_lr_dist_m: null, race_fuel_g_h: null, drink_ml_h: null, weeks: b.weeks,
   };
   for (const s of sessions) s.in_published_window = s.date <= plan.published_until;
@@ -210,7 +244,7 @@ function optionInputs(spec: Spec, input: GeneratorInput, feas: Feasibility, st: 
     const ch = clone();
     const change: Record<string, unknown> = {};
     if (avail.includes('AVAILABILITY_TIME')) {
-      const extra = roundUp(feas.demand.V_req_time_s / 60 - (input.profile.available_minutes_per_week ?? 0), 10);
+      const extra = Math.ceil(feas.demand.V_req_time_s / 60 - (input.profile.available_minutes_per_week ?? 0));   // FEA-030: the exact extra minutes
       ch.profile.available_minutes_per_week = (input.profile.available_minutes_per_week ?? 0) + extra;
       change.extra_minutes_per_week = extra;
     }
@@ -303,7 +337,7 @@ function feasibilityOut(feas: Feasibility, input: GeneratorInput, options?: Reco
     } : null,
     demand: d.family === 'base' ? null : {
       preset_id: d.preset, L_req_time_s: Math.round(d.L_req_time_s), floor_dist_m: Math.round(d.floor_dist_m), distance_stop_m: d.dist_stop_m, V_req_time_s: Math.round(d.V_req_time_s),
-      runs_req: d.runs_req, required_levels: d.required_levels, expected_race_duration_s: Math.round(d.expected_duration_s), met_by_logged_distance: d.met_by_logged_distance, credited: false,
+      runs_req: d.runs_req, required_levels: d.required_levels, expected_race_duration_s: Math.round(d.expected_duration_s), met_by_logged_distance: d.met_by_logged_distance, credited: d.credited,
     },
     interim_target_s: null,
     ...(options ? { options, alternative_option: null } : {}),
@@ -322,17 +356,27 @@ function stateOut(st: DerivedState, gate: GateResult, input: GeneratorInput) {
   };
 }
 
-function engineStateOut(input: GeneratorInput, st: DerivedState | undefined, feas: Feasibility | undefined, plan: Plan | undefined) {
+function engineStateOut(spec: Spec, input: GeneratorInput, st: DerivedState | undefined, feas: Feasibility | undefined, plan: Plan | undefined) {
   const prev = input.engine_state ?? {};
   return {
     ...prev, as_of: input.today, plan_version: plan?.version ?? prev.plan_version ?? 0,
     progression_profile_until: prev.progression_profile_until ?? (st && st.slow_log ? addDays(input.today, 7 * st.probation_weeks_left) : null),
     rich_weeks_consecutive: prev.rich_weeks_consecutive ?? 0, baseline_confirmed: st?.baseline_confirmed ?? prev.baseline_confirmed ?? false,
     est_confirm_weeks: st?.est_confirm_weeks ?? prev.est_confirm_weeks ?? 0,
-    ladder: prev.ladder ?? (feas?.layout?.ladderKind ? { kind: feas.layout.ladderKind, rung_index: feas.layout.ladderKind === 'start' ? 1 : 1, floor_rung: feas.layout.ladderKind === 'start' ? 1 : 1, start: feas.layout.planStart, entry_reason: feas.layout.ladderKind === 'start' ? 'never_run' : 'gap', counted_session_ids: [], unclean_weeks_on_rung: 0, backfill_advance_dates: [] } : null),
+    // SAF-082/083: the ladder position moves with the clean sessions logged (rung = floor rung + done ÷ sessions per rung)
+    ladder: prev.ladder && st ? { ...prev.ladder, rung_index: (prev.ladder.floor_rung ?? 1) + Math.floor(st.ladder_pos / pnum(spec, 'rtr.sessions_per_rung')), counted_session_ids: st.ladder_counted }
+      : prev.ladder ?? (feas?.layout?.ladderKind ? { kind: feas.layout.ladderKind, rung_index: feas.layout.ladderKind === 'start' ? 1 : Number(String(feas.layout.ladder[0]?.rung ?? 'R1').slice(1)), floor_rung: feas.layout.ladderKind === 'start' ? 1 : Number(String(feas.layout.ladder[0]?.rung ?? 'R1').slice(1)), start: feas.layout.planStart, entry_reason: feas.layout.ladderKind === 'start' ? 'never_run' : 'gap', counted_session_ids: [], unclean_weeks_on_rung: 0, backfill_advance_dates: [] } : null),
     active_anchor_id: st?.anchor?.confidence === 'measured' ? st.anchor.id : (prev.active_anchor_id ?? null),
     pace_anchor_10k_equiv_s: st?.anchor?.confidence === 'measured' ? Math.round(st.anchor.equiv_10k_s) : (prev.pace_anchor_10k_equiv_s ?? null),
     last_verdict: feas?.verdict ?? prev.last_verdict ?? null,
+    module_dose: st?.module_dose ?? prev.module_dose ?? {},
+    // CMP-002 levels passed by test, SES-013 failed/unlogged tests and their retest dates
+    levels: [...(prev.levels ?? []), ...(st?.test_levels ?? []).map(t => ({ node: t.node, level: t.level, confidence: 'measured' as const, source: 'exit_test', achieved_on: t.achieved_on }))],
+    exit_tests: st?.exit_tests ?? prev.exit_tests ?? [],
+    // published deload weeks (the current week), so later re-plans know which completed weeks were deloads (LOD-003)
+    dated_events: { ...(prev.dated_events ?? {}), deload_weeks: [...new Set([...(prev.dated_events?.deload_weeks ?? []), ...(plan?.weeks ?? []).filter(w => w.is_deload && w.start <= input.today).map(w => w.start)])].sort(),
+      strides_runs: [...(st?.strides_dates ?? new Set(prev.dated_events?.strides_runs ?? []))].filter(d => !st || daysBetween(d, input.today) <= 42).sort(),
+      taper_weeks: [...new Set([...(prev.dated_events?.taper_weeks ?? []), ...(plan?.weeks ?? []).filter(w => w.taper_k && w.start <= input.today).map(w => w.start)])].sort() },
   };
 }
 
@@ -359,11 +403,14 @@ function planMessages(feas: Feasibility, input: GeneratorInput, plan?: Plan): Me
   return out;
 }
 
-export function generate(spec: Spec, input: GeneratorInput): Result {
+export function generate(spec: Spec, input0: GeneratorInput): Result {
+  // GEN-004 / TST-080: the output never depends on the order in which log entries or events arrive
+  const byKey = <T extends { date: string; id: string }>(a: T, b: T) => a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  const input: GeneratorInput = { ...input0, log: [...(input0.log ?? [])].sort(byKey), events: [...(input0.events ?? [])].sort(byKey) };
   const r = core(spec, input, false);
   const base: Result = {
     schema_version: 'v5.2', kind: r.kind, ruleset_version: spec.rulesVersion, registry_version: spec.registryVersion, today: input.today,
-    messages: [] as MessageInstance[], fired_rules: [], engine_state: engineStateOut(input, r.st, r.feas, r.plan), flags: input.flags,
+    messages: [] as MessageInstance[], fired_rules: [], engine_state: engineStateOut(spec, input, r.st, r.feas, r.plan), flags: input.flags,
   };
   const dedupe = (ms: MessageInstance[]) => { const seen = new Set<string>(); return ms.filter(m => { const k = m.id; if (seen.has(k)) return false; seen.add(k); return true; }); };
   if (r.kind === 'hold') { base.hold = r.hold; base.previous_plan_kept = input.parent_plan != null; base.messages = dedupe(r.messages); base.fired_rules = firedOut(r.fired); return base; }
