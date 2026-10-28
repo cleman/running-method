@@ -1,0 +1,28 @@
+<div class="banner" role="note">
+  <div class="banner-inner"><span>Prototype, not medical advice, not validated on runners</span></div>
+</div>
+<header class="wrap topbar">
+  <div class="brand">
+    <b>Running Method</b>
+    <small>Test build for trusted testers · spec {{SPEC_VERSION}} · built {{BUILT_ON}}</small>
+  </div>
+  <button class="btn quiet small" type="button" data-go="data" id="go-data">Your data</button>
+</header>
+<main class="wrap" id="main" aria-live="polite"></main>
+<nav class="tabs" aria-label="Steps">
+  <ol>
+    <li><button type="button" data-go="profile" id="tab-profile"><b>1</b>Profile</button></li>
+    <li><button type="button" data-go="goal" id="tab-goal"><b>2</b>Goal</button></li>
+    <li><button type="button" data-go="plan" id="tab-plan"><b>3</b>Plan</button></li>
+    <li><button type="button" data-go="log" id="tab-log"><b>4</b>Log</button></li>
+    <li><button type="button" data-go="replan" id="tab-replan"><b>5</b>Re-plan</button></li>
+  </ol>
+</nav>
+<div id="busy" class="busy" hidden>
+  <div class="card" role="status">
+    <div class="spinner" aria-hidden="true"></div>
+    <b id="busy-title">Building your plan</b>
+    <p class="muted small" id="busy-text">The generator runs here, on this device. When a goal does not fit, it checks each option before showing it, which can take up to a minute on a phone.</p>
+  </div>
+</div>
+<div id="toast" class="toast" hidden></div>

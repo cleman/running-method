@@ -1,0 +1,15 @@
+{
+  "name": "running-method-web",
+  "version": "0.1.0",
+  "description": "Prototype web page for trusted testers: the engine runs in the browser, answers stay in the browser.",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node check.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2"
+  }
+}
