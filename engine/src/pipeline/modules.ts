@@ -5,7 +5,7 @@ import type { Effort, Node, PhaseType } from '../model/types.ts';
 
 export interface ModuleDef {
   id: string; name: string; trains: { node: Node; level: number }[]; prereqs: { node: Node; level: number }[];
-  effort_profile: Effort; allowed_phases: (PhaseType | 'BASE_LATE' | 'BUILD_LAST_THIRD')[]; presets: string[] | 'all'; why: string; long?: boolean;
+  effort_profile: Effort; allowed_phases: (PhaseType | 'BASE_LATE' | 'BUILD_LAST_THIRD')[]; presets: string[] | 'all'; why: string; long?: boolean; hills?: boolean;
 }
 const ALL_RUN: PhaseType[] = ['START_LADDER', 'RTR', 'ONBOARD', 'BASE', 'BUILD', 'SPECIFIC', 'SHARPEN', 'TAPER', 'RACE', 'TRANSITION', 'MAINTAIN'];
 const t = (node: Node, ...levels: number[]) => levels.map(level => ({ node, level }));
@@ -32,6 +32,12 @@ export const MODULES: Record<string, ModuleDef> = {
   'SES-M-020': { id: 'SES-M-020', name: 'FT-2 critical-speed test', trains: [], prereqs: [...t('VO2', 1), ...t('THR', 1), ...t('TOL', 2)], effort_profile: 'E4', allowed_phases: ['BASE', 'BUILD'], presets: 'all', why: 'MSG-SES-TEST' },
   'SES-M-022': { id: 'SES-M-022', name: 'Heat-exposure easy run', trains: t('HEAT', 2), prereqs: t('AER', 2), effort_profile: 'E1', allowed_phases: ['SPECIFIC', 'TAPER'], presets: 'all', why: 'MSG-NUT-HEAT' },
   'SES-M-024': { id: 'SES-M-024', name: 'Taper sharpener', trains: [], prereqs: [], effort_profile: 'E3', allowed_phases: ['TAPER'], presets: 'all', why: 'MSG-SES-THR' },
+  // v5.3 (06 §2, §2d): new modules, each with a time form and a distance form (fartlek: time only)
+  'SES-M-027': { id: 'SES-M-027', name: 'Short reps', trains: [...t('VO2', 2, 3), ...t('ECO', 2)], prereqs: [...t('VO2', 1), ...t('THR', 1), ...t('TOL', 2)], effort_profile: 'E4', allowed_phases: ['BUILD', 'SPECIFIC', 'SHARPEN', 'MAINTAIN'], presets: ['method_default', 'daniels', 'hansons', 'pfitzinger_classic'], why: 'MSG-SES-SHORT' },
+  'SES-M-028': { id: 'SES-M-028', name: 'Hill repeats', trains: [...t('VO2', 2, 3), ...t('ECO', 2)], prereqs: [...t('VO2', 1), ...t('TOL', 2)], effort_profile: 'E4', allowed_phases: ['BASE_LATE', 'BUILD', 'SPECIFIC', 'SHARPEN', 'MAINTAIN'], presets: ['method_default', 'daniels', 'pfitzinger_classic'], why: 'MSG-SES-HILLS', hills: true },
+  'SES-M-029': { id: 'SES-M-029', name: 'Fartlek', trains: t('VO2', 2), prereqs: [...t('VO2', 1), ...t('HAB', 2)], effort_profile: 'E4', allowed_phases: ['BASE_LATE', 'BUILD', 'SPECIFIC', 'SHARPEN', 'MAINTAIN'], presets: ['method_default', 'daniels', 'hansons', 'pfitzinger_classic', 'higdon_novice', 'first', 'koop_ultra', 'norwegian_elite'], why: 'MSG-SES-FARTLEK' },
+  'SES-M-030': { id: 'SES-M-030', name: 'Combination threshold + VO2', trains: [...t('THR', 3, 4), ...t('VO2', 3)], prereqs: [...t('THR', 2), ...t('VO2', 2)], effort_profile: 'E4', allowed_phases: ['BUILD', 'SPECIFIC', 'SHARPEN', 'MAINTAIN'], presets: ['method_default', 'daniels', 'pfitzinger_classic'], why: 'MSG-SES-COMBO' },
+  'SES-M-031': { id: 'SES-M-031', name: 'Long run with a steady finish', trains: t('PACE', 1), prereqs: [...t('DUR', 2), ...t('AER', 3)], effort_profile: 'E2', allowed_phases: ['BUILD', 'SPECIFIC'], presets: ['method_default'], why: 'MSG-SES-LONG-STEADY', long: true },
   'SES-M-026': { id: 'SES-M-026', name: 'Goal race', trains: [], prereqs: [], effort_profile: 'E4', allowed_phases: ['RACE', 'TAPER'], presets: 'all', why: 'MSG-SES-RACE' },
 };
-// SPEC-QUESTION Q-E5: the goal race has no module id in 06; the engine uses SES-M-026 "Goal race" (not in the catalogue).
+// Q-E5 (v5.3): SES-M-026 "Goal race" is now in the 06 catalogue.

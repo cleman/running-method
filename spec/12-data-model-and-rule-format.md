@@ -1,4 +1,4 @@
-# 12 — Data model and rule format (v5.2)
+# 12 — Data model and rule format (v5.3)
 
 Serves criteria 11 (data model, rule format usable by a website rule engine), 5 (deterministic), 8 (evidence travels with every rule and parameter), 13 (testable). Entity layering follows the common practice profile → goal → plan → phase → week → session [hearing-1 §5, CREDIBLE]; no plan-level standard exists [hearing-1 §5, UNKNOWN], so this schema is the method's own.
 
@@ -17,7 +17,7 @@ Serves criteria 11 (data model, rule format usable by a website rule engine), 5 
 ### Runner side
 | Entity | Key fields |
 |---|---|
-| `RunnerProfile` | id, birth_month, birth_year (both required, no "I don't know"; INP-001/002, v5), sex (optional; used only for REDs screen routing and age-grade tables), body_mass_kg (optional, confidence), training_age_years (conf), other_sport_background ∈ {none, cycling, swimming, triathlon, team, other}, injury_last_12m (bool, site_text never interpreted), injuries_history_count, available_days[] (weekday set), max_runs_per_week, available_minutes_per_week, blocked_dates[], long_run_day, run_walk_preference (bool), preset_preference (SchoolPreset id or null), night_shift_dates[] (dated roster; 01 CTX-005), never_run (bool; 01 §1), hill_access (bool, default false; 06 SES-022), level_tests_opt_out (bool, default false; 06 SES-025, v5.2), nutrition_referral_flag (bool, one fixed question; 11), caffeine_sensitive (bool; 11), units_pref, created_at |
+| `RunnerProfile` | (v5.3 adds injury_last_12w, hard_sessions_max ∈ {1, 2, 3}, prescription_preference ∈ {distance, time, both}; 01 §1.1) id, birth_month, birth_year (both required, no "I don't know"; INP-001/002, v5), sex (optional; used only for REDs screen routing and age-grade tables), body_mass_kg (optional, confidence), training_age_years (conf), other_sport_background ∈ {none, cycling, swimming, triathlon, team, other}, injury_last_12m (bool, site_text never interpreted), injuries_history_count, available_days[] (weekday set), max_runs_per_week, available_minutes_per_week, blocked_dates[], long_run_day, run_walk_preference (bool), preset_preference (SchoolPreset id or null), night_shift_dates[] (dated roster; 01 CTX-005), never_run (bool; 01 §1), hill_access (bool, default false; 06 SES-022), level_tests_opt_out (bool, default false; 06 SES-025, v5.2), nutrition_referral_flag (bool, one fixed question; 11), caffeine_sensitive (bool; 11), units_pref, created_at |
 | `ScreeningRecord` | id, runner_id, instrument = "PAR-Q+ 2023" (fixed text), answers{q_id: bool}, followup_answers{q_id: bool}, guardian_attested_on (minors), guardian_hardcap_optin (bool; SAF-043), completed_on, valid_until (= completed_on + `screen.valid_days`), outcome ∈ {proceed, proceed_restricted, pause_until_clearance, no_plan}, clearance_attested_on (nullable) |
 | `ScreeningItemMap` | item_id → factor ∈ {symptom, known_disease, musculoskeletal, other}; filled from the licensed PAR-Q+ text and signed off in clinical review (release blocker, RESOLUTIONS A4) |
 | `SpecialStatus` | runner_id, type ∈ {minor, pregnant, postpartum, masters_65_vigorous}, start_date, attested (bool), due_date (required in pregnancy mode; SAF-051/054, v5), has_given_birth (SAF-054); `pregnant` → maintenance mode, effort ≤ `pregnancy.max_effort` (SAF-051) |
@@ -25,7 +25,7 @@ Serves criteria 11 (data model, rule format usable by a website rule engine), 5 
 | `ContextModifier` | id (`CTX-nnn/x`: one record per operation), rule_id (CTX-nnn), op_index, trigger (condition), parameter_id, operation ∈ {set, min, max, multiply}, value, grade, envelope (population tags), user_message_id |
 | `ActivityRecord` | id, runner_id, date, entered_at, type ∈ {run, run_walk, race, test, cross_training, strength}, planned_session_id (nullable), duration_s, distance_m (nullable), rpe_0_10, effort_reported (nullable), pain_0_10 (nullable), gi_score_0_10 (nullable), carb_g_per_h (nullable), notes, fatigue_flag (bool), stopped_early_reason (enum, nullable), short_sleep_or_night_shift (bool), conditions_hot (bool), effort_all_out (bool), fuel_products[], **confidence**, **plausibility ∈ {ok, flagged, confirmed}**, source ∈ {tick, manual_add, onboarding_claim, backfill} |
 | `OnboardingClaim` | runner_id, claimed_weekly_distance_m, claimed_weekly_time_s, claimed_runs_per_week, claimed_L30_distance_m, claimed_L30_duration_s, last_run_date, claimed_continuous_30min (bool), each with confidence |
-| `PerformanceAnchor` | id, runner_id, kind ∈ {race, field_test, cs_test}, distance_m, time_s, date, entered_at, confidence, age_grade_pct (derived, WMA 2023), superseded_by |
+| `PerformanceAnchor` | id, runner_id, kind ∈ {race, field_test, cs_test}, distance_m, time_s, date, entered_at, effort_all_out, official_result_confirmed (v5.3, EXP-001), confidence ∈ {measured, declared (v5.3, INP-005), estimated}, age_grade_pct (derived, WMA 2023; v5.3 approximate tables, 02 §2b), superseded_by |
 | `SweatTest` | runner_id, date, duration_s, rate_ml_h, conditions (11) |
 | `REDsScreenRecord` | runner_id, date, answers{q_id: bool} (fixed question set), trigger ∈ {onboarding, interval, off_cycle} (11 NUT-050) |
 | `HRReference` | runner_id, kind ∈ {hrmax_measured, lthr_measured}, value_bpm, date, method — no `age_formula` kind exists (INV-09) |
@@ -34,7 +34,7 @@ Serves criteria 11 (data model, rule format usable by a website rule engine), 5 
 | Entity | Key fields |
 |---|---|
 | `DerivedState` | runner_id, as_of, V7_time_s, V7_dist_m, V28_time_s, V28_dist_m, F28, L30_eff_dist_m, L30_eff_time_s, L30_source ∈ {log_rich, log_sparse_claim, undefined_rtr}, log_status ∈ {rich, sparse, none}, days_since_last_run, age_low, age_high (INP-002), tol_tier, prior_tol_tier (tier before the latest gap; SAF-080), V_hold_s, L_hold_s (baseline hold, LOD-005), active_anchor_id, pace_anchor_10k_equiv_s (for the FEA-014 pace bands), pending_anchor_10k_s and pending_anchor_date (ADP-067, v5.1), baseline_confirmed and est_confirm_weeks (LOD-007/008, v5.1), perf_level (age-grade band), progression_profile ∈ {standard, slow}, probation_until, active_flags[] |
-| `CompetenceState` | runner_id, node, level, confidence, source ∈ {log_threshold, exit_test, self_report}, achieved_on, last_exercised_on |
+| `CompetenceState` | runner_id, node, level, confidence ∈ {measured, declared (v5.3: experienced path, EXP-002), estimated, unknown}, source ∈ {log_threshold, exit_test, self_report, ladder_credit, race_result (v5.3)}, achieved_on, last_exercised_on |
 
 ### Goal side
 | Entity | Key fields |
@@ -608,7 +608,7 @@ Every path below is used by at least one record. **v5.2 (Q12):** every path has 
 | `week` | `week.in_heat_window` | bool | the week overlaps the heat.acclim_window_days before the race (NUT-040, v5.2) |
 | `week` | `week.is_msp_week` | bool | SPECIFIC loading week whose loading_index_in_phase is a multiple of dst.msp_every_weeks (0, 2, 4 …; DST-018, v5.2) |
 | `week` | `week.is_race_long_run_week` | bool | the week's long run is the dst.race_long_every_weeks-th, 2×-th … non-deload long run of SPECIFIC (DST-006, v5.2) |
-| `week` | `week.key_dose_mode` | enum | 'progress' (default), 'start' (deload, SES-016), 'last' (maintenance, SES-018) (v5.2) |
+| `week` | `week.key_dose_mode` | enum | 'progress' (default), 'start' (deload, SES-016), 'last' (maintenance, SES-018) (v5.2), 'entry' (calibration: entry rung, no step-up, EXP-003, v5.3) |
 | `week` | `week.key_slots` | list<Slot> | the week's key slots in rank order after S7.3 (07 §2b, v5.2) |
 | `week` | `week.last_key_slot` | Slot | the last-ranked key slot (DST-018, v5.2) |
 | `week` | `week.loading_index_in_phase` | int | non-deload weeks of the same phase before this one (CMP-007 rotation, v5.2) |
@@ -620,6 +620,38 @@ Every path below is used by at least one record. **v5.2 (Q12):** every path has 
 | `week` | `week.strength_days_free` | int | days of the week where SES-020 may place strength (easy or key days, not the day before the long run) (v5.2) |
 | `week` | `week.test_allowed` | bool | not a deload, TAPER, RACE or TRANSITION week, and no other test (SES-014 field test or level test) in the week (SES-012, v5.2) |
 | `week` | `week.weeks_in_phase` | int | weeks of the current phase up to and including this one (PHS-014, v5.2) |
+| `anchor` | `anchor.effort_all_out` | bool | §2 entity field (the runner says the race was run all-out) |
+| `anchor` | `anchor.official_result_confirmed` | bool | v5.3 (EXP-001, INP-005): answer to "Was this an official race result, run all-out?"; null = not asked |
+| `plan` | `plan.plan_start` | date | §2 entity field (Monday of plan week 1) |
+| `profile` | `profile.injury_last_12w` | bool | v5.3: asked when injury_last_12m = true; the injury was in the last exp.injury_free_weeks (EXP-001) |
+| `profile` | `profile.hard_sessions_max` | int | v5.3 (owner decision 4): the runner's ceiling of key sessions a week, 1–3; null → exp.hard_sessions_max_default (SES-006) |
+| `profile` | `profile.prescription_preference` | enum | v5.3 (SES-031): distance, time or both; null → ses.prescription_default |
+| `session` | `session.has_repeats` | bool | the session (not a long run, not the goal race) holds at least one work segment at E3 or E4, repeated or continuous (SES-031, v5.3) |
+| `session` | `session.prescription_form` | enum | time, distance or both: how the card writes the repeats (SES-031, v5.3) |
+| `session` | `session.show_distances` | list<int m> | the distance written for each segment and recovery in the distance form, or null where the time form is kept (SES-032, v5.3) |
+| `session` | `session.is_projected` | bool | the session lies in a week after the current one (07 §2b projection, SES-028, v5.3) |
+| `session` | `session.confirmed_step` | int | the module's last logged dose step, or its entry rung (SES-027) when none is logged (SES-028, v5.3) |
+| `state` | `state.exp_path` | enum | none, calibrating, confirmed, fallen_back: the experienced-runner path (02 §2b, EXP-001…005; EngineState.experienced.path, v5.3) |
+| `state` | `state.exp_race` | PerformanceAnchor | the qualifying race of 02 §2b: the most recent anchor of kind race within exp.distance_tol_pct of 5K, 10K, HM or M; null if none (v5.3) |
+| `state` | `state.exp_race.date` | date | as anchor.date |
+| `state` | `state.exp_race.effort_all_out` | bool | as anchor.effort_all_out |
+| `state` | `state.exp_race.official_result_confirmed` | bool | as anchor.official_result_confirmed |
+| `state` | `state.exp_claims_consistent` | bool | the claims lie in the row of the 02 §2b table for the race's age-grade band (weekly time within exp.volume_band_min_min … exp.volume_band_max_min), claimed runs/week ≥ exp.runs_min, and GEN-022 found no inconsistency (EXP-001, v5.3) |
+| `state` | `state.exp_calibration_until` | date | last day of plan week exp.calibration_weeks of the experienced path (EXP-001; EngineState.experienced.calibration_until, v5.3) |
+| `state` | `state.exp_fallback_nodes` | list<enum> | nodes moved back to the cautious path by EXP-004 (too-hard key sessions) (v5.3) |
+| `state` | `state.exp_rpe_high_keys` | int | calibration key sessions logged with RPE > min(target RPE + ses.progress_rpe_margin, result.rpe_high − 1) (EXP-004, v5.3) |
+| `state` | `state.exp_rpe_high_nodes` | list<enum> | the nodes trained by those sessions (THR for SES-M-008, VO2 for SES-M-010) when there are at least exp.fallback_rpe_sessions of them (EXP-004, v5.3) |
+| `state` | `state.exp_missed_week` | bool | a completed calibration week holds no logged run (EXP-004, v5.3) |
+| `state` | `state.exp_volume_ratio_min` | number | lowest logged ÷ planned time over the completed calibration weeks; null before the first one is complete (EXP-004, v5.3) |
+| `state` | `state.exp_calibration_complete` | bool | every calibration week is complete and logged, with no EXP-004 condition (EXP-005, v5.3) |
+| `state` | `state.level_confidence.HAB` | enum | as state.level_confidence |
+| `state` | `state.level_confidence.AER` | enum | as state.level_confidence |
+| `state` | `state.level_confidence.TOL` | enum | as state.level_confidence |
+| `week` | `week.is_calibration` | bool | the week starts on or before state.exp_calibration_until while state.exp_path = calibrating, and its phase is BASE, BUILD or SPECIFIC (EXP-003, v5.3) |
+| `week` | `week.long_run_form` | enum | a (all-easy long run, three workouts) or b (two workouts and a long run with quality) (SES-026, v5.3) |
+| `week` | `week.exp_pattern_index` | int | week.loading_index_in_phase modulo the length of the exp.long_quality_pattern row (SES-026, v5.3; the grammar has no modulo operator) |
+| `week` | `week.exp_pattern_row` | enum | row of exp.long_quality_pattern: BUILD, SPECIFIC_time (time goal) or SPECIFIC_finish (SES-026, v5.3) |
+
 ### 2b.2b Element fields of list paths (v5.2, Q12)
 
 A comprehension variable (`s`, `x`, `w`, `lr`, `e`, `f`, `o`, `q` …) bound over a list path reads the fields of the list's element type. The element types and their fields are those of `spec/schema` (Session, Week: `result.schema.json`; ActivityRecord, RiskFlag, PerformanceAnchor, GoalEditAttempt, AdaptationEvent: `input-profile.schema.json`), plus these derived element fields:
@@ -631,6 +663,7 @@ A comprehension variable (`s`, `x`, `w`, `lr`, `e`, `f`, `o`, `q` …) bound ove
 | Session | `has_strides` | bool | the session carries a strides segment (SES-021) |
 | Session | `day_before_key`, `day_before_long_run` | bool | the next day holds a key session / the long run |
 | Session | `hard_time_s`, `e2_time_s` | int s | E3+E4 and E2 segment time of the session |
+| Session | `repeats_family_module`, `family_alternative_exists` | bool | v5.3 (SES-030): the key session uses the same family module as the most recent earlier slot of its family / another member of that family was eligible for this slot |
 | Week | `has_e3_touch` | bool | schema field (INV-08) |
 | Week | `completed_time_s` | int s | time of the week's done or partial sessions (ADP-024) |
 | PerformanceAnchor | `confidence` | enum | derived by INP-005 |
@@ -691,8 +724,8 @@ A comprehension variable (`s`, `x`, `w`, `lr`, `e`, `f`, `o`, `q` …) bound ove
 | `fuel_level_low(n)` | lower edge of `fuel.level_band[n]` (v5.2, NUT-013) |
 | `fuel_step_ceiling(goal, demand)` | min(fuel_band_high(goal.expected_duration_s), p('fuel.max_default_g_h'), upper edge of `fuel.level_band[demand.required_levels.FUEL]`) (v5.2, NUT-011) |
 | `target_rpe(e)` | `p('ses.target_rpe')[e]` (v5.2, SES-011) |
-| `dose_start(mid)`, `dose_max(mid)` | 0 and the last index of `ses.dose.<mid>.steps` (v5.2) |
-| `next_dose(mid, step)` | min(step + 1, dose_max(mid)) (v5.2) |
+| `dose_start(mid)`, `dose_max(mid)` | v5.3: the entry rung and the top rung of `ses.entry_rung.<mid>` / `ses.top_rung.<mid>` at the runner's level of the module's rung node (SES-027; modules without such a row: 0 and the last index of `ses.dose.<mid>.steps`, as in v5.2) |
+| `next_dose(mid, step)` | min(step + 1, dose_max(mid)) (v5.2; v5.3: dose_max is level-dependent) |
 | `dose_fit(mid, step, week)` | the largest step ≤ `step` whose work fits the week's remaining E3+E4 budget (`tid.hard_share_max` × V(w) minus the work of the slots ranked before it) and E2 budget; `null` when even `dose_start` does not fit (the slot is then dropped, SES-006) (v5.2) |
 | `dose_work_s(mid, step)` | work time of a step (repeats × rep length, or the E2/E3 share of a progression run) (v5.2) |
 | `highest_tol_level(v28_s, l30_s)` | highest TOL level whose 02 §2 weekly-time and long-run thresholds both hold (INP-030) |
@@ -700,6 +733,8 @@ A comprehension variable (`s`, `x`, `w`, `lr`, `e`, `f`, `o`, `q` …) bound ove
 | `level_prereqs_hold(node_id, n, d)` | every prerequisite edge of node level n (02 §3) holds on date d (CMP-002) |
 | `round_up(x, step)` | smallest multiple of `step` ≥ x |
 | `ceil_div(a, b)` | ⌈a / b⌉ |
+| `exp_level(node_id)` | v5.3 (EXP-002): THR and VO2 from `exp.level_table` by the age-grade band of state.exp_race; MSP from the same table when the race's distance family equals the goal's family, else 0; HAB, TOL, AER and DUR = the 02 §2 threshold level computed on the claims (as INP-030), capped at `exp.claim_level_cap`; any other node 0 |
+| `age_grade_pct(anchor, sex)` | v5.3 (02 §2b): 100 × `perf.wma_open_s`[sex][distance] / `perf.wma_age_factor`(sex, age_low(anchor.date)) / anchor.time_s, the factor interpolated linearly between the listed ages; sex unknown → the lower of the two sexes' values |
 | `anchor_l30_ok(state, goal)` | FEA-023: measured L30_eff_dist ≥ race / longest_ratio_max, or L30_eff_time ≥ L_req_time |
 
 ### 2b.4 Procedures (named algorithms; a record that calls one is `procedure`, not `formal`)
@@ -715,6 +750,7 @@ A comprehension variable (`s`, `x`, `w`, `lr`, `e`, `f`, `o`, `q` …) bound ove
 | `t0t3_limit(week)` | 07 S5 | MIN over every T0–T3 cap that applies to the week. **v5.2:** the value of the T0–T3 term of the 12 §3.6 composition for that target and binding in the current pass (+∞ when no T0–T3 cap wrote it) |
 | `decay(levels, gap_weeks, decay_weeks)` | 02 CMP-003 | per-node decay table. **v5.2:** for every node except TOL, AER and HAB (recomputed from the log), level − ⌊gap_weeks / decay_weeks⌋, floor 0, where gap_weeks counts from the node's `last_exercised_on` (EngineState) to today; recomputed at every call, so it never compounds |
 | `place_in_order(week, order)` | 06 SES-003 | slot placement with day constraints. **v5.2 algorithm:** D = the week's available weekdays minus blocked dates (SES-005); long run on `long_run_day` if in D, else the latest day of D; key slots on the k days of D that maximise the smallest gap (in days) between consecutive hard days of the Monday–Sunday week, the long run counting as a hard day (SES-004, owner Q2), with no two hard days on consecutive dates — also across the week boundary with the previous week's last hard day — and no key session or long run on a post-night-shift date (CTX-005); ties to the earliest set of dates; if no set exists, the lowest-ranked slot is dropped and the search repeats (07 §2b S7.4); easy runs on the earliest remaining days up to the week's run count; strides (SES-021) on the earliest easy runs not the day before a key session; strength (SES-020) on the earliest easy or key days not the day before the long run |
+| `distance_form(session)` | 06 §2d; SES-032 (v5.3) | conversion with the pace model, rounding to a list with a tolerance and a fallback to the time form per segment |
 | `choose_key_modules(week, k)` | 07 §2b S7.3; 02 CMP-007 | v5.2 algorithm in 02 §4 (CMP-007): DST-002 node filter, weighted gap per slot, fallback chain, DST-018 override, SES-012 test substitution, phase overrides |
 
 The validator re-implements the S-group procedures separately (07 §5a); the oracle of 07 §5a (TST-110…112) checks them against 13's hand values.
@@ -941,6 +977,7 @@ Every record in `rules.json` carries two derived fields, written by `tools/build
 | distribute_week | pipeline | S7.6 | per_week |
 | extras | pipeline | S7.7 | per_week (v5.2: SES-020/021) |
 | build_race_fuelling | pipeline | S7.8 | |
+| render_session | pipeline | S7.8 | per session (v5.3: SES-031/032 time or distance form) |
 | version_emitted | pipeline | S10 | |
 
 ### 3.6 Write composition (v5.2, engine glue Q2)
@@ -965,7 +1002,7 @@ FEA-013 is a `floor` on `feas.verdict_rank` (v5.2 fix: "at best stretch").
 4. S8 → S8r → S8: at most `repair.max_passes` repair passes (§07 6.1); after the last pass a still failing plan goes to S9 (`plan.s8r_exhausted`, GEN-003).
 5. S9 runs, for each candidate option in order, a **nested** call S3–S8 on the option's goal or availability (never S9 again: options of options are not generated) and keeps the first `repair.max_options` that pass (FEA-041).
 
-### 3.8 Persistence: EngineState (v5.2, engine glue Q4)
+### 3.8 Persistence: EngineState (v5.2, engine glue Q4; v5.3 adds `experienced`)
 
 > **In plain words.** The tool remembers only a few things between visits (for example which step of a return ladder you are on, or a doctor's clearance). Everything else is recomputed from your log, so the same inputs always give the same plan.
 
@@ -978,6 +1015,7 @@ FEA-013 is a `floor` on `feas.verdict_rank` (v5.2 fix: "at best stretch").
 | levels from exit tests and ladder credit, with dates (CMP-002, SES-024) | gate outcome (S1 re-runs on every call), effort ceiling from active effects |
 | module dose steps (`state.module_dose`), exit-test schedule and retest dates (SES-011…013), fuelling step (NUT-011/012), run-walk rung (SES-010) | demand, feasibility, phases, weeks, sessions |
 | active anchor and pending anchor (ADP-060…067) | |
+| v5.3: the experienced path (`experienced`: path, start, calibration end, fallback nodes and reason; 02 §2b EXP-001…005) | the qualifying race, its age-grade, the declared levels (EXP-002), the calibration signals of EXP-004 |
 | active effects with their `until`: blocks, freezes, holds, effort ceilings (§3.3b) | |
 | named counters and dated event lists: adp022/adp055/fatigue weeks, adp052 events, weeks in MAINTAIN | |
 | messages already shown (`once`, SAF-061 per season), last goal race (INV-31), last verdict, season index, deload counter start | |

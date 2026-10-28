@@ -7,6 +7,7 @@ import { sha256Hex } from './util/sha256.ts';
 import { addDays, daysBetween, mondayOf, WEEKDAYS } from './util/dates.ts';
 import { reasonClass, REASON_ORDER } from './rules/helpers.ts';
 import { deriveState, type DerivedState, NODES } from './pipeline/state.ts';
+import { engineStateExperienced } from './pipeline/experienced.ts';
 import { runGate, scalar, type FiredRule, type GateResult } from './pipeline/gate.ts';
 import { assess, availability, type Availability, type Feasibility } from './pipeline/feasibility.ts';
 import { buildWeeks } from './pipeline/sessions.ts';
@@ -60,6 +61,7 @@ function validatorView(spec: Spec, input: GeneratorInput, st: DerivedState, gate
       ladderEndDate: ladderWeeks ? addDays(plan.plan_start, 7 * ladderWeeks) : null, max_tolerated_g_h: null,
       profileByWeek: (feas.layout?.curve ?? []).map(c => c.profile ?? 'slow'), age_low: st.age_low, age_high: st.age_high,
       logged: st.entries.filter(e => e.is_run && e.measured && !e.flagged).map(e => ({ date: e.date, duration_s: e.duration_s, distance_m: e.distance_m ?? null })),
+      exp_path: st.exp.path,
     },
     // INV-25 binds a goal race's long-run demand; a goal-free H0 plan has none
     demand: { L_req_time_s: feas.demand.family === 'base' ? 0 : feas.demand.L_req_time_s, floor_dist_m: feas.demand.floor_dist_m, met_by_logged_distance: feas.demand.met_by_logged_distance, credited: feas.demand.credited, family: feas.demand.family, distance: input.goal.distance, time_cap_s: feas.demand.time_cap_s, runs },
@@ -82,11 +84,16 @@ function core(spec: Spec, input: GeneratorInput, nested: boolean, degraded = fal
   if (missing.length) return { kind: 'hold', ledger, fired: [{ stage: 'S0', rule_id: 'INP-001', op: 'ask', target: missing.join(',') }], messages: [{ id: 'MSG-INP-AGE', rule_id: 'INP-002' }], hold: { rule_ids: ['INP-001', 'INP-002'], questions: missing } };
   const av = availability(spec, input);
   // ---- S2 (derived state; S1 reads it) and S1 gate
-  const st = deriveState(spec, input);
-  fired.push(...st.fired);
+  let st = deriveState(spec, input);
   let gate = runGate(spec, input, st);
+  // v5.3 EXP-001: entry to the experienced path needs gate = proceed (S1 reads S2, so S2 is re-derived without the entry)
+  if (st.exp.entered && gate.gate !== 'proceed') { st = deriveState(spec, input, { expEntryBlocked: true }); gate = runGate(spec, input, st); }
+  fired.push(...st.fired);
   fired.push(...gate.fired);
   for (const m of gate.messages) messages.push({ id: m.id, rule_id: m.rule_id });
+  // v5.3 experienced path (EXP-001/004/005/006)
+  const EXP_MSG: Record<string, string> = { 'MSG-EXP-PATH': 'EXP-001', 'MSG-EXP-CONFIRM-Q': 'EXP-006', 'MSG-EXP-FALLBACK': 'EXP-004', 'MSG-EXP-CONFIRMED': 'EXP-005' };
+  for (const id of st.exp.messages) messages.push({ id, layer: 'card', rule_id: EXP_MSG[id], ...(id === 'MSG-EXP-PATH' ? { placeholders: { weeks: { type: 'int', value: pnum(spec, 'exp.calibration_weeks') } } } : {}) } as MessageInstance);
   if (gate.holds.length || gate.asks.length) return { kind: 'hold', gate, st, ledger, fired, messages: [...messages, { id: 'MSG-SAF-QUESTIONS' }], hold: { rule_ids: [...gate.holds, ...gate.asks].sort(), questions: gate.questions } };
   if (gate.errors.length) return { kind: 'safe_state', gate, st, ledger, fired, messages: [{ id: 'MSG-SAF-HOLD' }], error: { rule_id: gate.errors[0].id, detail: gate.errors[0].why } };
   if (gate.gate === 'pause_until_clearance' || gate.gate === 'no_plan') {
@@ -351,8 +358,9 @@ function stateOut(st: DerivedState, gate: GateResult, input: GeneratorInput) {
     V28_time_s: Math.round(st.V28_time_s), V28_week_s: Math.round(st.V28_time_s), V_hold_s: st.V_hold_s, L_hold_s: st.L_hold_s, days_since_last_run: st.days_since_last_run,
     age_low: st.age_low(input.today) ?? 0, age_high: st.age_high(input.today) ?? 0, tol_tier: st.tol_tier, tol_confidence: st.level_confidence.TOL,
     progression_profile: st.slow_ctx.length || st.slow_log ? 'slow' : 'standard', baseline_confirmed: st.baseline_confirmed,
-    levels: NODES.filter(n => st.levels[n] > 0).map(n => ({ node: n, level: st.levels[n], confidence: st.level_confidence[n], source: st.level_confidence[n] === 'measured' ? 'log_threshold' : 'self_report' })),
+    levels: NODES.filter(n => st.levels[n] > 0).map(n => ({ node: n, level: st.levels[n], confidence: st.level_confidence[n], source: st.level_confidence[n] === 'declared' && ['THR', 'VO2', 'MSP'].includes(n) ? 'race_result' : st.level_confidence[n] === 'measured' ? 'log_threshold' : 'self_report' })),
     s_slow_m_s: Math.round(st.s_slow * 1e6) / 1e6, effort_ceiling: gate.gate === 'proceed_restricted' ? 'E2' : gate.effortCeiling, max_tolerated_g_h: null,
+    exp_path: st.exp.path, exp_agegrade_pct: st.exp.agegrade_pct == null ? null : Math.round(st.exp.agegrade_pct * 10) / 10, exp_calibration_until: st.exp.calibration_until,
   };
 }
 
@@ -373,6 +381,8 @@ function engineStateOut(spec: Spec, input: GeneratorInput, st: DerivedState | un
     // CMP-002 levels passed by test, SES-013 failed/unlogged tests and their retest dates
     levels: [...(prev.levels ?? []), ...(st?.test_levels ?? []).map(t => ({ node: t.node, level: t.level, confidence: 'measured' as const, source: 'exit_test', achieved_on: t.achieved_on }))],
     exit_tests: st?.exit_tests ?? prev.exit_tests ?? [],
+    // v5.3 (02 §2b): the experienced-runner path
+    ...(st ? (() => { const x = engineStateExperienced(st.exp, input.engine_state); return x ? { experienced: x } : {}; })() : {}),
     // published deload weeks (the current week), so later re-plans know which completed weeks were deloads (LOD-003)
     dated_events: { ...(prev.dated_events ?? {}), deload_weeks: [...new Set([...(prev.dated_events?.deload_weeks ?? []), ...(plan?.weeks ?? []).filter(w => w.is_deload && w.start <= input.today).map(w => w.start)])].sort(),
       strides_runs: [...(st?.strides_dates ?? new Set(prev.dated_events?.strides_runs ?? []))].filter(d => !st || daysBetween(d, input.today) <= 42).sort(),
@@ -392,7 +402,7 @@ function firedOut(f: FiredRule[]) {
   });
 }
 
-function planMessages(feas: Feasibility, input: GeneratorInput, plan?: Plan): MessageInstance[] {
+function planMessages(feas: Feasibility, input: GeneratorInput, plan?: Plan, st?: DerivedState): MessageInstance[] {
   const out: MessageInstance[] = [];
   if (feas.verdict === 'stretch') out.push({ id: 'MSG-FEA-STRETCH', layer: 'card', rule_id: 'FEA-036' });
   if (feas.verdict === 'infeasible') out.push({ id: 'MSG-FEA-NO', layer: 'card', rule_id: 'FEA-036' });
@@ -400,6 +410,16 @@ function planMessages(feas: Feasibility, input: GeneratorInput, plan?: Plan): Me
   if (feas.band && input.goal.goal_type === 'time') out.push({ id: 'MSG-FEA-BAND', layer: 'card', rule_id: 'FEA-010', placeholders: {
     fast_edge: { type: 'time', value: Math.round(feas.band.fast_edge_s) }, point: { type: 'time', value: Math.round(feas.band.P_race_s) }, slow_edge: { type: 'time', value: Math.round(feas.band.slow_edge_s) } } });
   if (plan && plan.pace_mode === 'effort_only' && plan.phases.some(p => p.type === 'ONBOARD')) out.push({ id: 'MSG-ONBOARD-NOPACE', layer: 'card' });
+  if (plan) {
+    // v5.3: calibration (EXP-003), planned progression (SES-028), declared paces (FEA-014), distance forms (SES-031)
+    const ss = plan.weeks.flatMap(w => w.sessions);
+    if (plan.weeks.some(w => w.is_calibration)) out.push({ id: 'MSG-EXP-CALIBRATION', layer: 'card', rule_id: 'EXP-003' });
+    if (plan.weeks.filter(w => w.sessions.some(s => s.is_key && s.dose_step != null)).length > 1) out.push({ id: 'MSG-SES-PROJECTION', layer: 'card', rule_id: 'SES-028' });
+    if (st?.anchor?.confidence === 'declared' && ss.some(s => s.pace_range)) out.push({ id: 'MSG-SES-PACE-DECLARED', layer: 'why', rule_id: 'FEA-014' });
+    const forms = new Set(ss.map(s => s.prescription_form).filter(Boolean));
+    if (forms.has('distance')) out.push({ id: 'MSG-SES-FORM-DIST', layer: 'why', rule_id: 'SES-031' });
+    if (forms.has('both')) out.push({ id: 'MSG-SES-FORM-BOTH', layer: 'why', rule_id: 'SES-031' });
+  }
   return out;
 }
 
@@ -409,7 +429,7 @@ export function generate(spec: Spec, input0: GeneratorInput): Result {
   const input: GeneratorInput = { ...input0, log: [...(input0.log ?? [])].sort(byKey), events: [...(input0.events ?? [])].sort(byKey) };
   const r = core(spec, input, false);
   const base: Result = {
-    schema_version: 'v5.2', kind: r.kind, ruleset_version: spec.rulesVersion, registry_version: spec.registryVersion, today: input.today,
+    schema_version: 'v5.3', kind: r.kind, ruleset_version: spec.rulesVersion, registry_version: spec.registryVersion, today: input.today,
     messages: [] as MessageInstance[], fired_rules: [], engine_state: engineStateOut(spec, input, r.st, r.feas, r.plan), flags: input.flags,
   };
   const dedupe = (ms: MessageInstance[]) => { const seen = new Set<string>(); return ms.filter(m => { const k = m.id; if (seen.has(k)) return false; seen.add(k); return true; }); };
@@ -438,7 +458,7 @@ export function generate(spec: Spec, input0: GeneratorInput): Result {
   base.validation = { pass: r.validation!.pass, passes_used: r.validation!.passes_used, violations: [] };
   base.ledger = r.ledger;
   base.state = stateOut(r.st!, r.gate!, input);
-  base.messages = dedupe([...planMessages(feas, input, plan), ...r.messages]);
+  base.messages = dedupe([...planMessages(feas, input, plan, r.st), ...r.messages]);
   base.fired_rules = firedOut(r.fired);
   return base;
 }

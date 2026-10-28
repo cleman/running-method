@@ -1,4 +1,4 @@
-# messages.md — the single message catalogue (v5.1)
+# messages.md — the single message catalogue (v5.3)
 
 Serves criteria 12 (understandable) and 11 (implementation-ready); p1-C R1, R3, R7, R9, R14. This file **governs** over any message text quoted in a module.
 
@@ -200,8 +200,28 @@ Banned on the card: bare "likely", "rare" or "common" without a number; "moderat
 | MSG-SES-TEST-SKIP | card | "Prefer not to test? Skip it: you will do a normal session, and your training will show when you are ready." | "Tests are optional; they just get you there sooner." | — | UI (v5.2, SES-025) | — |
 | MSG-SES-STEP | why | "Last time this session felt as planned, so this one is a small step bigger." | "Sessions grow only after you have handled the last one." | — | SES-011 (v5.2) | — |
 | MSG-SES-HOLD-DOSE | why | "Same size as last time: it felt harder than planned, or you did not rate it." | "We step up only after a session felt right." | — | SES-011 (v5.2) | — |
+| MSG-SES-SHORT | card | "Short fast repeats: hard but smooth, about your 5K effort. Jog easy between them." | "Short repeats train speed and form without a long strain." | — | UI (v5.3, SES-M-027) | — |
+| MSG-SES-HILLS | card | "Run up the hill at a hard effort, then jog back down slowly." | "Hills build strength and speed with less pounding." | — | UI (v5.3, SES-M-028) | — |
+| MSG-SES-FARTLEK | card | "Fartlek: run hard for the time shown, then easy, and repeat. Go by feel." | "Changing pace by feel builds speed and rhythm." | — | UI (v5.3, SES-M-029) | — |
+| MSG-SES-COMBO | card | "First a steady hard part where you can say a few words, then short faster repeats." | "Fast work on tired legs is what the end of a race asks for." | — | UI (v5.3, SES-M-030) | — |
+| MSG-SES-LONG-STEADY | card | "Long run: easy most of the way, then the last {min:min} min a bit faster, still in control." | "Ending a long run steady teaches you to hold pace when tired." | min:min | SES-026 (v5.3) | — |
+| MSG-SES-PROJECTION | card | "Planned progression, if sessions go as intended. Each Monday we redraw it from what you logged." | "Sessions grow one small step at a time. If one feels too hard, the next stays the same size." | — | SES-028 (v5.3) | — |
+| MSG-SES-FORM-DIST | why | "Repeats are written by distance because we know your paces. You can switch to time in the settings." | "The time is what the plan counts. The distance is a guide." | — | SES-031 (v5.3) | — |
+| MSG-SES-FORM-BOTH | why | "Each repeat shows a distance and about how long it takes." | "Use whichever is easier where you run." | — | SES-031 (v5.3) | — |
+| MSG-SES-HARD-MAX-Q | card | "Hard sessions per week, at most: 3 (recommended), 2 or 1?" | "We never give more than your training allows. This only sets a limit." | — | UI (v5.3, SES-006) | — |
+| MSG-SES-PACE-DECLARED | why | "Your paces come from the race you entered. The slow end is a bit wider until a race or test confirms them." | "A time typed in later is less sure than one logged on the day." | — | FEA-014 (v5.3) | — |
 | MSG-ONBOARD-NOPACE | card | "No paces yet: the first weeks are by feel. A short test in week {n:int} sets your paces." | "Paces need a measured result; guesses can mislead." | n:int | UI (no rule) | — |
 | MSG-LADDER-NORMAL | card | "Most people repeat a week; that is normal." | "The steps are never rushed." | — | UI (no rule) | — |
+
+### 6g. Experienced-runner path (02 §2b, v5.3)
+
+| ID | Layer | Text | Why | Placeholders | Emitted by | Flags |
+|---|---|---|---|---|---|---|
+| MSG-EXP-CONFIRM-Q | card | "Was this an official race, run all out? Say yes and we will start your plan at your level." | "A real race result tells us a lot about how you can train." | — | EXP-006 (v5.3) | — |
+| MSG-EXP-PATH | card | "Your race and your usual week set your starting level. The first {weeks:int} weeks check that it fits." | "You have trained for years, so we start where you are, not at the bottom." | weeks:int | EXP-001 (v5.3) | — |
+| MSG-EXP-CALIBRATION | card | "These first weeks are normal training. Log each run and rate how hard it felt." | "Your answers show us whether the start is right." | — | EXP-003 (v5.3) | — |
+| MSG-EXP-FALLBACK | card | "Your first weeks were harder than planned, so we made your plan easier." | "It is safer to build up again from a lower start. You can move back up as your runs show it." | — | EXP-004 (v5.3) | — |
+| MSG-EXP-CONFIRMED | card | "Your first weeks went well. Your plan keeps your level and your usual week." | "Your logged runs now confirm the history you gave us." | — | EXP-005 (v5.3) | — |
 
 ## 7. Safety messages (10; all **S**, inlined in v5 — 10 §5 is a non-normative copy)
 
@@ -266,6 +286,7 @@ Banned on the card: bare "likely", "rare" or "common" without a number; "moderat
 | MSG-WHY-ADP | why | "When life changes your week, your plan adjusts. Missed runs are never made up." | "—" | — | ADP-001, ADP-002, ADP-004, ADP-010, ADP-011, ADP-012, … 30 rules | — |
 | MSG-WHY-DST | why | "Each race distance has its own longest run and taper." | "—" | — | DST-001, DST-002, DST-003, DST-004, DST-005, DST-006, … 9 rules | — |
 | MSG-WHY-SAF | why | "Safety rules always come first." | "—" | — | SAF-003, SAF-022, SAF-080, SAF-081, SAF-082, SAF-083, SAF-085, SAF-086 | S |
+| MSG-WHY-EXP | why | "Your race and your training history set where your plan starts." | "—" | — | EXP-001, EXP-002, EXP-003, EXP-004, EXP-005 (v5.3) | — |
 | MSG-WHY-NUT | why | "Fuel and drink advice stays general and is never a diet." | "—" | — | NUT-001, NUT-003, NUT-004, NUT-005, NUT-010, NUT-011, … 11 rules | — |
 
 ## 10. Message lint (v5, p2-B R7, p2-C R11, p2-A R9; run by `design/v5/tools/check_messages_v5.py`, TST-094)

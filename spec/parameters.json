@@ -1,7 +1,7 @@
 {
- "version": "v5.2",
+ "version": "v5.3",
  "source": "parameters.md (tables + ```param block); built by tools/build_parameters.py",
- "count": 344,
+ "count": 386,
  "parameters": [
   {
    "id": "anchor.jump_confirm_mult",
@@ -1242,6 +1242,381 @@
    "presets": "—",
    "source": "gap/engine.md Q3",
    "default_text": "5"
+  },
+  {
+   "id": "exp.age_min",
+   "type": "int",
+   "unit": "years",
+   "default": 18,
+   "limit_direction": "lower",
+   "owner": "02",
+   "grade": "N/A (engineering: minors keep their own rules, 10)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "10 SAF-042/043",
+   "default_text": "18"
+  },
+  {
+   "id": "exp.agegrade_bands",
+   "type": "list",
+   "unit": "WMA %",
+   "default": [
+    55,
+    65,
+    75
+   ],
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "ALLEGED (coaching practice, from memory)",
+   "basis": "dd",
+   "range": "± 5",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A2",
+   "default_text": "55 / 65 / 75"
+  },
+  {
+   "id": "exp.calibration_keys",
+   "type": "int",
+   "unit": "key sessions",
+   "default": 2,
+   "limit_direction": "upper",
+   "owner": "02",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A3; owner decision 4",
+   "default_text": "2"
+  },
+  {
+   "id": "exp.calibration_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 3,
+   "limit_direction": "lower",
+   "owner": "02",
+   "grade": "UNKNOWN (owner decision 3)",
+   "basis": "dd",
+   "range": "2–4",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A3",
+   "default_text": "3"
+  },
+  {
+   "id": "exp.claim_level_cap",
+   "type": "int",
+   "unit": "level",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A2",
+   "default_text": "3"
+  },
+  {
+   "id": "exp.declared_pace_widen_pct",
+   "type": "number",
+   "unit": "%",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "03",
+   "grade": "UNKNOWN (owner decision 2)",
+   "basis": "dd",
+   "range": "1–4",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A4",
+   "default_text": "2"
+  },
+  {
+   "id": "exp.distance_tol_pct",
+   "type": "number",
+   "unit": "%",
+   "default": 2,
+   "limit_direction": "upper",
+   "owner": "02",
+   "grade": "N/A (engineering: course tolerance)",
+   "basis": "eng",
+   "range": "1–3",
+   "presets": "—",
+   "source": "02 §2b",
+   "default_text": "2"
+  },
+  {
+   "id": "exp.fallback_rpe_sessions",
+   "type": "int",
+   "unit": "sessions",
+   "default": 2,
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–3",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A3",
+   "default_text": "2"
+  },
+  {
+   "id": "exp.fallback_volume_ratio",
+   "type": "number",
+   "unit": "× planned",
+   "default": 0.8,
+   "limit_direction": "none",
+   "owner": "02",
+   "grade": "UNKNOWN (as prog.est.confirm_ratio)",
+   "basis": "dd",
+   "range": "0.7–0.9",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A3",
+   "default_text": "0.8"
+  },
+  {
+   "id": "exp.hard_sessions_max_default",
+   "type": "int",
+   "unit": "key sessions",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "N/A (engineering: owner decision 4 default)",
+   "basis": "eng",
+   "range": "1–3",
+   "presets": "—",
+   "source": "docs/decisions-v5.3.md 4",
+   "default_text": "3"
+  },
+  {
+   "id": "exp.injury_free_weeks",
+   "type": "int",
+   "unit": "weeks",
+   "default": 12,
+   "limit_direction": "lower",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "8–26",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A1",
+   "default_text": "12"
+  },
+  {
+   "id": "exp.keys_max",
+   "type": "int",
+   "unit": "key sessions",
+   "default": 3,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "ALLEGED (Hansons, FIRST, Pfitzinger 2–3 quality sessions, from memory; owner decision 4)",
+   "basis": "dd",
+   "range": "2–3",
+   "presets": "—",
+   "source": "docs/decisions-v5.3.md 4",
+   "default_text": "3"
+  },
+  {
+   "id": "exp.l30_discount",
+   "type": "number",
+   "unit": "× claimed",
+   "default": 0.9,
+   "limit_direction": "upper",
+   "owner": "07",
+   "grade": "UNKNOWN (same as claim.l30_discount)",
+   "basis": "dd",
+   "range": "0.8–1.0",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A4",
+   "default_text": "0.9"
+  },
+  {
+   "id": "exp.level_table",
+   "type": "map",
+   "unit": "levels",
+   "default": {
+    "0": {
+     "THR": 1,
+     "VO2": 1,
+     "MSP": 0
+    },
+    "55": {
+     "THR": 2,
+     "VO2": 1,
+     "MSP": 1
+    },
+    "65": {
+     "THR": 3,
+     "VO2": 2,
+     "MSP": 1
+    },
+    "75": {
+     "THR": 3,
+     "VO2": 3,
+     "MSP": 2
+    }
+   },
+   "keys": "age-grade band lower edge",
+   "limit_direction": "upper",
+   "owner": "02",
+   "grade": "ALLEGED (age-grade vs session ability, coaching practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A2",
+   "default_text": "< 55: THR 1, VO2 1, MSP 0; 55–64: 2, 1, 1; 65–74: 3, 2, 1; ≥ 75: 3, 3, 2"
+  },
+  {
+   "id": "exp.long_quality_pattern",
+   "type": "map",
+   "unit": "form by loading week",
+   "default": {
+    "BUILD": [
+     "a",
+     "b"
+    ],
+    "SPECIFIC_time": [
+     "b",
+     "b",
+     "a"
+    ],
+    "SPECIFIC_finish": [
+     "a",
+     "b"
+    ]
+   },
+   "keys": "row",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory; owner decision 4)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 SES-026",
+   "default_text": "BUILD a, b; SPECIFIC_time b, b, a; SPECIFIC_finish a, b"
+  },
+  {
+   "id": "exp.race_max_age_days",
+   "type": "int",
+   "unit": "days",
+   "default": 84,
+   "limit_direction": "upper",
+   "owner": "02",
+   "grade": "UNKNOWN (12 weeks, owner decision 1)",
+   "basis": "dd",
+   "range": "42–120",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A1",
+   "default_text": "84"
+  },
+  {
+   "id": "exp.runs_min",
+   "type": "int",
+   "unit": "runs/week",
+   "default": 3,
+   "limit_direction": "lower",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "3–4",
+   "presets": "—",
+   "source": "02 §2b",
+   "default_text": "3"
+  },
+  {
+   "id": "exp.taper_keys",
+   "type": "int",
+   "unit": "sharpeners",
+   "default": 2,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "1–2",
+   "presets": "—",
+   "source": "proposal v5.3 §4 B1",
+   "default_text": "2"
+  },
+  {
+   "id": "exp.three_keys_runs_min",
+   "type": "int",
+   "unit": "runs",
+   "default": 6,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "UNKNOWN (owner decision 4)",
+   "basis": "dd",
+   "range": "5–7",
+   "presets": "—",
+   "source": "docs/decisions-v5.3.md 4",
+   "default_text": "6"
+  },
+  {
+   "id": "exp.three_keys_tol_min",
+   "type": "int",
+   "unit": "TOL level",
+   "default": 3,
+   "limit_direction": "lower",
+   "owner": "06",
+   "grade": "UNKNOWN (owner decision 4)",
+   "basis": "dd",
+   "range": "3–4",
+   "presets": "—",
+   "source": "docs/decisions-v5.3.md 4",
+   "default_text": "3"
+  },
+  {
+   "id": "exp.training_age_min",
+   "type": "number",
+   "unit": "years",
+   "default": 2,
+   "limit_direction": "lower",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "1–3",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A1",
+   "default_text": "2"
+  },
+  {
+   "id": "exp.volume_band_max_min",
+   "type": "map",
+   "unit": "min/week",
+   "default": {
+    "0": 420,
+    "55": 720,
+    "65": null,
+    "75": null
+   },
+   "keys": "age-grade band lower edge",
+   "limit_direction": "upper",
+   "owner": "02",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "02 §2b (v5.3 addition: \"or the reverse\")",
+   "default_text": "< 55: 420; 55: 720; 65, 75: none"
+  },
+  {
+   "id": "exp.volume_band_min_min",
+   "type": "map",
+   "unit": "min/week",
+   "default": {
+    "0": 0,
+    "55": 150,
+    "65": 240,
+    "75": 300
+   },
+   "keys": "age-grade band lower edge",
+   "limit_direction": "lower",
+   "owner": "02",
+   "grade": "ALLEGED (volume vs performance, from memory)",
+   "basis": "dd",
+   "range": "± 60",
+   "presets": "—",
+   "source": "proposal v5.3 §3 A2",
+   "default_text": "< 55: 0; 55: 150; 65: 240; 75: 300"
   },
   {
    "id": "fatigue.clear_weeks",
@@ -3231,6 +3606,80 @@
    "default_text": "70"
   },
   {
+   "id": "perf.wma_age_factor",
+   "type": "map",
+   "unit": "factor",
+   "default": {
+    "m": {
+     "30": 1.0,
+     "35": 0.99,
+     "40": 0.965,
+     "45": 0.935,
+     "50": 0.9,
+     "55": 0.865,
+     "60": 0.83,
+     "65": 0.795,
+     "70": 0.755,
+     "75": 0.71,
+     "80": 0.66,
+     "85": 0.6,
+     "90": 0.53
+    },
+    "f": {
+     "30": 1.0,
+     "35": 0.985,
+     "40": 0.955,
+     "45": 0.92,
+     "50": 0.88,
+     "55": 0.84,
+     "60": 0.8,
+     "65": 0.76,
+     "70": 0.715,
+     "75": 0.665,
+     "80": 0.61,
+     "85": 0.55,
+     "90": 0.48
+    }
+   },
+   "keys": "sex, age",
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "ALLEGED (smooth approximation from memory; NOT the WMA 2023 factors)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "02 §2b",
+   "default_text": "men 30 1.00, 35 0.99, 40 0.965, 45 0.935, 50 0.90, 55 0.865, 60 0.83, 65 0.795, 70 0.755, 75 0.71, 80 0.66, 85 0.60, 90 0.53; women 30 1.00, 35 0.985, 40 0.955, 45 0.92, 50 0.88, 55 0.84, 60 0.80, 65 0.76, 70 0.715, 75 0.665, 80 0.61, 85 0.55, 90 0.48"
+  },
+  {
+   "id": "perf.wma_open_s",
+   "type": "map",
+   "unit": "s",
+   "default": {
+    "m": {
+     "5K": 769,
+     "10K": 1584,
+     "HM": 3451,
+     "M": 7235
+    },
+    "f": {
+     "5K": 834,
+     "10K": 1726,
+     "HM": 3772,
+     "M": 7796
+    }
+   },
+   "keys": "sex, distance",
+   "limit_direction": "none",
+   "owner": "01",
+   "grade": "ALLEGED (road world bests as remembered; NOT the WMA 2023 table, to be replaced by it)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "02 §2b",
+   "default_text": "men 5K 769, 10K 1584, HM 3451, M 7235; women 5K 834, 10K 1726, HM 3772, M 7796"
+  },
+  {
    "id": "phs.build_max",
    "type": "int",
    "unit": "weeks",
@@ -4598,6 +5047,34 @@
    "default_text": "600 / 300"
   },
   {
+   "id": "ses.dist_round_recovery_m",
+   "type": "int",
+   "unit": "m",
+   "default": 100,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "N/A (engineering)",
+   "basis": "eng",
+   "range": "50–200",
+   "presets": "—",
+   "source": "06 §2d",
+   "default_text": "100"
+  },
+  {
+   "id": "ses.dist_round_tol_pct",
+   "type": "number",
+   "unit": "%",
+   "default": 10,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "UNKNOWN",
+   "basis": "dd",
+   "range": "5–15",
+   "presets": "—",
+   "source": "proposal v5.3 §4 B4",
+   "default_text": "10"
+  },
+  {
    "id": "ses.dose.<SES-M-id>",
    "type": "map",
    "unit": "segments",
@@ -4797,6 +5274,30 @@
      "reps": 5,
      "rep_s": 480,
      "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 4,
+     "rep_s": 660,
+     "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 4,
+     "rep_s": 720,
+     "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 5,
+     "rep_s": 660,
+     "rec_s": 120
+    },
+    {
+     "effort": "E3",
+     "reps": 5,
+     "rep_s": 720,
+     "rec_s": 120
     }
    ],
    "family": "ses.dose.<SES-M-id>.steps",
@@ -4843,6 +5344,24 @@
      "effort": "E3",
      "reps": 1,
      "rep_s": 2400
+    },
+    {
+     "effort": "E3",
+     "reps": 2,
+     "rep_s": 1500,
+     "rec_s": 180
+    },
+    {
+     "effort": "E3",
+     "reps": 3,
+     "rep_s": 1080,
+     "rec_s": 180
+    },
+    {
+     "effort": "E3",
+     "reps": 2,
+     "rep_s": 1800,
+     "rec_s": 180
     }
    ],
    "family": "ses.dose.<SES-M-id>.steps",
@@ -4882,6 +5401,30 @@
      "effort": "E4",
      "reps": 6,
      "rep_s": 180,
+     "rec_s": 180
+    },
+    {
+     "effort": "E4",
+     "reps": 5,
+     "rep_s": 240,
+     "rec_s": 180
+    },
+    {
+     "effort": "E4",
+     "reps": 6,
+     "rep_s": 240,
+     "rec_s": 180
+    },
+    {
+     "effort": "E4",
+     "reps": 7,
+     "rep_s": 240,
+     "rec_s": 180
+    },
+    {
+     "effort": "E4",
+     "reps": 6,
+     "rep_s": 300,
      "rec_s": 180
     }
    ],
@@ -4938,6 +5481,21 @@
     {
      "effort": "race",
      "share": "L3",
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 0.8,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 1.0,
+     "rec_s": 120
+    },
+    {
+     "effort": "race",
+     "share": 1.1,
      "rec_s": 120
     }
    ],
@@ -5191,6 +5749,326 @@
    "default_text": "06 §2c table"
   },
   {
+   "id": "ses.dose.SES-M-027.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E4",
+     "reps": 10,
+     "rep_s": 60,
+     "rec_s": 60
+    },
+    {
+     "effort": "E4",
+     "reps": 12,
+     "rep_s": 60,
+     "rec_s": 60
+    },
+    {
+     "effort": "E4",
+     "reps": 15,
+     "rep_s": 60,
+     "rec_s": 60
+    },
+    {
+     "effort": "E4",
+     "reps": 12,
+     "rep_s": 90,
+     "rec_s": 90
+    },
+    {
+     "effort": "E4",
+     "reps": 14,
+     "rep_s": 90,
+     "rec_s": 90
+    },
+    {
+     "effort": "E4",
+     "reps": 16,
+     "rep_s": 90,
+     "rec_s": 90
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-028.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "effort": "E4",
+     "reps": 8,
+     "rep_s": 60,
+     "rec_s": 120
+    },
+    {
+     "effort": "E4",
+     "reps": 10,
+     "rep_s": 60,
+     "rec_s": 120
+    },
+    {
+     "effort": "E4",
+     "reps": 12,
+     "rep_s": 60,
+     "rec_s": 120
+    },
+    {
+     "effort": "E4",
+     "reps": 8,
+     "rep_s": 90,
+     "rec_s": 180
+    },
+    {
+     "effort": "E4",
+     "reps": 10,
+     "rep_s": 90,
+     "rec_s": 180
+    },
+    {
+     "effort": "E4",
+     "reps": 12,
+     "rep_s": 90,
+     "rec_s": 180
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-029.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "blocks": [
+      {
+       "effort": "E4",
+       "reps": 8,
+       "rep_s": 60,
+       "rec_s": 60
+      }
+     ]
+    },
+    {
+     "blocks": [
+      {
+       "effort": "E4",
+       "reps": 1,
+       "rep_s": 60,
+       "rec_after_s": 60
+      },
+      {
+       "effort": "E4",
+       "reps": 1,
+       "rep_s": 120,
+       "rec_after_s": 120
+      },
+      {
+       "effort": "E4",
+       "reps": 1,
+       "rep_s": 180,
+       "rec_after_s": 180
+      },
+      {
+       "effort": "E4",
+       "reps": 1,
+       "rep_s": 120,
+       "rec_after_s": 120
+      },
+      {
+       "effort": "E4",
+       "reps": 1,
+       "rep_s": 60
+      }
+     ]
+    },
+    {
+     "blocks": [
+      {
+       "effort": "E4",
+       "reps": 10,
+       "rep_s": 60,
+       "rec_s": 60
+      }
+     ]
+    },
+    {
+     "blocks": [
+      {
+       "effort": "E4",
+       "reps": 6,
+       "rep_s": 120,
+       "rec_s": 60
+      }
+     ]
+    },
+    {
+     "blocks": [
+      {
+       "effort": "E4",
+       "reps": 8,
+       "rep_s": 120,
+       "rec_s": 60
+      }
+     ]
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-030.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "blocks": [
+      {
+       "effort": "E3",
+       "reps": 1,
+       "rep_s": 900,
+       "rec_after_s": 180
+      },
+      {
+       "effort": "E4",
+       "reps": 4,
+       "rep_s": 60,
+       "rec_s": 60
+      }
+     ]
+    },
+    {
+     "blocks": [
+      {
+       "effort": "E3",
+       "reps": 1,
+       "rep_s": 1200,
+       "rec_after_s": 180
+      },
+      {
+       "effort": "E4",
+       "reps": 6,
+       "rep_s": 60,
+       "rec_s": 60
+      }
+     ]
+    },
+    {
+     "blocks": [
+      {
+       "effort": "E3",
+       "reps": 2,
+       "rep_s": 720,
+       "rec_s": 120,
+       "rec_after_s": 180
+      },
+      {
+       "effort": "E4",
+       "reps": 6,
+       "rep_s": 60,
+       "rec_s": 60
+      }
+     ]
+    },
+    {
+     "blocks": [
+      {
+       "effort": "E3",
+       "reps": 2,
+       "rep_s": 900,
+       "rec_s": 120,
+       "rec_after_s": 180
+      },
+      {
+       "effort": "E4",
+       "reps": 8,
+       "rep_s": 60,
+       "rec_s": 60
+      }
+     ]
+    },
+    {
+     "blocks": [
+      {
+       "effort": "E3",
+       "reps": 2,
+       "rep_s": 1080,
+       "rec_s": 120,
+       "rec_after_s": 180
+      },
+      {
+       "effort": "E4",
+       "reps": 8,
+       "rep_s": 60,
+       "rec_s": 60
+      }
+     ]
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
+   "id": "ses.dose.SES-M-031.steps",
+   "type": "segments",
+   "unit": "steps",
+   "default": [
+    {
+     "e2_s": 600
+    },
+    {
+     "e2_s": 900
+    },
+    {
+     "e2_s": 1200
+    },
+    {
+     "e2_s": 1500
+    }
+   ],
+   "family": "ses.dose.<SES-M-id>.steps",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2c; owner Q3",
+   "default_text": "06 §2c table"
+  },
+  {
    "id": "ses.drift_rpe_max",
    "type": "int",
    "unit": "min / RPE",
@@ -5231,6 +6109,80 @@
    "presets": "—",
    "source": "opening-contextrealist",
    "default_text": "20"
+  },
+  {
+   "id": "ses.entry_rung.<SES-M-id>",
+   "type": "map",
+   "unit": "step index by level of the rung node",
+   "default": {
+    "SES-M-008": [
+     0,
+     0,
+     0,
+     5,
+     7
+    ],
+    "SES-M-009": [
+     0,
+     0,
+     0,
+     3,
+     5
+    ],
+    "SES-M-010": [
+     0,
+     0,
+     2,
+     4
+    ],
+    "SES-M-011": [
+     0,
+     0,
+     2,
+     4
+    ],
+    "SES-M-027": [
+     0,
+     0,
+     2,
+     3
+    ],
+    "SES-M-028": [
+     0,
+     0,
+     1,
+     3
+    ],
+    "SES-M-029": [
+     0,
+     0,
+     2,
+     3
+    ],
+    "SES-M-030": [
+     0,
+     0,
+     0,
+     1,
+     2
+    ],
+    "SES-M-031": [
+     0,
+     0,
+     0,
+     1,
+     2
+    ]
+   },
+   "keys": "module, level",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2d; proposal v5.3 §4 B2",
+   "default_text": "06 §2d table"
   },
   {
    "id": "ses.exit.DUR3_min",
@@ -5460,6 +6412,33 @@
    "default_text": "06 §3b table (THR1 2 × 8 min; THR2 5 × 5 min; THR3 30 min; THR4 3 × 15 min; VO2_2 5 × 3 min; VO2_3 6 × 3 min; MSP share; DUR 60/90/135/180 min; HAB2 FT-0)"
   },
   {
+   "id": "ses.family.<node>",
+   "type": "map",
+   "unit": "rotation lists",
+   "default": {
+    "THR": [
+     "SES-M-008",
+     "SES-M-009",
+     "SES-M-030"
+    ],
+    "VO2": [
+     "SES-M-010",
+     "SES-M-027",
+     "SES-M-028",
+     "SES-M-029"
+    ]
+   },
+   "keys": "node",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory; owner decision 6)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 SES-030",
+   "default_text": "THR: SES-M-008, 009, 030; VO2: SES-M-010, 027, 028, 029"
+  },
+  {
    "id": "ses.ft0_min",
    "type": "int",
    "unit": "min",
@@ -5505,6 +6484,20 @@
    "default_text": "400 + 2000"
   },
   {
+   "id": "ses.hill_speed_ratio",
+   "type": "number",
+   "unit": "× E4 midpoint speed",
+   "default": 0.85,
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "UNKNOWN (gradient dependent)",
+   "basis": "dd",
+   "range": "0.75–0.95",
+   "presets": "—",
+   "source": "06 §2d",
+   "default_text": "0.85"
+  },
+  {
    "id": "ses.medlong_ratio",
    "type": "number",
    "unit": "× current long run",
@@ -5539,6 +6532,40 @@
    "default_text": "5K 10; 10K 10; HM 15; M 20"
   },
   {
+   "id": "ses.msp_share_max",
+   "type": "map",
+   "unit": "share of race duration",
+   "default": {
+    "5K": 1.0,
+    "10K": 1.1,
+    "HM": 0.75,
+    "M": 0.6
+   },
+   "keys": "distance",
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "ALLEGED (10 × 1 km for 10K, from memory)",
+   "basis": "dd",
+   "range": "± 0.15",
+   "presets": "—",
+   "source": "proposal v5.3 §4 B2",
+   "default_text": "5K 1.00; 10K 1.10; HM 0.75; M 0.60"
+  },
+  {
+   "id": "ses.prescription_default",
+   "type": "enum",
+   "unit": "form",
+   "default": "distance",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "N/A (engineering: owner decision 5)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "docs/decisions-v5.3.md 5",
+   "default_text": "distance"
+  },
+  {
    "id": "ses.progress_rpe_margin",
    "type": "int",
    "unit": "RPE points",
@@ -5551,6 +6578,20 @@
    "presets": "—",
    "source": "wg1 §3",
    "default_text": "1"
+  },
+  {
+   "id": "ses.projection_max_steps",
+   "type": "int",
+   "unit": "rungs",
+   "default": 6,
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "UNKNOWN (owner decision 7)",
+   "basis": "dd",
+   "range": "3–10",
+   "presets": "—",
+   "source": "proposal v5.3 §5",
+   "default_text": "6"
   },
   {
    "id": "ses.race_effort",
@@ -5588,6 +6629,31 @@
    "presets": "—",
    "source": "07 §3",
    "default_text": "14"
+  },
+  {
+   "id": "ses.rung_node",
+   "type": "map",
+   "unit": "node",
+   "default": {
+    "SES-M-008": "THR",
+    "SES-M-009": "THR",
+    "SES-M-030": "THR",
+    "SES-M-010": "VO2",
+    "SES-M-027": "VO2",
+    "SES-M-028": "VO2",
+    "SES-M-029": "VO2",
+    "SES-M-011": "MSP",
+    "SES-M-031": "DUR"
+   },
+   "keys": "module",
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "N/A (engineering: 06 §2d)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2d",
+   "default_text": "SES-M-008, 009, 030: THR; SES-M-010, 027, 028, 029: VO2; SES-M-011: MSP; SES-M-031: DUR"
   },
   {
    "id": "ses.runwalk.entry_rung",
@@ -5761,6 +6827,122 @@
    "presets": "—",
    "source": "gap/prose-rules.md SES-011",
    "default_text": "E1 3; E2 5; E3 6; E4 7"
+  },
+  {
+   "id": "ses.time_only_modules",
+   "type": "set",
+   "unit": "modules",
+   "default": [
+    "SES-M-029"
+   ],
+   "limit_direction": "none",
+   "owner": "06",
+   "grade": "N/A (engineering: fartlek is by time)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "proposal v5.3 §4 B3",
+   "default_text": "SES-M-029"
+  },
+  {
+   "id": "ses.top_rung.<SES-M-id>",
+   "type": "map",
+   "unit": "step index by level of the rung node",
+   "default": {
+    "SES-M-008": [
+     5,
+     5,
+     5,
+     7,
+     9
+    ],
+    "SES-M-009": [
+     5,
+     5,
+     5,
+     7,
+     8
+    ],
+    "SES-M-010": [
+     3,
+     3,
+     5,
+     7
+    ],
+    "SES-M-011": [
+     7,
+     7,
+     9,
+     10
+    ],
+    "SES-M-027": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "SES-M-028": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "SES-M-029": [
+     2,
+     2,
+     4,
+     4
+    ],
+    "SES-M-030": [
+     2,
+     2,
+     2,
+     3,
+     4
+    ],
+    "SES-M-031": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ]
+   },
+   "keys": "module, level",
+   "limit_direction": "upper",
+   "owner": "06",
+   "grade": "ALLEGED (practice, from memory)",
+   "basis": "dd",
+   "range": "—",
+   "presets": "—",
+   "source": "06 §2d; proposal v5.3 §4 B2",
+   "default_text": "06 §2d table"
+  },
+  {
+   "id": "ses.track_distances_m",
+   "type": "list",
+   "unit": "m",
+   "default": [
+    200,
+    300,
+    400,
+    500,
+    600,
+    800,
+    1000,
+    1200,
+    1600,
+    2000
+   ],
+   "limit_direction": "none",
+   "owner": "06",
+   "note": "then whole km",
+   "grade": "N/A (engineering: track lap fractions)",
+   "basis": "eng",
+   "range": "—",
+   "presets": "—",
+   "source": "proposal v5.3 §4 B4",
+   "default_text": "200, 300, 400, 500, 600, 800, 1000, 1200, 1600, 2000, then whole km"
   },
   {
    "id": "ses.warmup_s",

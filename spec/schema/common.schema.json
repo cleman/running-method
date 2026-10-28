@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://running-method/spec/schema/common.schema.json",
-  "title": "Shared definitions (v5.2)",
+  "title": "Shared definitions (v5.3)",
   "description": "Types shared by the generator input (input-profile.schema.json) and its result (result.schema.json). Units follow 12 §1: durations in integer seconds, distances in integer metres, paces in integer s/km, dates as ISO local dates in the runner's time zone, weeks start on Monday.",
   "$defs": {
     "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "ISO-8601 local date in the runner's time zone (12 §3.10)."},
@@ -10,7 +10,7 @@
     "seconds": {"type": "integer", "minimum": 0},
     "metres": {"type": "integer", "minimum": 0},
     "effort": {"enum": ["E0", "E1", "E2", "E3", "E4", "E5"], "description": "Effort ladder (12 §1). Ordered by effort_rank (12 §2b.3): E0 < E1 < E2 < E3 < E4; E5 (strides) ranks with E3 for hard-day tests only (v5.2, Q6b)."},
-    "confidence": {"enum": ["measured", "estimated", "unknown"]},
+    "confidence": {"enum": ["measured", "declared", "estimated", "unknown"], "description": "v5.3 adds declared (02 §2b, INP-005): a confirmed official race entered late, and the levels set from it on the experienced path."},
     "grade": {"enum": ["VERIFIED", "CORROBORATED", "CREDIBLE", "ALLEGED", "CONTRADICTED", "UNKNOWN", "N/A"]},
     "basis": {"enum": ["evidence", "convention", "design_default", "eng"]},
     "distance": {"enum": ["5K", "10K", "HM", "M", "50K", "100K", "none"]},
@@ -72,8 +72,10 @@
           "type": "object",
           "required": ["effort", "duration_s"],
           "additionalProperties": false,
-          "properties": {"effort": {"$ref": "#/$defs/effort"}, "duration_s": {"$ref": "#/$defs/seconds"}}
-        }
+          "properties": {"effort": {"$ref": "#/$defs/effort"}, "duration_s": {"$ref": "#/$defs/seconds"}, "show_distance_m": {"$ref": "#/$defs/metres", "description": "v5.3 (SES-032): the distance written on the card for this jog."}}
+        },
+        "show_distance_m": {"$ref": "#/$defs/metres", "description": "v5.3 (SES-032): the track-friendly distance written on the card for each repeat of a time-controlled segment; duration_s stays the prescription."},
+        "show_about_m": {"$ref": "#/$defs/metres", "description": "v5.3 (SES-032): the rounding was outside ses.dist_round_tol_pct, so the time form is kept and the card adds about this many metres."}
       },
       "oneOf": [{"required": ["duration_s"]}, {"required": ["distance_m"]}]
     },
@@ -91,7 +93,7 @@
         "node": {"$ref": "#/$defs/node"},
         "level": {"type": "integer", "minimum": 0, "maximum": 5},
         "confidence": {"$ref": "#/$defs/confidence"},
-        "source": {"enum": ["log_threshold", "exit_test", "self_report", "ladder_credit"]},
+        "source": {"enum": ["log_threshold", "exit_test", "self_report", "ladder_credit", "race_result"]},
         "achieved_on": {"$ref": "#/$defs/date"},
         "last_exercised_on": {"$ref": "#/$defs/date"}
       }
@@ -172,7 +174,8 @@
         "last_goal_race": {"type": ["object", "null"], "properties": {"date": {"$ref": "#/$defs/date"}, "distance": {"$ref": "#/$defs/distance"}}, "additionalProperties": false},
         "last_verdict": {"oneOf": [{"$ref": "#/$defs/verdict"}, {"type": "null"}]},
         "season_index": {"type": "integer", "minimum": 0},
-        "deload_counter_from": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}], "description": "Start of the last recovery-like week (PHS-001); carries over a goal change (FEA-025)."}
+        "deload_counter_from": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}], "description": "Start of the last recovery-like week (PHS-001); carries over a goal change (FEA-025)."},
+        "experienced": {"type": ["object", "null"], "additionalProperties": false, "description": "v5.3 (02 §2b, EXP-001…005): the experienced-runner path of this season.", "properties": {"path": {"enum": ["none", "calibrating", "confirmed", "fallen_back"]}, "since": {"$ref": "#/$defs/date"}, "calibration_from": {"$ref": "#/$defs/date"}, "calibration_until": {"$ref": "#/$defs/date"}, "fallback_nodes": {"type": "array", "items": {"$ref": "#/$defs/node"}}, "fallback_reason": {"enum": ["rpe", "missed_week", "pain", "volume", null]}, "race_id": {"type": "string"}}}
       }
     }
   }

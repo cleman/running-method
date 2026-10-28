@@ -1,4 +1,4 @@
-# engine/ — the plan generator (spec v5.2, MVP scope)
+# engine/ — the plan generator (spec v5.3, MVP scope)
 
 ## In plain words
 
@@ -97,6 +97,22 @@ The independent oracle (`oracle/`, written by another session) was run against t
 Every failure is either a disagreement written up in `docs/disagreements.md` or a feature listed below as not done.
 Full numbers, and what is still not covered: `docs/test-report.md`. Week-by-week plans of five personas, replayed
 with the oracle's "as planned" runner: `docs/persona-plans/`.
+
+## v5.3 (28 Oct 2026)
+
+Implemented: the experienced-runner path (`src/pipeline/experienced.ts`: qualifying race, approximate age-grade, claim
+consistency, EXP-001…006, calibration signals, fallback and confirmation), declared levels (EXP-002) and declared paces with
+a wider slow edge (INP-005, FEA-014), no ONBOARD on that path, the long run from the discounted claim without the TOL cap
+(GEN-011), the standard profile (GEN-014, CTX-007), LOD-007 measured against the claim; in `sessions.ts` the key count
+(SES-007 through the rule engine, the runner's ceiling in SES-006), calibration weeks (EXP-003), forms a/b (SES-026, with the
+steady-finish long run SES-M-031), entry and top rungs by level (SES-027), the planned dose path (SES-028), family rotation
+(SES-030), five new modules (SES-M-027…031, `modules.ts`), the time or distance form of repeats (SES-031/032), two taper
+sharpeners on the experienced path, and the v5.3 hard-day rule in placement and in the validator (SES-004, INV-17). Also: a
+re-plan never exceeds the parent version's week (INV-04 applied as a cap, Q-E40).
+
+Not done in v5.3: DST-006 race-effort long runs (form b uses SES-M-031 everywhere, Q-E39); the SES-014 re-test before an
+anchor ages out (Q-E36); GEN-022's age-grade clause (Q-E38). Tests: `test/v53.test.ts`. Run results: `docs/test-report.md`
+(addendum). The oracle has not been run against v5.3.
 
 ## Not done yet (MVP rules or features that are missing or partial)
 

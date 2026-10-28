@@ -1,4 +1,4 @@
-"""Build spec/rules.json from the module texts (the only source). v5.2.
+"""Build spec/rules.json from the module texts (the only source). v5.3 (EXP module prefix added).
 
 Usage: python3 -I design/v5/tools/build_rules.py design/v5
 
@@ -54,7 +54,7 @@ for line in sec35.splitlines():
         for ev in [x.strip() for x in m.group(1).split(",")]:
             EVENT_STAGE[ev] = m.group(2)
 MODULE_STAGE = {"INP": "S0", "SCR": "S1", "CTX": "S1", "CMP": "S2", "FEA": "S3", "PHS": "S4", "LOD": "S6", "SES": "S7",
-                "DST": "S7", "NUT": "S7", "ADP": "on_event", "SAF": "S1", "REP": "S8r", "GEN": "S2"}
+                "DST": "S7", "NUT": "S7", "ADP": "on_event", "SAF": "S1", "REP": "S8r", "GEN": "S2", "EXP": "S2"}
 GEN_STAGE = {"GEN-001": "S1", "GEN-002": "S1", "GEN-003": "S9", "GEN-004": "S10", "GEN-005": "S7.3", "GEN-030": "on_event",
              "GEN-031": "S3", "GEN-032": "S3"}
 
@@ -134,7 +134,7 @@ def msgs_of(a):
 
 PREFIX_WHY = {"INP": "MSG-WHY-INP", "SCR": "MSG-WHY-SCR", "CTX": "MSG-WHY-CTX", "CMP": "MSG-WHY-CMP", "FEA": "MSG-WHY-FEA",
               "PHS": "MSG-WHY-PHS", "LOD": "MSG-WHY-LOD", "SES": "MSG-WHY-SES", "GEN": "MSG-WHY-GEN", "ADP": "MSG-WHY-ADP",
-              "DST": "MSG-WHY-DST", "SAF": "MSG-WHY-SAF", "NUT": "MSG-WHY-NUT", "REP": "MSG-WHY-GEN"}
+              "DST": "MSG-WHY-DST", "SAF": "MSG-WHY-SAF", "NUT": "MSG-WHY-NUT", "REP": "MSG-WHY-GEN", "EXP": "MSG-WHY-EXP"}
 MVP_EXTRA = set("""REP-001 REP-002 REP-003 REP-004 REP-005 REP-006 SES-024 SES-025
 DST-017 DST-018 SES-020 SES-021 SES-022 NUT-021 NUT-030 NUT-040 FEA-026
 INP-007 FEA-030 FEA-031 LOD-030 SES-005 SES-008 ADP-024 ADP-070 ADP-071 ADP-073
@@ -146,7 +146,8 @@ INP-008 CMP-001 CMP-002 CMP-003 CMP-004 CMP-006 FEA-006 FEA-011 FEA-037 FEA-038 
 SES-003 SES-009 ADP-013 ADP-023 ADP-054 ADP-056 ADP-058 ADP-061 ADP-063 ADP-065 ADP-080 GEN-030 GEN-031 SAF-061 SAF-085
 CMP-007 CMP-008 SES-004 SES-005 SES-006 SES-007 SES-008 SES-009 SES-010 SES-011 SES-012 SES-013 SES-014 SES-015 SES-016 SES-017 SES-018
 DST-001 DST-002 DST-004 DST-005 DST-006 PHS-013 PHS-014 NUT-010 NUT-011 NUT-012 NUT-013
-ADP-067""".split())  # v5.1: ADP-067 (formal) is on the MVP pace path; LOD-007/008 are T2, hence MVP by tier
+ADP-067
+EXP-001 EXP-002 EXP-003 EXP-004 EXP-005 EXP-006 SES-026 SES-027 SES-028 SES-030 SES-031 SES-032""".split())  # v5.1: ADP-067 (formal) is on the MVP pace path; LOD-007/008 are T2, hence MVP by tier
 # v5.2 (gap/prose-rules.md §4.9): PHS-015 (ultra), DST-007 (marathon) and SES-019 (norwegian_elite) are not reachable in the
 # MVP profile and are no longer tagged MVP; DST-017/018, SES-020/021/022, NUT-021/030/040 and FEA-026 are reachable and now are;
 # the REP records (07 §6.1) and SES-024 are new MVP rules.
@@ -225,7 +226,7 @@ for r in records:
 R = [r for r in records if r["kind"] == "rule"]
 cnt = collections.Counter(r["expression_status"] for r in R)
 out = {"grammar": "RuleExpr: CEL subset with CEL's four-valued evaluation (true, false, error, unknown); unknown only for declared attributes; absent undeclared values are errors (12 §3.2)",
-       "version": "v5.2", "source": "module texts 01-11 (RULE lines + rulexpr blocks); built by design/v5/tools/build_rules.py",
+       "version": "v5.3", "source": "module texts 01-11 (RULE lines + rulexpr blocks); built by design/v5/tools/build_rules.py",
        "counts": {"rules": len(R), "formal": cnt["formal"], "procedure": cnt["procedure"], "static": cnt["static"],
                   "text_only": cnt["text_only"], "invariants": sum(1 for r in records if r["kind"] == "invariant"),
                   "mvp_rules": sum(1 for r in R if r["release"] == "MVP")},

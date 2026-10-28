@@ -1,15 +1,15 @@
 {
  "grammar": "RuleExpr: CEL subset with CEL's four-valued evaluation (true, false, error, unknown); unknown only for declared attributes; absent undeclared values are errors (12 §3.2)",
- "version": "v5.2",
+ "version": "v5.3",
  "source": "module texts 01-11 (RULE lines + rulexpr blocks); built by design/v5/tools/build_rules.py",
  "counts": {
-  "rules": 301,
-  "formal": 248,
-  "procedure": 14,
+  "rules": 313,
+  "formal": 259,
+  "procedure": 15,
   "static": 7,
   "text_only": 32,
   "invariants": 31,
-  "mvp_rules": 269
+  "mvp_rules": 281
  },
  "records": [
   {
@@ -192,7 +192,7 @@
    "priority": 54,
    "hit_policy": "ALL",
    "when_text": "a PerformanceAnchor is saved",
-   "then_text": "confidence = measured only if kind ∈ {race, field_test, cs_test}, distance and time are given and entered_at ≤ date + log.contemporaneous_window_h; else estimated; age_grade_pct from WMA 2023 tables",
+   "then_text": "confidence = measured only if kind ∈ {race, field_test, cs_test}, distance and time are given and entered_at ≤ date + log.contemporaneous_window_h; v5.3: else declared if kind = race, effort_all_out = true and the runner confirmed it as an official result (official_result_confirmed = true; owner decision 2); else estimated. A declared anchor sets paces only on the experienced path (02 EXP-001), with the slow edge widened by exp.declared_pace_widen_pct (03 §3b), until a measured race or test replaces it; for prediction (03 §3) it counts as estimated; age_grade_pct from WMA 2023 tables",
    "because": "only contemporaneous race or test results may set paces",
    "evidence": {
     "text": "factdesk1 §3, CORROBORATED; wg3 §1, CORROBORATED (WMA); factdesk2 §6, UNKNOWN (recalled times)",
@@ -211,7 +211,7 @@
    "action": {
     "op": "set",
     "target": "anchor.confidence",
-    "expr": "(anchor.kind in ['race', 'field_test', 'cs_test'] && has(anchor.distance_m) && has(anchor.time_s) && hours_between(anchor.date, anchor.entered_at) <= p('log.contemporaneous_window_h')) ? 'measured' : 'estimated'"
+    "expr": "(anchor.kind in ['race', 'field_test', 'cs_test'] && has(anchor.distance_m) && has(anchor.time_s) && hours_between(anchor.date, anchor.entered_at) <= p('log.contemporaneous_window_h')) ? 'measured' : ((anchor.kind == 'race' && has(anchor.distance_m) && has(anchor.time_s) && anchor.effort_all_out == true && anchor.official_result_confirmed == true) ? 'declared' : 'estimated')"
    },
    "expression_status": "formal",
    "explain": {
@@ -1337,7 +1337,7 @@
    "tier": "T1",
    "priority": 86,
    "hit_policy": "COLLECT",
-   "when_text": "log_status ≠ rich",
+   "when_text": "log_status ≠ rich and the runner is not on the experienced path (02 EXP-001, v5.3: its calibration weeks check the history instead)",
    "then_text": "progression_profile = slow (as GEN-014) and show MSG-CTX-007",
    "because": "unverified history must not unlock fast progression",
    "evidence": {
@@ -1351,7 +1351,7 @@
    "release": "MVP",
    "stage": "S1",
    "scope": "global",
-   "condition": "state.log_status != 'rich'",
+   "condition": "state.log_status != 'rich' && !(state.exp_path in ['calibrating', 'confirmed'])",
    "on_unknown": "fire",
    "action": {
     "op": "set",
@@ -1410,6 +1410,314 @@
    "tests": {
     "fires": "T-CTX-008-fires",
     "silent": "T-CTX-008-silent"
+   }
+  },
+  {
+   "id": "EXP-001",
+   "module": "02",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 120,
+   "hit_policy": "PRIORITY",
+   "when_text": "a plan is generated and the runner is not already on the experienced path or fallen back from it this season",
+   "then_text": "the runner enters the experienced path (state.exp_path = calibrating, calibration until the end of plan week exp.calibration_weeks) only if all hold: a qualifying race (state.exp_race: kind race, standard distance, ≤ exp.race_max_age_days old, effort_all_out, official_result_confirmed = true); training_age_years ≥ exp.training_age_min; age_low(today) ≥ exp.age_min; the claims are consistent (claimed weekly time inside the row of the 02 §2b table for the race's age-grade, claimed runs/week ≥ exp.runs_min, no GEN-022 inconsistency); no active pain flag; no injury in the last exp.injury_free_weeks (injury_last_12m ≠ true, or injury_last_12w = false); gate = proceed; show MSG-EXP-PATH",
+   "because": "a recent all-out race and a history that agrees with it say more about a runner than the blanket distrust of v5.2, which gave an experienced runner a beginner's plan (proposal v5.3 §2, owner decision 1)",
+   "evidence": {
+    "text": "proposal v5.3 §1–§3; thresholds are design defaults, UNKNOWN; the idea that race performance and consistent volume predict session tolerance is ALLEGED (coaching practice, from memory)",
+    "grades": [
+     "ALLEGED",
+     "UNKNOWN"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
+   "condition": "state.exp_path == 'none' && has(state.exp_race) && state.exp_race.official_result_confirmed == true && state.exp_race.effort_all_out == true && days_between(state.exp_race.date, today) <= p('exp.race_max_age_days') && profile.training_age_years >= p('exp.training_age_min') && age_low(today) >= p('exp.age_min') && state.exp_claims_consistent && !exists(flags.active, f, f.kind == 'pain') && (profile.injury_last_12m != true || profile.injury_last_12w == false) && state.gate == 'proceed'",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "state.exp_path",
+    "expr": "'calibrating'",
+    "then": [
+     {
+      "op": "set",
+      "target": "state.exp_calibration_until",
+      "expr": "date_add(plan.plan_start, unit.week_d * p('exp.calibration_weeks') - 1)"
+     },
+     {
+      "op": "emit_message",
+      "msg": "MSG-EXP-PATH"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-EXP-PATH",
+    "coach": "because: a recent all-out race and a history that agrees with it say more about a runner than the blanket distrust of v5.2, which gave an experienced runner a beginner's plan (proposal v5.3 §2, owner decision 1)"
+   },
+   "tests": {
+    "fires": "T-EXP-001-fires",
+    "silent": "T-EXP-001-silent"
+   }
+  },
+  {
+   "id": "EXP-002",
+   "module": "02",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 121,
+   "hit_policy": "PRIORITY",
+   "when_text": "the runner is on the experienced path",
+   "then_text": "for each node set level = exp_level(node) when it is higher: THR and VO2 from exp.level_table by the race's age-grade band; MSP from the table only when the race's distance family equals the goal's family, else 0; HAB, TOL, AER and DUR from the claims by the 02 §2 thresholds, capped at exp.claim_level_cap; confidence = declared; nodes in state.exp_fallback_nodes keep their cautious value",
+   "because": "performance sets the performance-side levels and tolerance the volume-side ones (02 §1 principle 3), and a capped claim keeps TOL 4 for logged weeks",
+   "evidence": {
+    "text": "wg3 §1 WMA age-grading, CORROBORATED as a scale; the age-grade → level mapping is ALLEGED (coaching practice, from memory)",
+    "grades": [
+     "ALLEGED",
+     "CORROBORATED"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S2",
+   "scope": "per_node",
+   "condition": "state.exp_path in ['calibrating', 'confirmed'] && !(node.id in state.exp_fallback_nodes) && exp_level(node.id) > state.levels[node.id]",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "state.levels[node.id]",
+    "expr": "exp_level(node.id)",
+    "then": [
+     {
+      "op": "set",
+      "target": "state.level_confidence[node.id]",
+      "expr": "'declared'"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-EXP",
+    "coach": "because: performance sets the performance-side levels and tolerance the volume-side ones (02 §1 principle 3), and a capped claim keeps TOL 4 for logged weeks"
+   },
+   "tests": {
+    "fires": "T-EXP-002-fires",
+    "silent": "T-EXP-002-silent"
+   }
+  },
+  {
+   "id": "EXP-003",
+   "module": "02",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 122,
+   "hit_policy": "PRIORITY",
+   "when_text": "a non-deload week lies in the calibration window (week.is_calibration)",
+   "then_text": "the week holds exactly exp.calibration_keys key sessions, SES-M-008 then SES-M-010, each at its entry rung (SES-027) without step-up, and its long run at L30_eff; show MSG-EXP-CALIBRATION in the first calibration week",
+   "because": "the first weeks must check the declared start with ordinary training, not with tests (owner decision 3)",
+   "evidence": {
+    "text": "proposal v5.3 §3 A3; design default, UNKNOWN",
+    "grades": [
+     "UNKNOWN"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S7.1",
+   "scope": "per_week",
+   "condition": "week.is_calibration && !week.is_deload",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "week.method_default_count",
+    "expr": "p('exp.calibration_keys')",
+    "then": [
+     {
+      "op": "set",
+      "target": "week.key_slots",
+      "expr": "['SES-M-008', 'SES-M-010']"
+     },
+     {
+      "op": "set",
+      "target": "week.key_dose_mode",
+      "expr": "'entry'"
+     },
+     {
+      "op": "emit_message",
+      "msg": "MSG-EXP-CALIBRATION",
+      "once": true
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-EXP-CALIBRATION",
+    "coach": "because: the first weeks must check the declared start with ordinary training, not with tests (owner decision 3)"
+   },
+   "tests": {
+    "fires": "T-EXP-003-fires",
+    "silent": "T-EXP-003-silent"
+   }
+  },
+  {
+   "id": "EXP-004",
+   "module": "02",
+   "kind": "rule",
+   "tier": "T2",
+   "priority": 120,
+   "hit_policy": "ALL",
+   "when_text": "state.exp_path = calibrating and the log shows exp.fallback_rpe_sessions key sessions above the felt-as-intended RPE limit, or a completed calibration week with no logged run, or an active pain flag, or a completed calibration week with logged time < exp.fallback_volume_ratio × planned",
+   "then_text": "fall back: a pain flag, a missed week or low volume set state.exp_path = fallen_back (cautious path for every node); too-hard sessions alone add the nodes they train to state.exp_fallback_nodes (cautious level for those nodes only); regenerate from S2 (a reduction); show MSG-EXP-FALLBACK",
+   "because": "a declared start that the log contradicts must not keep driving the plan",
+   "evidence": {
+    "text": "proposal v5.3 §3 A3; factdesk1 §2, CORROBORATED (pain and next-morning rules); thresholds UNKNOWN",
+    "grades": [
+     "CORROBORATED",
+     "UNKNOWN"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
+   "condition": "state.exp_path == 'calibrating' && (state.exp_rpe_high_keys >= p('exp.fallback_rpe_sessions') || state.exp_missed_week || exists(flags.active, f, f.kind == 'pain') || state.exp_volume_ratio_min < p('exp.fallback_volume_ratio'))",
+   "on_unknown": "fire",
+   "action": {
+    "op": "set",
+    "target": "state.exp_path",
+    "expr": "(state.exp_missed_week || exists(flags.active, f, f.kind == 'pain') || state.exp_volume_ratio_min < p('exp.fallback_volume_ratio')) ? 'fallen_back' : 'calibrating'",
+    "then": [
+     {
+      "op": "set",
+      "target": "state.exp_fallback_nodes",
+      "expr": "state.exp_rpe_high_nodes"
+     },
+     {
+      "op": "emit_message",
+      "msg": "MSG-EXP-FALLBACK"
+     },
+     {
+      "op": "regenerate",
+      "from_stage": "S2"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-EXP-FALLBACK",
+    "coach": "because: a declared start that the log contradicts must not keep driving the plan"
+   },
+   "tests": {
+    "fires": "T-EXP-004-fires",
+    "silent": "T-EXP-004-silent"
+   }
+  },
+  {
+   "id": "EXP-005",
+   "module": "02",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 123,
+   "hit_policy": "PRIORITY",
+   "when_text": "state.exp_path = calibrating, the calibration window has ended and every calibration week is complete without a fallback",
+   "then_text": "state.exp_path = confirmed; HAB, AER and TOL become measured at their declared levels; state.baseline_confirmed = true (replaces LOD-008's count on this path); show MSG-EXP-CONFIRMED",
+   "because": "three logged weeks at the declared level confirm the history the plan was built on",
+   "evidence": {
+    "text": "proposal v5.3 §3 A3; factdesk2 §6, CREDIBLE (manual weekly logs fairly reliable); the three-week count is UNKNOWN",
+    "grades": [
+     "CREDIBLE",
+     "UNKNOWN"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
+   "condition": "state.exp_path == 'calibrating' && days_between(state.exp_calibration_until, today) > 0 && state.exp_calibration_complete",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "state.exp_path",
+    "expr": "'confirmed'",
+    "then": [
+     {
+      "op": "set",
+      "target": "state.baseline_confirmed",
+      "expr": "true"
+     },
+     {
+      "op": "set",
+      "target": "state.level_confidence.HAB",
+      "expr": "'measured'"
+     },
+     {
+      "op": "set",
+      "target": "state.level_confidence.AER",
+      "expr": "'measured'"
+     },
+     {
+      "op": "set",
+      "target": "state.level_confidence.TOL",
+      "expr": "'measured'"
+     },
+     {
+      "op": "emit_message",
+      "msg": "MSG-EXP-CONFIRMED"
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-EXP-CONFIRMED",
+    "coach": "because: three logged weeks at the declared level confirm the history the plan was built on"
+   },
+   "tests": {
+    "fires": "T-EXP-005-fires",
+    "silent": "T-EXP-005-silent"
+   }
+  },
+  {
+   "id": "EXP-006",
+   "module": "02",
+   "kind": "rule",
+   "tier": "T6",
+   "priority": 120,
+   "hit_policy": "PRIORITY",
+   "when_text": "a race anchor would qualify except that official_result_confirmed has not been answered",
+   "then_text": "plan on the cautious path and ask MSG-EXP-CONFIRM-Q once; a \"yes\" re-generates the plan (EXP-001)",
+   "because": "the experienced path rests on the runner's own confirmation of the result (owner decision 1), and a plan should not wait for it",
+   "evidence": {
+    "text": "proposal v5.3 §3 A1, N/A (engineering: structure or procedure, no physiological claim)",
+    "grades": [
+     "N/A"
+    ],
+    "basis": "eng"
+   },
+   "default": false,
+   "release": "MVP",
+   "stage": "S2",
+   "scope": "global",
+   "condition": "state.exp_path == 'none' && has(state.exp_race) && state.exp_race.official_result_confirmed == null && state.exp_race.effort_all_out == true && days_between(state.exp_race.date, today) <= p('exp.race_max_age_days')",
+   "on_unknown": "skip",
+   "action": {
+    "op": "emit_message",
+    "msg": "MSG-EXP-CONFIRM-Q",
+    "once": true
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-EXP-CONFIRM-Q",
+    "coach": "because: the experienced path rests on the runner's own confirmation of the result (owner decision 1), and a plan should not wait for it"
+   },
+   "tests": {
+    "fires": "T-EXP-006-fires",
+    "silent": "T-EXP-006-silent"
    }
   },
   {
@@ -1549,7 +1857,7 @@
    "priority": 113,
    "hit_policy": "PRIORITY",
    "when_text": "a level rests only on self-report (onboarding claim or backfilled entries)",
-   "then_text": "cap that node at cmp.self_report_level_cap[node] (2 for HAB, AER, TOL, DUR; 1 for THR, VO2, MSP, FUEL) with confidence = estimated, until contemporaneous log thresholds or an exit test confirm it",
+   "then_text": "cap that node at cmp.self_report_level_cap[node] (2 for HAB, AER, TOL, DUR; 1 for THR, VO2, MSP, FUEL) with confidence = estimated, until contemporaneous log thresholds or an exit test confirm it; v5.3: not on the experienced path (EXP-002 sets and caps those levels), except for the nodes in state.exp_fallback_nodes",
    "because": "self-reports are unverified and users may overstate history; weekly distance self-report is fairly reliable, pace and race times less so",
    "evidence": {
     "text": "opening-contrarian §1.4; factdesk2 §6, CREDIBLE (distance) / UNKNOWN (race times)",
@@ -1563,7 +1871,7 @@
    "release": "MVP",
    "stage": "S2",
    "scope": "per_node",
-   "condition": "state.level_rests_on_self_report[node.id]",
+   "condition": "state.level_rests_on_self_report[node.id] && (!(state.exp_path in ['calibrating', 'confirmed']) || node.id in state.exp_fallback_nodes)",
    "on_unknown": "fire",
    "action": {
     "op": "cap",
@@ -1952,7 +2260,7 @@
    "priority": 150,
    "hit_policy": "PRIORITY",
    "when_text": "a session at E1–E4 is rendered and INV-15 allows paces",
-   "then_text": "attach the pace range of §3b computed from the active measured anchor; re-compute only when the active anchor moves under the §3b step 4 bands (ADP-061, ADP-062, ADP-067; v5.1)",
+   "then_text": "attach the pace range of §3b computed from the active measured anchor (v5.3: or declared anchor on the experienced path, slow edge widened by exp.declared_pace_widen_pct); re-compute only when the active anchor moves under the §3b step 4 bands (ADP-061, ADP-062, ADP-067; v5.1)",
    "because": "paces need an explicit, deterministic derivation, and noise below retest variability must not move the plan",
    "evidence": {
     "text": "factdesk1 §3, CORROBORATED (CS ≈ 10K speed; talk test); factdesk3 §3, factdesk4 §6, CREDIBLE (3.4% CV, Machado 2015, single study) / CORROBORATED (1–1.5% trained); hearing-2 sys, CORROBORATED (deadband practice)",
@@ -1966,7 +2274,7 @@
    "release": "MVP",
    "stage": "S3",
    "scope": "per_session",
-   "condition": "effort_rank(session.effort_target) >= effort_rank('E1') && effort_rank(session.effort_target) <= effort_rank('E4') && anchor.confidence == 'measured' && days_between(anchor.date, session.date) <= p('anchor.max_age_days')",
+   "condition": "effort_rank(session.effort_target) >= effort_rank('E1') && effort_rank(session.effort_target) <= effort_rank('E4') && (anchor.confidence == 'measured' || (anchor.confidence == 'declared' && state.exp_path in ['calibrating', 'confirmed'])) && days_between(anchor.date, session.date) <= p('anchor.max_age_days')",
    "on_unknown": "skip",
    "action": {
     "op": "set",
@@ -3894,7 +4202,7 @@
    "priority": 259,
    "hit_policy": "ALL",
    "when_text": "state.baseline_confirmed = false and a non-deload week w outside TAPER, TRANSITION, RTR and START_LADDER is planned",
-   "then_text": "V(w) ≤ (1 + prog.est.week_max) × week.est_base_s (the best weekly time logged in the prog.est.window_weeks weeks before w; planned weeks count provisionally until logged; while no week is logged, the claimed V_hold); numeric MIN with LOD-003; show MSG-LOD-EST-CAP once",
+   "then_text": "V(w) ≤ (1 + prog.est.week_max) × week.est_base_s (the best weekly time logged in the prog.est.window_weeks weeks before w; planned weeks count provisionally until logged; while no week is logged, the claimed V_hold; v5.3: on the experienced path, 02 EXP-001, the base is never below the claimed V_hold, so the cap holds the claimed week from week 1 instead of forcing a climb back to it); numeric MIN with LOD-003; show MSG-LOD-EST-CAP once",
    "because": "a starting volume from memory is unverified, and under LOD-003 alone a claims-only runner went from 210 to 360 min a week in 5 weeks (+71%, external review v5 item 4); growth must follow what the log shows",
    "evidence": {
     "text": "wg4 §1 Buist (GRONORUN), CORROBORATED that a 10%-a-week plan did not lower injuries; the 10% value is UNKNOWN as a safety limit (convention); external review v5 item 4",
@@ -3913,7 +4221,7 @@
    "action": {
     "op": "cap",
     "target": "week.planned_time_s",
-    "expr": "(1 + p('prog.est.week_max')) * week.est_base_s",
+    "expr": "(1 + p('prog.est.week_max')) * (state.exp_path in ['calibrating', 'confirmed'] ? max(week.est_base_s, state.V_hold_s) : week.est_base_s)",
     "then": [
      {
       "op": "emit_message",
@@ -3940,7 +4248,7 @@
    "priority": 260,
    "hit_policy": "ALL",
    "when_text": "state.baseline_confirmed = false and state.est_confirm_weeks ≥ prog.est.confirm_weeks (consecutive completed weeks with measured entries and logged time ≥ prog.est.confirm_ratio × planned; logged weeks before the first plan count; an unlogged week restarts the count)",
-   "then_text": "baseline_confirmed = true: LOD-007 stops applying and growth follows the active profile (LOD-002/003); show MSG-LOD-BASE-CONFIRMED",
+   "then_text": "baseline_confirmed = true: LOD-007 stops applying and growth follows the active profile (LOD-002/003); show MSG-LOD-BASE-CONFIRMED; v5.3: on the experienced path the baseline is confirmed instead by EXP-005 at the end of the calibration weeks",
    "because": "after several logged weeks at the planned volume the baseline is a record, not a recollection",
    "evidence": {
     "text": "factdesk2 §6, CREDIBLE (manual weekly logs fairly reliable); count and ratio UNKNOWN (design default)",
@@ -5270,10 +5578,10 @@
    "priority": 302,
    "hit_policy": "PRIORITY",
    "when_text": "placing key sessions",
-   "then_text": "a \"hard day\" is any session with a segment at E3 or E4 (strides excluded, SES-021), or the long run (v5.2, owner Q2: the long run counts as a hard day for spacing, whatever quality.counts_long says for the quality count); no two hard days are consecutive, inside the week or across its start, unless the preset declares consecutive_hard_allowed; among valid placements choose the one maximising the smallest gap between hard days of the Monday–Sunday week, ties to the earlier days (12 §2b.4 place_in_order)",
+   "then_text": "a \"hard day\" is any session with a segment at E3 or E4 (strides excluded, SES-021), or the long run (v5.2, owner Q2: the long run counts as a hard day for spacing, whatever quality.counts_long says for the quality count), except, on the experienced path (02 EXP-001), a long run whose segments are all E1 (v5.3, owner decision 4 form a); no two hard days are consecutive, inside the week or across its start, unless the preset declares consecutive_hard_allowed; among valid placements choose the one maximising the smallest gap between hard days of the Monday–Sunday week, then (v5.3) the one with the fewest key sessions on the day after a long run, then the earlier days (12 §2b.4 place_in_order); v5.3, experienced path: the smallest-gap score counts this week's long run and the previous week's long run as points of the week even when they are not hard days, so workouts are spread away from the long runs",
    "because": "spacing hard days is common practice (INV-17)",
    "evidence": {
-    "text": "hearing-1 §2, CREDIBLE practice; v5.2 long run counted as a hard day for spacing: ALLEGED (common plan practice, from memory)",
+    "text": "hearing-1 §2, CREDIBLE practice; v5.2 long run counted as a hard day for spacing: ALLEGED (common plan practice, from memory); v5.3 all-easy long run of the experienced path not a hard day: ALLEGED (Hansons-style weeks, from memory)",
     "grades": [
      "ALLEGED",
      "CREDIBLE"
@@ -5346,7 +5654,7 @@
    "priority": 303,
    "hit_policy": "PRIORITY",
    "when_text": "setting the week's key-session count",
-   "then_text": "count = MIN(quality.per_week[preset], quality.method_default[state] if preset = method_default, week runs − quality.non_key_runs_min (v5.2, owner Q2: at least the long run and one easy run besides the key sessions), the largest count placeable under SES-004 and SES-005 (try k, then k − 1, 07 §2b S7.4), the largest count whose start doses fit the week's TID budgets (v5.2: drop the last-ranked slot rather than trim it, S7.5)), where the long run counts toward the total only if quality.counts_long[preset]",
+   "then_text": "count = MIN(quality.per_week[preset], quality.method_default[state] if preset = method_default, week runs − quality.non_key_runs_min (v5.2, owner Q2: at least the long run and one easy run besides the key sessions), the largest count placeable under SES-004 and SES-005 (try k, then k − 1, 07 §2b S7.4), the largest count whose start doses fit the week's TID budgets (v5.2: drop the last-ranked slot rather than trim it, S7.5), and (v5.3, owner decision 4) the runner's ceiling profile.hard_sessions_max (1, 2 or 3; default exp.hard_sessions_max_default = 3)), where the long run counts toward the total only if quality.counts_long[preset]",
    "because": "a school's quality count only works in its own week",
    "evidence": {
     "text": "wg2 impl. 7, CORROBORATED; opening-statusquo R2; v5.2 run-count and budget terms: ALLEGED (common novice and intermediate practice, from memory)",
@@ -5365,7 +5673,7 @@
    "action": {
     "op": "cap",
     "target": "week.quality_max",
-    "expr": "max(0, min(preset.id == 'method_default' ? week.method_default_count : p('quality.per_week')[preset.id], week.runs - p('quality.non_key_runs_min')))"
+    "expr": "max(0, min(preset.id == 'method_default' ? week.method_default_count : p('quality.per_week')[preset.id], week.runs - p('quality.non_key_runs_min'), has(profile.hard_sessions_max) ? profile.hard_sessions_max : p('exp.hard_sessions_max_default')))"
    },
    "expression_status": "formal",
    "explain": {
@@ -5385,11 +5693,12 @@
    "priority": 304,
    "hit_policy": "PRIORITY",
    "when_text": "preset = method_default",
-   "then_text": "quality.method_default = 0 in START_LADDER, RTR, ONBOARD, TRANSITION and RACE weeks or while level(HAB) < L2; 1 in BASE, TAPER and MAINTAIN or while level(TOL) ≤ L2; in SHARPEN the count of the last completed non-deload week, at most 2; otherwise 2 in BUILD and SPECIFIC (v5.2: tests in this order; owner Q2)",
+   "then_text": "quality.method_default = 0 in START_LADDER, RTR, ONBOARD, TRANSITION and RACE weeks or while level(HAB) < L2; 1 in BASE, TAPER and MAINTAIN or while level(TOL) ≤ L2; in SHARPEN the count of the last completed non-deload week, at most 2; otherwise 2 in BUILD and SPECIFIC (v5.2: tests in this order; owner Q2). **v5.3, experienced path (02 EXP-001; owner decision 4), tested after the zero cases and SHARPEN:** a calibration week (EXP-003) exp.calibration_keys (2); BASE 1 (strides come on top, SES-021); TAPER exp.taper_keys (2 sharpeners, SES-015); MAINTAIN 1; BUILD and SPECIFIC exp.keys_max (3) when the week plans ≥ exp.three_keys_runs_min runs (6, the long run included) and level(TOL) ≥ exp.three_keys_tol_min (3, declared or logged), else 2; the budget term of SES-006 and the runner's ceiling still apply",
    "because": "novice plans use 0–1 key sessions, Daniels 2",
    "evidence": {
-    "text": "wg2 §1, impl. 7, CORROBORATED; hearing-1 §2, CORROBORATED; v5.2 counts for TAPER, RACE, MAINTAIN, SHARPEN: design choice, UNKNOWN",
+    "text": "wg2 §1, impl. 7, CORROBORATED; hearing-1 §2, CORROBORATED; v5.2 counts for TAPER, RACE, MAINTAIN, SHARPEN: design choice, UNKNOWN; v5.3 three key sessions for experienced runners: ALLEGED (Hansons, FIRST and Pfitzinger use 2–3 quality sessions, from memory; owner decision 4)",
     "grades": [
+     "ALLEGED",
      "CORROBORATED",
      "UNKNOWN"
     ],
@@ -5404,7 +5713,7 @@
    "action": {
     "op": "set",
     "target": "week.method_default_count",
-    "expr": "(week.phase in ['START_LADDER', 'RTR', 'ONBOARD', 'TRANSITION', 'RACE'] || week.is_race_week || state.levels.HAB < p('quality.min_hab_level')) ? 0 : (week.phase == 'SHARPEN' ? min(p('quality.method_default_max'), state.last_week_key_count) : ((week.phase in ['BASE', 'TAPER', 'MAINTAIN'] || state.levels.TOL <= p('quality.low_tol_level')) ? 1 : p('quality.method_default_max')))"
+    "expr": "(week.phase in ['START_LADDER', 'RTR', 'ONBOARD', 'TRANSITION', 'RACE'] || week.is_race_week || state.levels.HAB < p('quality.min_hab_level')) ? 0 : (week.phase == 'SHARPEN' ? min(p('quality.method_default_max'), state.last_week_key_count) : (state.exp_path in ['calibrating', 'confirmed'] ? (week.is_calibration ? p('exp.calibration_keys') : (week.phase in ['BUILD', 'SPECIFIC'] ? ((week.runs >= p('exp.three_keys_runs_min') && state.levels.TOL >= p('exp.three_keys_tol_min')) ? p('exp.keys_max') : p('quality.method_default_max')) : (week.phase == 'TAPER' ? p('exp.taper_keys') : 1))) : ((week.phase in ['BASE', 'TAPER', 'MAINTAIN'] || state.levels.TOL <= p('quality.low_tol_level')) ? 1 : p('quality.method_default_max'))))"
    },
    "expression_status": "formal",
    "explain": {
@@ -5539,7 +5848,7 @@
    "priority": 307,
    "hit_policy": "PRIORITY",
    "when_text": "the previous non-deload instance of a module was logged done with RPE ≤ min(target RPE + ses.progress_rpe_margin, result.rpe_high − 1) (target RPE: ses.target_rpe by effort)",
-   "then_text": "the next instance steps up by one dose step of ses.dose.<id>.steps (06 §2c); otherwise, or when the RPE was not given, repeat the dose; never exceed the dose max, the week's TID budgets (dose_fit) or any numeric cap (MIN); future weeks show one step ahead only (07 §2b projection); after a deload or taper the module resumes at its last completed dose (v5.2, owner Q3)",
+   "then_text": "the next instance steps up by one dose step of ses.dose.<id>.steps (06 §2c); otherwise, or when the RPE was not given, repeat the dose; never exceed the dose max (v5.3: the top rung for the runner's level, SES-027), the week's TID budgets (dose_fit) or any numeric cap (MIN); a first instance starts at the entry rung for the runner's level (SES-027, v5.3); future weeks show the planned dose path (SES-028, 07 §2b, v5.3: one step per planned instance); after a deload or taper the module resumes at its last completed dose (v5.2, owner Q3); v5.3: the step-up rule then reads the last non-deload instance, so a deload instance neither counts as a step nor stops the path (SES-028)",
    "because": "progression follows tolerated work",
    "evidence": {
     "text": "wg1 §3 session RPE, CORROBORATED; opening-statusquo R3; v5.2 dose ladders (lengthen repeats, then add one) and target session RPE: ALLEGED (Daniels-style cruise intervals and Foster session RPE, from memory)",
@@ -5675,7 +5984,7 @@
    "tier": "T5",
    "priority": 310,
    "hit_policy": "PRIORITY",
-   "when_text": "ONBOARD ends, or no anchor with confidence = measured is younger than anchor.max_age_days − ses.retest_lead_days",
+   "when_text": "ONBOARD ends, or no anchor with confidence = measured (v5.3: or declared, on the experienced path) is younger than anchor.max_age_days − ses.retest_lead_days",
    "then_text": "schedule SES-M-020 if VO2 L1 and THR L1 hold, else SES-M-019 if its prereqs hold, else SES-M-018 (benchmark only; plan stays effort-only); a logged race with distance ∈ {5K, 10K} replaces the test",
    "because": "paces need measured anchors; novices stay effort-only until they can test safely",
    "evidence": {
@@ -5689,7 +5998,7 @@
    "release": "MVP",
    "stage": "S7.3",
    "scope": "global",
-   "condition": "event.type == 'onboard_end' || !exists(state.anchors, a, a.confidence == 'measured' && days_between(a.date, today) <= p('anchor.max_age_days') - p('ses.retest_lead_days'))",
+   "condition": "event.type == 'onboard_end' || !exists(state.anchors, a, (a.confidence == 'measured' || (a.confidence == 'declared' && state.exp_path in ['calibrating', 'confirmed'])) && days_between(a.date, today) <= p('anchor.max_age_days') - p('ses.retest_lead_days'))",
    "on_unknown": "skip",
    "action": {
     "op": "schedule_session",
@@ -6008,8 +6317,8 @@
    "tier": "T6",
    "priority": 302,
    "hit_policy": "PRIORITY",
-   "when_text": "SES-M-007 is selected and RunnerProfile.hill_access ≠ true",
-   "then_text": "replace it with SES-M-006",
+   "when_text": "SES-M-007 or SES-M-028 (v5.3) is selected and RunnerProfile.hill_access ≠ true",
+   "then_text": "replace SES-M-007 with SES-M-006 and SES-M-028 with SES-M-027",
    "because": "terrain is out of scope",
    "evidence": {
     "text": "criteria.md scope note, N/A (engineering: structure or procedure, no physiological claim)",
@@ -6022,12 +6331,12 @@
    "release": "MVP",
    "stage": "S7",
    "scope": "per_candidate",
-   "condition": "slot.module == 'SES-M-007' && profile.hill_access != true",
+   "condition": "slot.module in ['SES-M-007', 'SES-M-028'] && profile.hill_access != true",
    "on_unknown": "fire",
    "action": {
     "op": "replace_module",
     "target": "slot",
-    "expr": "'SES-M-006'"
+    "expr": "slot.module == 'SES-M-007' ? 'SES-M-006' : 'SES-M-027'"
    },
    "expression_status": "formal",
    "explain": {
@@ -6119,6 +6428,240 @@
    "tests": {
     "fires": "T-SES-025-fires",
     "silent": "T-SES-025-silent"
+   }
+  },
+  {
+   "id": "SES-026",
+   "module": "06",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 318,
+   "hit_policy": "PRIORITY",
+   "when_text": "the experienced path holds, the week is a non-deload BUILD or SPECIFIC week and its key count is 3 (SES-007)",
+   "then_text": "the three key sessions take one of two forms, by exp.long_quality_pattern[row][week.loading_index_in_phase mod its length] (row BUILD; SPECIFIC_time for a time goal; SPECIFIC_finish otherwise): form a = three workouts (a threshold-type slot, a VO2-type slot, and a third slot from the family with the larger cmp.weight for the goal distance, or SES-M-011 where DST-018 applies) and an all-E1 long run that is not a hard day (SES-004); form b = two workouts and a long run with quality (SES-M-031 steady finish for the short family and half-marathon finish goals; SES-M-005 where DST-006/DST-007 apply), which counts as the third key session and as a hard day; on the experienced path SES-M-008 is allowed in every BASE week, and in BASE the one key slot takes the threshold family (SES-030) when no node has a gap",
+   "because": "three quality sessions fit a week only if the long run is easy or itself carries the third quality element (owner decision 4)",
+   "evidence": {
+    "text": "docs/decisions-v5.3.md decision 4; ALLEGED (Hansons, FIRST, Pfitzinger week structures, from memory)",
+    "grades": [
+     "ALLEGED"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S7.3",
+   "scope": "per_week",
+   "condition": "state.exp_path in ['calibrating', 'confirmed'] && week.phase in ['BUILD', 'SPECIFIC'] && !week.is_deload && week.quality_max >= p('exp.keys_max')",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "week.long_run_form",
+    "expr": "p('exp.long_quality_pattern')[week.exp_pattern_row][week.exp_pattern_index]"
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-SES",
+    "coach": "because: three quality sessions fit a week only if the long run is easy or itself carries the third quality element (owner decision 4)"
+   },
+   "tests": {
+    "fires": "T-SES-026-fires",
+    "silent": "T-SES-026-silent"
+   }
+  },
+  {
+   "id": "SES-027",
+   "module": "06",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 319,
+   "hit_policy": "PRIORITY",
+   "when_text": "a key module's dose step is set",
+   "then_text": "a first instance (no earlier instance logged or planned in this plan) starts at ses.entry_rung.<module>[level of its rung node] and no instance exceeds ses.top_rung.<module>[that level] (06 §2d); level tests keep their own size",
+   "because": "a runner at threshold level 3 gains nothing from 3 × 5 min, and an untested runner must not reach the upper rungs (proposal v5.3 §4 B2)",
+   "evidence": {
+    "text": "proposal v5.3 §4 B2; ALLEGED (practice, from memory)",
+    "grades": [
+     "ALLEGED"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S7.5",
+   "scope": "per_session",
+   "condition": "event.type == 'dose_sessions' && session.is_key && !session.is_test",
+   "on_unknown": "skip",
+   "action": {
+    "op": "cap",
+    "target": "session.dose_step",
+    "expr": "dose_max(session.module_id)"
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-SES",
+    "coach": "because: a runner at threshold level 3 gains nothing from 3 × 5 min, and an untested runner must not reach the upper rungs (proposal v5.3 §4 B2)"
+   },
+   "tests": {
+    "fires": "T-SES-027-fires",
+    "silent": "T-SES-027-silent"
+   }
+  },
+  {
+   "id": "SES-028",
+   "module": "06",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 320,
+   "hit_policy": "PRIORITY",
+   "when_text": "a plan week after the current one is built (projection, 07 §2b)",
+   "then_text": "each key module's instance takes one step above its previous planned non-deload instance, as if every session goes as intended, within the top rung, the TID budgets and every numeric cap, and never more than ses.projection_max_steps steps above the last logged step of the module (or above its entry rung when none is logged); a deload or taper instance does not count as a step; the plan shows MSG-SES-PROJECTION; at each weekly re-plan the path restarts from the log (SES-011), so a session that felt too hard or was missed holds or steps the path back (a reduction, ADP-014)",
+   "because": "a plan that repeats week 1 for 22 weeks hides the progression the runner will actually do (owner decision 7)",
+   "evidence": {
+    "text": "proposal v5.3 §5; design default, UNKNOWN",
+    "grades": [
+     "UNKNOWN"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S7.5",
+   "scope": "per_session",
+   "condition": "event.type == 'dose_sessions' && session.is_key && !session.is_test && session.is_projected",
+   "on_unknown": "skip",
+   "action": {
+    "op": "cap",
+    "target": "session.dose_step",
+    "expr": "session.confirmed_step + p('ses.projection_max_steps')",
+    "then": [
+     {
+      "op": "emit_message",
+      "msg": "MSG-SES-PROJECTION",
+      "once": true
+     }
+    ]
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-SES-PROJECTION",
+    "coach": "because: a plan that repeats week 1 for 22 weeks hides the progression the runner will actually do (owner decision 7)"
+   },
+   "tests": {
+    "fires": "T-SES-028-fires",
+    "silent": "T-SES-028-silent"
+   }
+  },
+  {
+   "id": "SES-030",
+   "module": "06",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 321,
+   "hit_policy": "PRIORITY",
+   "when_text": "a BUILD or SPECIFIC key slot trains THR or VO2 (CMP-007, its fallback, or SES-026)",
+   "then_text": "its module is the next member of ses.family.<node> in rotation after the member of that family used in the most recent earlier slot, skipping members that fail SES-001/SES-022, members already in the week and, for a slot that closes a gap, members that do not train (node, level + 1) (06 §2d)",
+   "because": "the same session every week trains one stimulus only; a rotation keeps one threshold-type and one VO2-type stimulus while varying the session (owner decision 6)",
+   "evidence": {
+    "text": "proposal v5.3 §4 B3; ALLEGED (common coaching practice, from memory)",
+    "grades": [
+     "ALLEGED"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S7.5",
+   "scope": "per_week",
+   "condition": "event.type == 'sessions_set' && week.phase in ['BUILD', 'SPECIFIC']",
+   "on_unknown": "skip",
+   "action": {
+    "op": "constraint",
+    "check": "all(week.sessions, s, !s.is_key || !s.repeats_family_module || !s.family_alternative_exists)"
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-SES",
+    "coach": "because: the same session every week trains one stimulus only; a rotation keeps one threshold-type and one VO2-type stimulus while varying the session (owner decision 6)"
+   },
+   "tests": {
+    "fires": "T-SES-030-fires",
+    "silent": "T-SES-030-silent"
+   }
+  },
+  {
+   "id": "SES-031",
+   "module": "06",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 322,
+   "hit_policy": "PRIORITY",
+   "when_text": "a session with E3 or E4 repeats is rendered",
+   "then_text": "prescription_form = time when the plan is effort-only or the module is in ses.time_only_modules (SES-M-029), else profile.prescription_preference (distance, time or both; unset → ses.prescription_default = distance); the time stays the controlling quantity of every budget and cap",
+   "because": "runners on a track or a measured loop think in metres, and a distance without a pace means nothing (owner decision 5)",
+   "evidence": {
+    "text": "docs/decisions-v5.3.md decision 5, N/A (engineering: structure or procedure, no physiological claim)",
+    "grades": [
+     "N/A"
+    ],
+    "basis": "eng"
+   },
+   "default": false,
+   "release": "MVP",
+   "stage": "S7.8",
+   "scope": "per_session",
+   "condition": "event.type == 'render_session' && session.has_repeats",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "session.prescription_form",
+    "expr": "(plan.pace_mode == 'effort_only' || session.module_id in p('ses.time_only_modules')) ? 'time' : (has(profile.prescription_preference) ? profile.prescription_preference : p('ses.prescription_default'))"
+   },
+   "expression_status": "formal",
+   "explain": {
+    "runner": "MSG-WHY-SES",
+    "coach": "because: runners on a track or a measured loop think in metres, and a distance without a pace means nothing (owner decision 5)"
+   },
+   "tests": {
+    "fires": "T-SES-031-fires",
+    "silent": "T-SES-031-silent"
+   }
+  },
+  {
+   "id": "SES-032",
+   "module": "06",
+   "kind": "rule",
+   "tier": "T5",
+   "priority": 323,
+   "hit_policy": "PRIORITY",
+   "when_text": "a segment is rendered in the distance form",
+   "then_text": "its distance = rep time × the midpoint speed of its effort pace range (hill reps × ses.hill_speed_ratio), rounded to the nearest of ses.track_distances_m (then whole km), ties to the shorter; when the rounding changes the rep by more than ses.dist_round_tol_pct the segment keeps its time form (\"about {x} m\"); recoveries at the E1 midpoint, rounded to ses.dist_round_recovery_m",
+   "because": "track-friendly distances are what runners can run, and the rounding must not change the planned work by more than a small margin",
+   "evidence": {
+    "text": "proposal v5.3 §4 B4; tolerance UNKNOWN (design default)",
+    "grades": [
+     "UNKNOWN"
+    ],
+    "basis": "design_default"
+   },
+   "default": true,
+   "release": "MVP",
+   "stage": "S7.8",
+   "scope": "per_session",
+   "condition": "event.type == 'render_session' && session.prescription_form != 'time'",
+   "on_unknown": "skip",
+   "action": {
+    "op": "set",
+    "target": "session.show_distances",
+    "expr": "distance_form(session)"
+   },
+   "expression_status": "procedure",
+   "explain": {
+    "runner": "MSG-WHY-SES",
+    "coach": "because: track-friendly distances are what runners can run, and the rounding must not change the planned work by more than a small margin"
+   },
+   "tests": {
+    "fires": "T-SES-032-fires",
+    "silent": "T-SES-032-silent"
    }
   },
   {
@@ -6417,7 +6960,7 @@
    "priority": 352,
    "hit_policy": "ALL",
    "when_text": "log_status = sparse",
-   "then_text": "L30_eff = max(logged measured L30, claim.l30_discount × claimed L30), never above claim.l30_week_ratio_max × claimed weekly distance; set profile = slow for log.probation_weeks; v5 (p2-C R7): while log_status ≠ rich, L30_eff from claims is also ≤ claim.l30_cap_by_tol[tol_tier] (TOL computed from claims, capped per CMP-004)",
+   "then_text": "L30_eff = max(logged measured L30, claim.l30_discount × claimed L30), never above claim.l30_week_ratio_max × claimed weekly distance; set profile = slow for log.probation_weeks; v5 (p2-C R7): while log_status ≠ rich, L30_eff from claims is also ≤ claim.l30_cap_by_tol[tol_tier] (TOL computed from claims, capped per CMP-004); **v5.3: on the experienced path (02 EXP-001) L30_eff = max(logged measured L30, exp.l30_discount × claimed L30), still ≤ claim.l30_week_ratio_max × claimed weekly distance and every spike cap, without the TOL cap and without the slow profile** (owner decisions 1 and 3: the calibration weeks check the claim instead)",
    "because": "unlogged claims may be inflated; self-reported weekly distance is fairly reliable",
    "evidence": {
     "text": "opening-contrarian §1.4; opening-executor request 2; factdesk2 §6, CREDIBLE",
@@ -6435,17 +6978,19 @@
    "action": {
     "op": "set",
     "target": "state.L30_eff_dist_m",
-    "expr": "min(max(state.logged_l30_dist_m, p('claim.l30_discount') * claim.L30_distance_m), p('claim.l30_week_ratio_max') * claim.weekly_distance_m)",
+    "expr": "min(max(state.logged_l30_dist_m, (state.exp_path in ['calibrating', 'confirmed'] ? p('exp.l30_discount') : p('claim.l30_discount')) * claim.L30_distance_m), p('claim.l30_week_ratio_max') * claim.weekly_distance_m)",
     "then": [
      {
       "op": "cap",
       "target": "state.L30_eff_time_s",
-      "expr": "unit.min_s * p('claim.l30_cap_by_tol')[state.tol_tier]"
+      "expr": "unit.min_s * p('claim.l30_cap_by_tol')[state.tol_tier]",
+      "when": "!(state.exp_path in ['calibrating', 'confirmed'])"
      },
      {
       "op": "set",
       "target": "state.progression_profile",
-      "expr": "'slow'"
+      "expr": "'slow'",
+      "when": "!(state.exp_path in ['calibrating', 'confirmed'])"
      },
      {
       "op": "emit_message",
@@ -6561,7 +7106,7 @@
    "tier": "T5",
    "priority": 351,
    "hit_policy": "PRIORITY",
-   "when_text": "log_status ≠ rich or any core input has confidence ≠ measured",
+   "when_text": "log_status ≠ rich or any core input has confidence ≠ measured, and (v5.3) the runner is not on the experienced path (02 EXP-001: standard profile from week 1; EXP-004 falls back if the log disagrees)",
    "then_text": "use progression profile slow (05) until log_status = rich for log.probation_weeks consecutive weeks",
    "because": "unverified history should not unlock fast progression",
    "evidence": {
@@ -6575,7 +7120,7 @@
    "release": "MVP",
    "stage": "S2",
    "scope": "global",
-   "condition": "state.log_status != 'rich' || exists(state.core_inputs, i, i.confidence != 'measured')",
+   "condition": "(state.log_status != 'rich' || exists(state.core_inputs, i, i.confidence != 'measured')) && !(state.exp_path in ['calibrating', 'confirmed'])",
    "on_unknown": "fire",
    "action": {
     "op": "set",
@@ -9425,7 +9970,7 @@
    "priority": 450,
    "hit_policy": "PRIORITY",
    "when_text": "Goal.family = short",
-   "then_text": "long runs are SES-M-003 at E1 only; race-effort work lives in key sessions, never in the long run",
+   "then_text": "long runs are SES-M-003 at E1 only; race-effort work lives in key sessions, never in the long run; v5.3: except the steady-finish long run SES-M-031 (E2, never E3+) on the experienced path, form b of SES-026",
    "because": "short-race specificity is speed, while the long run serves AER/DUR",
    "evidence": {
     "text": "hearing-1 §2, CORROBORATED (shared core); wg1 §1 weighting, CREDIBLE",
@@ -9443,7 +9988,7 @@
    "on_unknown": "fire",
    "action": {
     "op": "constraint",
-    "check": "all(plan.long_runs, lr, lr.module_id == 'SES-M-003' && lr.hard_time_s == 0 && lr.e2_time_s == 0)",
+    "check": "all(plan.long_runs, lr, (lr.module_id == 'SES-M-003' && lr.hard_time_s == 0 && lr.e2_time_s == 0) || (state.exp_path in ['calibrating', 'confirmed'] && lr.module_id == 'SES-M-031' && lr.hard_time_s == 0))",
     "then": [
      {
       "op": "filter_candidates",
@@ -12942,10 +13487,10 @@
    "kind": "invariant",
    "tier": "T2",
    "severity": "repair (→ effort)",
-   "text": "No pace target from an anchor with confidence ≠ measured or older than `anchor.max_age_days`. Paces only from the 03 §3b pace model (FEA-014), never from the target, logged pace or HR formulas",
+   "text": "No pace target from an anchor with confidence ≠ measured (v5.3: or declared, on the experienced path, 03 §3b) or older than `anchor.max_age_days`. Paces only from the 03 §3b pace model (FEA-014), never from the target, logged pace or HR formulas",
    "stage": "S8",
    "scope": "per_plan",
-   "assert": "all(plan.sessions, s, !has(s.pace_range) || (anchor.confidence == 'measured' && days_between(anchor.date, s.date) <= p('anchor.max_age_days')))",
+   "assert": "all(plan.sessions, s, !has(s.pace_range) || ((anchor.confidence == 'measured' || (anchor.confidence == 'declared' && state.exp_path in ['calibrating', 'confirmed'])) && days_between(anchor.date, s.date) <= p('anchor.max_age_days')))",
    "check_kind": "S",
    "on_unknown": "fire",
    "evidence": {
@@ -12958,7 +13503,7 @@
    "release": "MVP",
    "explain": {
     "runner": "MSG-ADP-CHANGED",
-    "coach": "No pace target from an anchor with confidence ≠ measured or older than `anchor.max_age_days`. Paces only from the 03 §3b pace model (FEA-014), never from the target, logged pace or HR formulas"
+    "coach": "No pace target from an anchor with confidence ≠ measured (v5.3: or declared, on the experienced path, 03 §3b) or older than `anchor.max_age_days`. Paces only from the 03 §3b pace model (FEA-014), never from the target, logged pace or HR formulas"
    },
    "tests": {
     "fires": "T-INV-15-fires",
@@ -13000,7 +13545,7 @@
    "kind": "invariant",
    "tier": "T5",
    "severity": "repair",
-   "text": "No two hard days on consecutive days unless the preset declares it (v5.2: hard = a segment at E3 or E4, or the long run, SES-004; strides do not count)",
+   "text": "No two hard days on consecutive days unless the preset declares it (v5.2: hard = a segment at E3 or E4, or the long run, SES-004; strides do not count; v5.3: an all-E1 long run on the experienced path is not hard)",
    "stage": "S8",
    "scope": "per_plan",
    "assert": "all(plan.sessions, s, !(s.is_hard && s.next_day_is_hard) || preset.consecutive_hard_allowed)",
@@ -13016,7 +13561,7 @@
    "release": "MVP",
    "explain": {
     "runner": "MSG-ADP-CHANGED",
-    "coach": "No two hard days on consecutive days unless the preset declares it (v5.2: hard = a segment at E3 or E4, or the long run, SES-004; strides do not count)"
+    "coach": "No two hard days on consecutive days unless the preset declares it (v5.2: hard = a segment at E3 or E4, or the long run, SES-004; strides do not count; v5.3: an all-E1 long run on the experienced path is not hard)"
    },
    "tests": {
     "fires": "T-INV-17-fires",

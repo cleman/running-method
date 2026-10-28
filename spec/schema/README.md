@@ -1,4 +1,6 @@
-# spec/schema — the shared contract between generator and oracle (v5.2)
+# spec/schema — the shared contract between generator and oracle (v5.3)
+
+**v5.3:** inputs accept `schema_version` v5.2 or v5.3 (every new field is optional: `profile.injury_last_12w`, `profile.hard_sessions_max`, `profile.prescription_preference`, `anchors[].official_result_confirmed`); results carry v5.3. New: confidence `declared`, level source `race_result`, `engine_state.experienced`, `segment.show_distance_m` / `show_about_m` / `recovery.show_distance_m`, `session.prescription_form`, `week.is_calibration`, `week.long_run_form`, and three state-snapshot fields (`exp_path`, `exp_agegrade_pct`, `exp_calibration_until`).
 
 These JSON Schemas (draft 2020-12) are part of the specification. The generator (engine) reads an **input** and returns a **result**; the oracle and the validator parse the same result. Neither side may add or rename a field without a spec version bump.
 

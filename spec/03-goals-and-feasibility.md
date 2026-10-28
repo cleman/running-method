@@ -99,7 +99,7 @@ The prediction answers: **with today's fitness, what time is likely on race day?
 
 ### 3b. Pace model (v2, F-12)
 
-Pace ranges are derived **only** from a measured anchor younger than `anchor.max_age_days` (INV-15). Otherwise the session stays effort-only.
+Pace ranges are derived **only** from a measured anchor younger than `anchor.max_age_days` (INV-15), or (v5.3, owner decision 2) on the experienced path from a **declared** race (01 INP-005: a confirmed official all-out race entered after the 48-h window). From a declared anchor the slow edge of every range is widened by `exp.declared_pace_widen_pct` (2%: slow s/km × 1.02, rounded up to `pace.round_s`); the fast edge is not widened, so a mis-remembered time cannot push sessions faster. The widening ends when a measured race or field test becomes the active anchor. Otherwise the session stays effort-only.
 
 1. **Equivalent times.** From the anchor, compute equivalent race times `T_5K`, `T_10K`, `T_HM`. Use the Riegel exponent `pred.riegel_exp_min` for distances up to the half, and `riegel_marathon` for `T_M`.
 2. **Critical speed (CS).**
@@ -126,7 +126,7 @@ Pace ranges are derived **only** from a measured anchor younger than `anchor.max
 5. Paces never come from the target time, from logged training pace (FEA-002) or from HR formulas (INV-09).
 
 ```
-RULE FEA-014 | priority T5.150 | when a session at E1–E4 is rendered and INV-15 allows paces | then attach the pace range of §3b computed from the active measured anchor; re-compute only when the active anchor moves under the §3b step 4 bands (ADP-061, ADP-062, ADP-067; v5.1) | because paces need an explicit, deterministic derivation, and noise below retest variability must not move the plan | evidence factdesk1 §3, CORROBORATED (CS ≈ 10K speed; talk test); factdesk3 §3, factdesk4 §6, CREDIBLE (3.4% CV, Machado 2015, single study) / CORROBORATED (1–1.5% trained); hearing-2 sys, CORROBORATED (deadband practice) | basis design_default | default? yes
+RULE FEA-014 | priority T5.150 | when a session at E1–E4 is rendered and INV-15 allows paces | then attach the pace range of §3b computed from the active measured anchor (v5.3: or declared anchor on the experienced path, slow edge widened by exp.declared_pace_widen_pct); re-compute only when the active anchor moves under the §3b step 4 bands (ADP-061, ADP-062, ADP-067; v5.1) | because paces need an explicit, deterministic derivation, and noise below retest variability must not move the plan | evidence factdesk1 §3, CORROBORATED (CS ≈ 10K speed; talk test); factdesk3 §3, factdesk4 §6, CREDIBLE (3.4% CV, Machado 2015, single study) / CORROBORATED (1–1.5% trained); hearing-2 sys, CORROBORATED (deadband practice) | basis design_default | default? yes
 ```
 
 ```
@@ -307,7 +307,7 @@ Source of `rules.json` (12 §3.2). One JSON object per line: `id`, `condition` (
 {"id": "FEA-004", "condition": "goal.expected_conditions == 'hot'", "on_unknown": "skip", "action": {"op": "set", "target": "demand.required_levels.HEAT", "expr": "max(demand.required_levels.HEAT, p('cmp.heat_required_level'))"}}
 {"id": "FEA-010", "condition": "goal.goal_type == 'time' && has(anchor.time_s)", "on_unknown": "skip", "action": {"op": "set", "target": "feas.predicted_band", "expr": "predict_band(goal.distance, anchor, state)"}, "status": "procedure"}
 {"id": "FEA-013", "condition": "goal.goal_type == 'time' && !has(anchor.time_s)", "on_unknown": "fire", "action": {"op": "add_reason", "code": "ANCHOR_UNKNOWN", "then": [{"op": "floor", "target": "feas.verdict_rank", "expr": "verdict_rank('stretch')"}, {"op": "set", "target": "plan.pace_mode", "expr": "'effort_only'"}]}}
-{"id": "FEA-014", "condition": "effort_rank(session.effort_target) >= effort_rank('E1') && effort_rank(session.effort_target) <= effort_rank('E4') && anchor.confidence == 'measured' && days_between(anchor.date, session.date) <= p('anchor.max_age_days')", "on_unknown": "skip", "action": {"op": "set", "target": "session.pace_range", "expr": "pace_range(anchor, session.effort_target)"}, "status": "procedure"}
+{"id": "FEA-014", "condition": "effort_rank(session.effort_target) >= effort_rank('E1') && effort_rank(session.effort_target) <= effort_rank('E4') && (anchor.confidence == 'measured' || (anchor.confidence == 'declared' && state.exp_path in ['calibrating', 'confirmed'])) && days_between(anchor.date, session.date) <= p('anchor.max_age_days')", "on_unknown": "skip", "action": {"op": "set", "target": "session.pace_range", "expr": "pace_range(anchor, session.effort_target)"}, "status": "procedure"}
 {"id": "FEA-020", "condition": "goal.goal_type in ['finish', 'time']", "on_unknown": "skip", "action": {"op": "set", "target": "feas.weeks_needed", "expr": "dry_run_weeks_needed(goal, preset, state)"}, "status": "procedure"}
 {"id": "FEA-021", "condition": "feas.k_key > feas.weeks_available - feas.weeks_needed.taper - feas.p0 || feas.k_all > feas.weeks_available - feas.weeks_needed.taper", "on_unknown": "fire", "action": {"op": "add_reason", "code": "LEVELS_UNREACHABLE"}}
 {"id": "FEA-022", "condition": "feas.slack < 0", "on_unknown": "fire", "action": {"op": "add_reason", "code": "PHASES_DO_NOT_FIT"}}

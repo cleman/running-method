@@ -70,3 +70,20 @@ Found while building `engine/`. Each has the default the engine uses now; the co
 - **Rose (TST-128):** 13 says the combined option races "on or after ≈ week 35". The engine's first passing date is 8 Aug 2027 (≈ week 40).
 - **Ben (13 §7a):** 13 says "add 60 min a week"; the engine computes 40 min from the restated fixture (V_req − available time, rounded up to 10 min).
 - **Maya race week (13 §5):** 13 shows two easy runs of about 20 min. The taper rule (−50 % of 105 min) gives two runs of 26 min.
+
+## v5.3 questions (Engine session, part C, 28 Oct 2026)
+
+Found while writing spec v5.3 and implementing it. Code that relies on a default is marked `// SPEC-QUESTION Q-En` or cites
+the rule. Plain-language versions for the owner are in the last column.
+
+| # | Question | Default in force (spec v5.3 and engine) | Who |
+|---|---|---|---|
+| Q-E33 | Proposal B4 says "if rounding changes a rep by more than 10%, the next rung down is used". A shorter rung changes the planned work | The segment keeps its time form and the card adds "about {x} m" (06 §2d, SES-032) | spec (council) |
+| Q-E34 | The proposal gives experienced runners 1 hard session in BASE but 2 in the calibration weeks, which often fall in BASE: weeks 5–8 of the owner's plan step back from 2 to 1 | As the proposal says (1 + strides after calibration). Recommended change: 2 in BASE on the experienced path | owner / coach |
+| Q-E35 | MSP comes from the race only when the race and the goal are the same family. A 1:21 half sets no race-pace level for a 10K, so race-pace work starts at its smallest rung (4 min) | As the proposal says. Recommended change: a race of the neighbouring family sets MSP one level below its table value | owner / coach |
+| Q-E36 | SES-014 asks for a field test before the anchor is older than `anchor.max_age_days − ses.retest_lead_days`. The engine schedules field tests only at the end of ONBOARD, so a plan longer than ~16 weeks loses its paces in the projection (also true in v5.2 for measured anchors) | Not projected; paces end with the anchor's age; the weekly re-plan would schedule it once built | engine (next block) |
+| Q-E37 | The age-grade tables in `parameters.md` (`perf.wma_open_s`, `perf.wma_age_factor`) are an approximation from memory, not the WMA 2023 tables | Used as they are, graded ALLEGED; replace with the official tables (same ids) | **owner** |
+| Q-E38 | GEN-022's age-grade clause (≥ 80 % asks the runner to confirm) still reads `claim.agegrade_pct = null` in the engine, so a very fast race is not questioned before the experienced path uses it | EXP-001's "official result" question stands in for it; wire GEN-022 to the 02 §2b age-grade (higher of both sexes, INP-032) in the next block | spec / engine |
+| Q-E39 | SES-026 form b uses SES-M-005 where DST-006/007 apply (half and marathon time goals), but the engine does not build DST-006 yet | The engine uses SES-M-031 (steady E2 finish) for every family | engine |
+| Q-E40 | A re-plan could exceed the parent version's week (INV-04) when the log turned "rich" and a higher aerobic level raised the target volume; INV-04 was a validator-only check, so the re-plan failed closed (seen in the v5.2 engine on the owner's case at the 2nd re-plan) | The generator now applies INV-04 as a cap on V(w) and LR(w), including the LOD-016 long-run raise | spec (confirm) |
+| Q-E41 | The proposal's oracle property "no hard session the day before or after the long run" contradicts owner decision 4 form a (three workouts, the third on Saturday before an easy Sunday long run) | Decision wins; spec 14 TST-133 restates the property; on the experienced path the gap score also counts the long runs, so workouts move away from them where possible | oracle |

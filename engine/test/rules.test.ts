@@ -7,9 +7,9 @@ import { evaluateRecord, composeTarget, orderKey, type RuleRecord, type Effect }
 import { evalContext } from '../src/context.ts';
 import { spec } from './helpers.ts';
 
-test('rules.json loads: 301 rules + 31 invariants, every condition, action expression and assertion parses', () => {
+test('rules.json loads: 313 rules + 31 invariants, every condition, action expression and assertion parses', () => {
   const s = spec();
-  assert.equal(s.rules.rules.length, 301);
+  assert.equal(s.rules.rules.length, 313);   // v5.3: + EXP-001…006, SES-026…028, SES-030…032
   assert.equal(s.rules.invariants.length, 31);
   const EXPR = ['expr', 'reasons_expr', 'every_expr', 'rung_expr', 'module_expr', 'weeks_expr', 'week_expr', 'dose_expr', 'order_expr', 'max_expr', 'msg_expr', 'method_expr', 'when', 'unless', 'filter', 'until', 'place_long_run', 'constraint'];
   let n = 0;

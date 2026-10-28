@@ -49,7 +49,7 @@ fams = {o.get("family") for o in machine.values()}
 for i in table:
     if i not in machine and i not in fams:
         errors.append("table row without a machine line: " + i)
-json.dump({"version": "v5.2", "source": "parameters.md (tables + ```param block); built by tools/build_parameters.py",
+json.dump({"version": "v5.3", "source": "parameters.md (tables + ```param block); built by tools/build_parameters.py",
            "count": len(out), "parameters": sorted(out, key=lambda o: o["id"])},
           open("parameters.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(json.dumps({"parameters": len(out), "table_rows": len(table)}))

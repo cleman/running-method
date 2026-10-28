@@ -22,6 +22,8 @@ export interface ValidatorView {
     L30_eff_time_s: number; L30_eff_dist_m: number | null; L30_source: string; claimDate?: string; V_hold_s: number; L_hold_s: number; tol_level: number; tol_confidence: string;
     levels: Record<string, number>; ladderEndDate: string | null; max_tolerated_g_h: number | null; profileByWeek: string[]; age_low: (d: string) => number | null; age_high: (d: string) => number | null;
     logged: { date: string; duration_s: number; distance_m: number | null }[];
+    /** v5.3 (02 §2b): the experienced-runner path (INV-15 declared anchors; SES-004/INV-17 easy long runs) */
+    exp_path: string;
   };
   demand: { L_req_time_s: number; floor_dist_m: number; met_by_logged_distance: boolean; credited?: boolean; family: string; distance: string; time_cap_s: number; runs: number };
   anchor: { confidence: string; date: string | null } | null;
@@ -125,8 +127,12 @@ function rootsFor(spec: Spec, v: ValidatorView, plan: Plan): Record<string, Valu
   const all = sessionsOf(plan);
   const sorted = [...all].sort((a, b) => a.date.localeCompare(b.date));
   const hardByDate = new Map<string, boolean>();
-  for (const s of sorted) if (s.is_hard) hardByDate.set(s.date, true);
-  const sess = sorted.map(s => ({ ...s, ladder: s.ladder.kind, next_day_is_hard: hardByDate.get(addDays(s.date, 1)) === true && s.is_hard })) as unknown as Value[];
+  // hard day re-derived from raw fields (SES-004, v5.3): an E3/E4 segment, the goal race, or a long run, except an all-E1
+  // long run on the experienced path
+  const onExp = v.state.exp_path === 'calibrating' || v.state.exp_path === 'confirmed';
+  const hardOf = (s: Session) => s.is_goal_race || s.segments.some(x => x.effort === 'E3' || x.effort === 'E4') || (s.is_long_run && !(onExp && s.segments.every(x => x.effort === 'E1')));
+  for (const s of sorted) if (hardOf(s)) hardByDate.set(s.date, true);
+  const sess = sorted.map(s => ({ ...s, is_hard: hardOf(s), ladder: s.ladder.kind, next_day_is_hard: hardByDate.get(addDays(s.date, 1)) === true && hardOf(s) })) as unknown as Value[];
   const isLoading = (w: Week) => !w.is_deload && !w.taper_k && !['START_LADDER', 'RTR', 'TRANSITION', 'SHARPEN'].includes(w.phase);
   const ss = (v.input.profile.special_status ?? []).filter(x => x.start_date <= v.input.today).sort((a, b) => b.start_date.localeCompare(a.start_date))[0];
   const runs = all.filter(s => s.is_run && !s.is_goal_race);
@@ -143,7 +149,7 @@ function rootsFor(spec: Spec, v: ValidatorView, plan: Plan): Record<string, Valu
       over_guard_runs: sess.filter(s => (s as unknown as Session).expected_duration_s > 60 * pnum(spec, 'lr.long_guard_min') && (s as unknown as Session).is_run && !(s as unknown as Session).is_goal_race),
     } as unknown as Value,
     state: {
-      gate: v.gate, V_hold_s: v.state.V_hold_s, L_hold_s: v.state.L_hold_s, progression_profile: v.state.profileByWeek[0] ?? 'slow', max_tolerated_g_h: v.state.max_tolerated_g_h,
+      gate: v.gate, exp_path: v.state.exp_path, V_hold_s: v.state.V_hold_s, L_hold_s: v.state.L_hold_s, progression_profile: v.state.profileByWeek[0] ?? 'slow', max_tolerated_g_h: v.state.max_tolerated_g_h,
       tol_level: v.state.tol_level, tol_confidence: v.state.tol_confidence, denominator_entries: [], V28_at_status_start_s: v.state.V_hold_s,
       last_goal_race_date: v.input.engine_state?.last_goal_race?.date ?? null, last_goal_race_distance: v.input.engine_state?.last_goal_race?.distance ?? null,
     } as unknown as Value,

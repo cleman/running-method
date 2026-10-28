@@ -88,6 +88,11 @@ Serves criterion 12. Each entry gives a plain-words meaning, then, where it help
 - **Tier.** One of seven rule levels: T0 red flags, T1 screening gates, T2 hard limits, T3 your constraints, T4 goal, T5 progression, T6 preferences.
 - **Two-day cap.** The day before and after a long run is at most half the long run, and the two days together at most 1.60 × L30_eff (07 INV-03, v2).
 - **Validator.** Separate code that checks every plan against the invariants before you see it (07 §5).
+- **Experienced path (v5.3).** The start used when a recent confirmed race and a matching training history show you already train well: your plan starts at your level, checked by three calibration weeks (02 §2b).
+- **Declared (v5.3).** A level or race result you gave us that we use straight away, but that your logged runs or a test have not yet confirmed. It sits between "estimated" and "measured".
+- **Calibration weeks (v5.3).** The first three weeks of the experienced path: normal training that checks the declared start; if they go badly the plan becomes more cautious (02 EXP-004).
+- **Entry rung (v5.3).** The size at which a session type starts for your level (06 §2d).
+- **Fartlek.** Running hard and easy in turns by time or feel, without a track.
 - **WMA age-grading.** Converts a race time into a percentage of the world-best performance for your age and sex (01).
 
 ## Nutrition

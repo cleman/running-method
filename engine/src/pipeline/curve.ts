@@ -19,6 +19,8 @@ export interface CurveInputs {
   slowWeeks: (w: number) => boolean;
   confirmedFrom: number;               // first week index (0-based) with a confirmed baseline (LOD-008)
   preWeeks: number[];                  // logged weekly totals of the prog.est.window_weeks weeks before the plan (oldest first)
+  /** v5.3 LOD-007 on the experienced path: the estimated base is never below the claimed V_hold */
+  estFloor?: number;
   lrCap: (V: number) => number;        // LOD-020
   prog: { slow: [number, number]; standard: [number, number]; est: number; window: number };
   deloadCut: number; taperCut: number; taperProfile: number[];
@@ -98,7 +100,7 @@ export function buildCurve(x: CurveInputs): CurveWeek[] {
     let cap = Math.min((1 + wk) * base, (1 + w2) * two);                                   // LOD-003
     if (w < x.confirmedFrom) {                                                              // LOD-007 (T2)
       const recent = [...x.preWeeks, ...out.map(o => o.V)].slice(-x.prog.window);
-      const est = recent.length ? Math.max(...recent) : x.V_hold;
+      const est = Math.max(recent.length ? Math.max(...recent) : x.V_hold, x.estFloor ?? 0);
       if ((1 + x.prog.est) * est < cap) capsHit.push('LOD-007');
       cap = Math.min(cap, (1 + x.prog.est) * est);
     }

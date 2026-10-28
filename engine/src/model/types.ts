@@ -1,8 +1,8 @@
-// Types of the serialised contract (spec/schema/*.schema.json, v5.2). The schema governs; these mirror it loosely.
+// Types of the serialised contract (spec/schema/*.schema.json, v5.3). The schema governs; these mirror it loosely.
 import type { ISODate, Weekday } from '../util/dates.ts';
 
 export type Effort = 'E0' | 'E1' | 'E2' | 'E3' | 'E4' | 'E5';
-export type Confidence = 'measured' | 'estimated' | 'unknown';
+export type Confidence = 'measured' | 'declared' | 'estimated' | 'unknown';   // v5.3: declared (02 §2b, INP-005)
 export type Distance = '5K' | '10K' | 'HM' | 'M' | '50K' | '100K' | 'none';
 export type PhaseType = 'START_LADDER' | 'RTR' | 'ONBOARD' | 'BASE' | 'BUILD' | 'SPECIFIC' | 'SHARPEN' | 'TAPER' | 'RACE' | 'TRANSITION' | 'MAINTAIN';
 export type Gate = 'proceed' | 'proceed_restricted' | 'pause_until_clearance' | 'no_plan';
@@ -22,7 +22,7 @@ export interface ActivityRecord {
   effort_all_out?: boolean | null; is_goal_race?: boolean; test_completed?: boolean | null; test_held_effort?: boolean | null;
   plausibility_answer?: string | null; [k: string]: unknown;
 }
-export interface Anchor { id: string; kind: string; distance_m: number; time_s: number; date: ISODate; entered_at: string; conditions_hot?: boolean; effort_all_out?: boolean | null; confirmed_by_runner?: boolean | null }
+export interface Anchor { id: string; kind: string; distance_m: number; time_s: number; date: ISODate; entered_at: string; conditions_hot?: boolean; effort_all_out?: boolean | null; confirmed_by_runner?: boolean | null; official_result_confirmed?: boolean | null }
 export interface RiskFlag { id: string; kind: string; subkind: string; region?: string | null; rule_id: string; raised_on: ISODate; status: 'active' | 'cleared'; cleared_on?: ISODate | null; clearance_attested_on?: ISODate | null }
 export interface AdaptationEvent { id: string; kind: string; date: ISODate; payload: Record<string, unknown> }
 
@@ -43,7 +43,11 @@ export interface EngineState {
   messages_shown?: { id: string; on: ISODate; season?: number }[];
   last_goal_race?: { date: ISODate; distance: Distance } | null; last_verdict?: Verdict | null; season_index?: number;
   deload_counter_from?: ISODate | null;
+  /** v5.3 (02 §2b, EXP-001…005) */
+  experienced?: ExperiencedState | null;
 }
+export type ExpPath = 'none' | 'calibrating' | 'confirmed' | 'fallen_back';
+export interface ExperiencedState { path: ExpPath; since?: ISODate; calibration_from?: ISODate; calibration_until?: ISODate; fallback_nodes?: Node[]; fallback_reason?: 'rpe' | 'missed_week' | 'pain' | 'volume' | null; race_id?: string }
 
 export interface GeneratorInput {
   schema_version: string; today: ISODate; now?: string; timezone: string; ruleset_version?: string; registry_version?: string;
@@ -55,6 +59,7 @@ export interface GeneratorInput {
     long_run_day: Weekday | null; run_walk_preference: boolean | null; run_walk_preference_explicit: boolean; preset_preference: string | null;
     night_shift_dates: ISODate[]; hill_access: boolean; nutrition_referral_flag: boolean; caffeine_sensitive: boolean; b2b_opt_in: boolean;
     level_tests_opt_out?: boolean; created_at: string;
+    injury_last_12w?: boolean | null; hard_sessions_max?: number | null; prescription_preference?: 'distance' | 'time' | 'both' | null;   // v5.3
     special_status?: { type: string; start_date: ISODate; attested: boolean; due_date?: ISODate; has_given_birth?: boolean | null }[];
     attestations?: { msg_id: string; attested_on: ISODate; flag_id?: string }[];
   };
@@ -73,7 +78,7 @@ export interface GeneratorInput {
   engine_state: EngineState | null; parent_plan: Plan | null;
 }
 
-export interface Segment { effort: Effort; role?: string; duration_s?: number; distance_m?: number; repeats: number; recovery?: { effort: Effort; duration_s: number } }
+export interface Segment { effort: Effort; role?: string; duration_s?: number; distance_m?: number; repeats: number; recovery?: { effort: Effort; duration_s: number; show_distance_m?: number }; show_distance_m?: number; show_about_m?: number }
 export interface MessageInstance { id: string; layer?: 'card' | 'why' | 'coach'; placeholders?: Record<string, { type: string; value: number | string }>; rule_id?: string }
 
 export interface Session {
@@ -85,6 +90,7 @@ export interface Session {
   hr_zone: null; hr_source: null; run_walk: boolean; run_walk_ratio: { run_s: number; walk_s: number; label?: string } | null;
   ladder: { kind: 'none' | 'rtr' | 'start'; rung: string | null }; fuel_target_g_h: number | null; why_message: MessageInstance;
   messages: MessageInstance[]; rule_ids: string[]; grade_label: string | null; status: string; in_published_window: boolean; test_declined?: boolean;
+  prescription_form?: 'time' | 'distance' | 'both';   // v5.3 SES-031
 }
 export interface Week {
   index: number; start: ISODate; iso_week: string; phase: PhaseType; season_index: number; phase_week_index: number;
@@ -92,6 +98,7 @@ export interface Week {
   planned_time_s: number; planned_dist_m: number | null; lr_s: number; runs: number; quality_max: number; key_session_count: number;
   e3_touches: number; has_e3_touch: boolean; hard_time_s: number; e2_time_s: number; easy_time_s: number; frozen: boolean;
   log_state: 'logged' | 'partial' | 'unlogged' | 'future'; sessions: Session[];
+  is_calibration: boolean; long_run_form: 'a' | 'b' | null;   // v5.3 EXP-003, SES-026
 }
 export interface Phase { type: PhaseType; start_week: number; n_weeks: number; season_index: number }
 export interface Plan {

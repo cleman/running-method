@@ -140,3 +140,22 @@ New spec readings used for these fixes: Q-E27 to Q-E32 in `questions.md`, marked
   levels 1, 2, 3 and 4 in successive long runs. This is a direct result of v5.2 (durability is proven only by a
   test). Proposal for the council: let logged long runs that were "felt as intended" count up to the level below the
   longest one, and test only the top level.
+
+## Addendum, spec v5.3 (Engine session part C, 28 Oct 2026)
+
+What was run after implementing v5.3 (nothing else is claimed):
+
+- `spec/`: `build_rules.py` build OK (313 rules: 259 formal, 15 procedure, 7 static, 32 text-only; 31 invariants);
+  `build_parameters.py` build OK (386 parameters); `check_rules_v5.py` **RESULT: ALL CHECKS PASS** (66 persona inputs still
+  validate against the schemas); `check_messages_v5.py` **RESULT: ALL MESSAGE CHECKS PASS**.
+- Engine unit tests: **58 / 58** (43 earlier, updated for the new rule count, + 15 new in `test/v53.test.ts`). `tsc --noEmit` clean.
+- All 66 persona inputs and the two v5.3 case files, each run twice: byte-identical, no crash, no repair pass. Kinds,
+  verdicts and reasons of the 66 personas are **unchanged** from the v5.2 engine (30 plans, 27 fail-closed, 7 safety stops, 2
+  holds). No persona enters the experienced path (none has `official_result_confirmed`); 9 get the new question (EXP-006).
+- What changed for those personas: 122 of 385 plan weeks differ, all through dose steps (the planned progression of SES-028
+  and the entry/top rungs of SES-027). No new session type appears on the cautious path in these personas.
+- Weekly replays of the owner's case (runner logs everything as planned): both paths stay valid to race day.
+
+**Not run:** the oracle. It is written for v5.2, and this session does not open `oracle/`. Expected oracle failures from
+spec changes, for the Oracle session: weekly dose expectations (v5.2 "one step ahead" → v5.3 planned path), `schema_version`
+"v5.3" in results, new result fields. A re-plan after a fully missed week still fails closed (adaptation rules, as before).

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://running-method/spec/schema/result.schema.json",
-  "title": "Generator result (v5.2)",
+  "title": "Generator result (v5.3)",
   "description": "The single object the generator returns for one call. kind selects the outcome: 'plan' (a validated plan), 'fail_closed' (no plan for the requested goal; ranked, pre-validated options, 07 §6.2), 'gate_stop' (S1 outcome pause_until_clearance or no_plan, GEN-001), 'hold' (a declared unknown under on_unknown hold or ask, 12 §3.2 rule 4), 'safe_state' (an error value E was reached, 12 §3.2 rule 5). Serialisation is canonical (README.md): byte-identical for identical inputs (GEN-004).",
   "type": "object",
   "required": [
@@ -17,7 +17,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "v5.2"
+      "const": "v5.3"
     },
     "kind": {
       "enum": [
@@ -500,6 +500,18 @@
         },
         "effort_ceiling": {
           "$ref": "common.schema.json#/$defs/effort"
+        },
+        "exp_path": {
+          "enum": ["none", "calibrating", "confirmed", "fallen_back"],
+          "description": "v5.3 (02 §2b): the experienced-runner path."
+        },
+        "exp_agegrade_pct": {
+          "type": ["number", "null"],
+          "description": "v5.3 (02 §2b): age-grade of the qualifying race (approximate tables; lower of both sexes when sex is unknown); null without a qualifying race."
+        },
+        "exp_calibration_until": {
+          "oneOf": [{"$ref": "common.schema.json#/$defs/date"}, {"type": "null"}],
+          "description": "v5.3 (EXP-001): last day of the calibration weeks."
         },
         "max_tolerated_g_h": {
           "type": [
@@ -1102,6 +1114,14 @@
         "is_deload": {
           "type": "boolean"
         },
+        "is_calibration": {
+          "type": "boolean",
+          "description": "v5.3 (EXP-003): a calibration week of the experienced path."
+        },
+        "long_run_form": {
+          "enum": ["a", "b", null],
+          "description": "v5.3 (SES-026): form of a three-key week on the experienced path (a: three workouts and an easy long run; b: two workouts and a long run with quality); null otherwise."
+        },
         "taper_k": {
           "type": [
             "integer",
@@ -1263,7 +1283,7 @@
         },
         "is_hard": {
           "type": "boolean",
-          "description": "Hard day for spacing (SES-004, INV-17, v5.2): any segment with effort_rank ≥ E3 (strides E5 excluded, SES-021), or the long run (v5.2 choice, owner Q2)."
+          "description": "Hard day for spacing (SES-004, INV-17, v5.2): any segment with effort_rank ≥ E3 (strides E5 excluded, SES-021), or the long run (v5.2 choice, owner Q2), except an all-E1 long run on the experienced path (v5.3, SES-004, owner decision 4 form a)."
         },
         "is_test": {
           "type": "boolean"
@@ -1316,6 +1336,10 @@
           ],
           "minimum": 0,
           "description": "Index into ses.dose.<module>.steps (v5.2)."
+        },
+        "prescription_form": {
+          "enum": ["time", "distance", "both"],
+          "description": "v5.3 (SES-031): how the card writes the repeats; the segment durations stay the prescription."
         },
         "prescription": {
           "enum": [

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://running-method/spec/schema/input-profile.schema.json",
-  "title": "Generator input (v5.2)",
+  "title": "Generator input (v5.3)",
   "description": "The complete input of plan = f(profile, goal, log, today, ruleset_version, registry_version) (07 §2), plus the stored EngineState and the parent plan for re-plans (12 §3.8). Every field a rule reads through the roots profile, screen, claim, anchor, log, goal, flags, event and today is here. Blank vs unknown vs null (12 §3.9): a field the runner was asked and answered 'I don't know' or left blank is listed in declared_unknown and carries null; a field not asked or not applicable is null and NOT listed; a field never null is required.",
   "type": "object",
   "required": [
@@ -23,7 +23,8 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "v5.2"
+      "enum": ["v5.2", "v5.3"],
+      "description": "v5.3 accepts v5.2 inputs unchanged: every v5.3 field is optional."
     },
     "today": {
       "$ref": "common.schema.json#/$defs/date",
@@ -310,6 +311,20 @@
         "level_tests_opt_out": {
           "type": "boolean",
           "description": "v5.2 (owner answer to question 4): the runner turned level tests off; levels then come from training (SES-025). Default false."
+        },
+        "injury_last_12w": {
+          "type": ["boolean", "null"],
+          "description": "v5.3 (EXP-001): asked only when injury_last_12m = true: was that injury in the last exp.injury_free_weeks? null = not asked."
+        },
+        "hard_sessions_max": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 3,
+          "description": "v5.3 (owner decision 4, SES-006): the runner's ceiling of key sessions a week; null = exp.hard_sessions_max_default (3)."
+        },
+        "prescription_preference": {
+          "enum": ["distance", "time", "both", null],
+          "description": "v5.3 (owner decision 5, SES-031): how repeats are written; null = ses.prescription_default (distance). Effort-only plans always use time."
         }
       }
     },
@@ -553,6 +568,10 @@
               "null"
             ],
             "description": "Answer to INP-025's confirm prompt."
+          },
+          "official_result_confirmed": {
+            "type": ["boolean", "null"],
+            "description": "v5.3 (EXP-001, INP-005): answer to 'Was this an official race result, run all-out?'; null = not asked (EXP-006 asks)."
           }
         }
       },

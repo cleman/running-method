@@ -1,7 +1,7 @@
 {
   "name": "running-method-engine",
   "version": "0.1.0",
-  "description": "Plan generator, validator and rule engine for spec v5.2 (pure functions; Node and browser).",
+  "description": "Plan generator, validator and rule engine for spec v5.3 (pure functions; Node and browser).",
   "type": "module",
   "license": "UNLICENSED",
   "private": true,

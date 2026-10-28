@@ -3,6 +3,7 @@ import type { ActivityRecord, Anchor, Confidence, EngineState, GeneratorInput, N
 import { PREREQS } from '../rules/helpers.ts';
 import { addDays, daysBetween, isoWeek, toDays, mondayOf, type ISODate } from '../util/dates.ts';
 import { type Spec, pnum, pval, roundDown } from '../context.ts';
+import { experiencedPath, onExpPath, type ExpView } from './experienced.ts';
 
 export interface EntryView extends ActivityRecord { measured: boolean; flagged: boolean; is_run: boolean }
 
@@ -46,6 +47,8 @@ export interface DerivedState {
   ladder_pos: number; ladder_counted: string[];
   /** dates of logged runs that held strides (VO2 L1 log threshold), kept in EngineState.dated_events.strides_runs */
   strides_dates: Set<ISODate>;
+  /** v5.3 experienced-runner path (02 §2b) */
+  exp: ExpView;
   messages: string[];
   fired: { stage: string; rule_id: string; op: string; target?: string; value?: number | string | boolean | null }[];
 }
@@ -85,7 +88,7 @@ export function riegel(spec: Spec, a: { distance_m: number; time_s: number }, d:
   return a.time_s * Math.pow(d / a.distance_m, e);
 }
 
-export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
+export function deriveState(spec: Spec, input: GeneratorInput, opts: { expEntryBlocked?: boolean } = {}): DerivedState {
   const today = input.today;
   const P = (id: string) => pnum(spec, id);
   const { low, high } = ageFns(input);
@@ -118,6 +121,12 @@ export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
   const runs = entries.filter(e => e.is_run && !e.flagged);
   const inLast = (e: ActivityRecord, n: number) => daysBetween(e.date, today) >= 0 && daysBetween(e.date, today) < n;
   const measured30 = runs.filter(e => e.measured && inLast(e, 30));
+
+  // ---- v5.3 experienced-runner path (02 §2b, EXP-001/004/005/006); EXP-001 needs gate = proceed, so the caller
+  // re-derives with expEntryBlocked when S1 did not proceed
+  const exp = experiencedPath({ spec, input, ageAt: low, entries, entryBlocked: opts.expEntryBlocked === true });
+  const onExp = onExpPath(exp.path);
+  fired.push(...exp.fired); messages.push(...exp.messages);
 
   // ---- log status (07 §3)
   const weeks30 = new Set(measured30.map(e => isoWeek(e.date)));
@@ -170,7 +179,8 @@ export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
   for (let n = 1; n <= 5; n++) if (V28_time_s >= TOL_V[n] * 60 && l30ForLevels >= TOL_L[n] * 60) tol = n;
   // SPEC-QUESTION Q-E7: 13 §3 calls Ana "TOL 3" (cap 120 min); her claimed 210 min/week is below the TOL 3 threshold (240) and
   // CMP-004 caps a claim at TOL 2 anyway, so the engine uses TOL 2 (cap 90). Her L30_eff is 85 either way.
-  if (selfReport) tol = Math.min(tol, capOf('TOL'));
+  const tolRaw = tol;
+  if (selfReport) tol = Math.min(tol, onExp ? P('exp.claim_level_cap') : capOf('TOL'));   // v5.3 EXP-002 replaces CMP-004 on the experienced path
   const tol_tier = tol;
 
   // ---- L30_eff (GEN-010 / GEN-011 / GEN-012)
@@ -190,13 +200,13 @@ export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
     L30_source = 'log'; L30_conf = 'measured';
     fired.push({ stage: 'S2', rule_id: 'GEN-010', op: 'set', target: 'state.L30_eff_time_s', value: L30_eff_time_s });
   } else if (log_status === 'sparse' && !rtrGap) {
-    const disc = P('claim.l30_discount');
+    const disc = onExp ? P('exp.l30_discount') : P('claim.l30_discount');   // v5.3 GEN-011 on the experienced path
     const loggedL30t = Math.max(0, ...runs.filter(e => e.measured && inLast(e, 30)).map(e => e.duration_s));
     const loggedL30d = Math.max(0, ...runs.filter(e => e.measured && inLast(e, 30)).map(e => e.distance_m ?? 0));
     const claimT = claim.L30_duration_s ?? (claim.L30_distance_m && claimSpeed ? claim.L30_distance_m / claimSpeed : null);
     L30_eff_time_s = Math.max(loggedL30t, claimT != null ? disc * claimT : 0);
     const capByTol = pval<Record<string, number | null>>(spec, 'claim.l30_cap_by_tol')[String(tol_tier)];
-    if (capByTol != null) L30_eff_time_s = Math.min(L30_eff_time_s, capByTol * 60);
+    if (capByTol != null && !onExp) L30_eff_time_s = Math.min(L30_eff_time_s, capByTol * 60);   // v5.3: no TOL cap on the experienced path
     if (claim.L30_distance_m != null || loggedL30d > 0) {
       let d = Math.max(loggedL30d, disc * (claim.L30_distance_m ?? 0));
       if (claim.weekly_distance_m != null) d = Math.min(d, P('claim.l30_week_ratio_max') * claim.weekly_distance_m);
@@ -229,8 +239,19 @@ export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
   // 06 §3: DUR is attained by its long-run level test (drift-free), not by a log threshold; a self-reported long run
   // still sets it, capped by CMP-004
   if (selfReport) for (let n = 1; n <= 4; n++) if (l30ForLevels >= DUR_L[n] * 60) levels.DUR = n;
-  for (const n of ['HAB', 'AER', 'DUR'] as Node[]) if (selfReport) levels[n] = Math.min(levels[n], capOf(n));
+  for (const n of ['HAB', 'AER', 'DUR'] as Node[]) if (selfReport) levels[n] = Math.min(levels[n], onExp ? P('exp.claim_level_cap') : capOf(n));
   for (const n of ['HAB', 'TOL', 'AER', 'DUR'] as Node[]) if (levels[n] > 0) level_confidence[n] = conf;
+  // v5.3 EXP-002: declared levels (volume side from the claims capped at exp.claim_level_cap, set above; performance side
+  // from the race's age-grade band), except the nodes EXP-004 moved back to the cautious path
+  void tolRaw;
+  if (onExp) {
+    if (selfReport) for (const n of ['HAB', 'TOL', 'AER', 'DUR'] as Node[]) if (levels[n] > 0) level_confidence[n] = exp.path === 'confirmed' && n !== 'DUR' ? 'measured' : 'declared';
+    for (const [n, l] of Object.entries(exp.perf_levels) as [Node, number][]) {
+      if (exp.fallback_nodes.includes(n) || l <= levels[n]) continue;
+      levels[n] = l; level_confidence[n] = 'declared';
+    }
+    fired.push({ stage: 'S2', rule_id: 'EXP-002', op: 'set', target: 'state.levels', value: `THR ${levels.THR} VO2 ${levels.VO2} MSP ${levels.MSP} TOL ${levels.TOL}` });
+  }
   // NUT-011/012/013 from the log: practice runs are measured entries with a logged intake
   const practice = runs.filter(e => e.measured && e.carb_g_per_h != null).sort((a, b) => a.date.localeCompare(b.date));
   const gi = (e: ActivityRecord) => e.gi_score_0_10;
@@ -258,9 +279,9 @@ export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
   if (['cycling', 'swimming', 'triathlon'].includes(prof.other_sport_background ?? '') && novice) slow_ctx.push('CTX-002');
   if (prof.injury_last_12m === true) slow_ctx.push('CTX-003');
   const coreEstimated = log_status !== 'rich';
-  const slow_log = coreEstimated;
+  const slow_log = coreEstimated && !onExp;   // v5.3 GEN-014 / CTX-007: not on the experienced path
   // GEN-014 probation: the end date stored in EngineState governs once set (12 §3.8); at the first call it starts today
-  const probation_weeks_left = es?.progression_profile_until
+  const probation_weeks_left = onExp ? 0 : es?.progression_profile_until
     ? Math.max(0, Math.ceil(daysBetween(today, es.progression_profile_until) / 7)) : (slow_log ? P('log.probation_weeks') : 0);
   const masters = (high(today) ?? 0) >= P('ctx.masters_age');
   const deload_every_ctx = slow_ctx.length > 0 || masters;
@@ -273,7 +294,7 @@ export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
     if (!runs.some(e => e.measured && mondayOf(e.date) === m)) break;
     est_confirm_weeks++;
   }
-  const baseline_confirmed = es?.baseline_confirmed === true || est_confirm_weeks >= P('prog.est.confirm_weeks');
+  const baseline_confirmed = es?.baseline_confirmed === true || est_confirm_weeks >= P('prog.est.confirm_weeks') || exp.path === 'confirmed';   // v5.3 EXP-005
 
   // ---- S_slow (03 §2): median speed of measured runs (28 days, ≥ log.min_entries_30d), else claims, else default pace
   const speeds = runs28.filter(e => e.measured && e.distance_m && e.duration_s && e.type !== 'race' && e.type !== 'test').map(e => (e.distance_m as number) / e.duration_s);
@@ -289,7 +310,9 @@ export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
     const a = sorted[0];
     const fresh = daysBetween(a.date, today) <= P('anchor.max_age_days');
     const measured = a.kind !== 'recalled' && enteredWithin(a.date, a.entered_at, win) && fresh;
-    anchor = { ...a, confidence: measured ? 'measured' : 'estimated', equiv_10k_s: riegel(spec, a, 10000) };
+    // v5.3 INP-005: a confirmed official all-out race that was entered late is declared (paces only on the experienced path)
+    const declared = !measured && fresh && a.kind === 'race' && a.effort_all_out === true && a.official_result_confirmed === true;
+    anchor = { ...a, confidence: measured ? 'measured' : declared ? 'declared' : 'estimated', equiv_10k_s: riegel(spec, a, 10000) };
   }
 
   // Q-E19: a claimed L30 is dated the day before the profile was created (day offset from today, ≤ −1)
@@ -473,7 +496,7 @@ export function deriveState(spec: Spec, input: GeneratorInput): DerivedState {
     V28_time_s, V28_dist_m, V7_prev_time_s, L30_eff_time_s, L30_eff_dist_m, L30_source, L30_conf,
     V_hold_s, L_hold_s, logged_week_totals, tol_tier, levels, level_confidence, slow_ctx, slow_log,
     probation_weeks_left, baseline_confirmed, est_confirm_weeks, s_slow, median_easy_speed, anchor, core_inputs,
-    deload_every_ctx, messages, fired, gap_band, claim_day, fuel_step_g_h, module_dose, module_next_step, test_levels, exit_tests, tests_due, strides_dates, ladder_pos, ladder_counted,
+    deload_every_ctx, messages, fired, exp, gap_band, claim_day, fuel_step_g_h, module_dose, module_next_step, test_levels, exit_tests, tests_due, strides_dates, ladder_pos, ladder_counted,
   };
 }
 

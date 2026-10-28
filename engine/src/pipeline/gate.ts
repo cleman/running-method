@@ -102,6 +102,8 @@ export function stateRoot(input: GeneratorInput, st: DerivedState, extra: Record
     core_inputs: st.core_inputs as unknown as Value,
     ladder_kind: input.engine_state?.ladder?.kind ?? (st.never_run ? 'start' : st.L30_source === 'undefined_rtr' ? 'rtr' : 'none'),
     ladder_runs_per_week: Math.min(3, input.profile.max_runs_per_week ?? 3), rungs_to_last: 5, last_field_test_date: null,
+    // v5.3 (02 §2b): CTX-007, GEN-011, GEN-014 and others read the experienced path
+    exp_path: st.exp.path, exp_fallback_nodes: st.exp.fallback_nodes as unknown as Value, exp_calibration_until: st.exp.calibration_until,
     ...extra,
   };
 }

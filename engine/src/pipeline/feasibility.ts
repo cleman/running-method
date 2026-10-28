@@ -14,6 +14,7 @@ import { computeDemand, predictBand, lrCapFn, RACE_M, FAMILY, type Band, type De
 import { allocatePhases, placeDeloads } from './phases.ts';
 import { buildCurve, growthWeek, type CurveInputs, type CurveWeek } from './curve.ts';
 import { startLadderSessions, rtrSessions, spacedDays, type LadderSession } from './ladder.ts';
+import { onExpPath } from './experienced.ts';
 
 export type Horizon = 'H0' | 'H1' | 'H2' | 'H3' | 'H4' | 'H5';
 export interface WeeksNeeded { rtr: number; onboard: number; base: number; build: number; specific: number; taper: number }
@@ -25,7 +26,7 @@ export interface Layout {
   /** curve inputs the session builder re-applies to realised week volumes (LOD-003/007) */
   /** season numbering: plan week i has index i + 1 + indexOffset (re-plans keep the parent's week numbers) */
   indexOffset: number;
-  growth: { V_hold: number; prog: CurveInputs['prog']; confirmedFrom: number; preWeeks: number[]; step: number; history: { V: number; LR: number; deload: boolean }[] };
+  growth: { V_hold: number; prog: CurveInputs['prog']; confirmedFrom: number; preWeeks: number[]; step: number; history: { V: number; LR: number; deload: boolean }[]; estFloor: number };
 }
 
 export interface Feasibility {
@@ -147,7 +148,10 @@ function layoutFor(c: Ctx, d: Demand, W: number, T: number, baseNeeded: number, 
   const ci: CurveInputs = {
     phases, deloads: new Set(deloads), lrOffset: lrWeekday, startOffset, V_hold, L_hold, L_target, V_peak, avail,
     l30Sources, sourcesUntil: st.gap_band ? startOffset + 7 : undefined, slowWeeks: w => slowCtx || (w - ladderWeeks < st.probation_weeks_left) || (ladderKind !== null && w - ladderWeeks < P('log.probation_weeks')),
-    confirmedFrom: st.baseline_confirmed ? 0 : ladderWeeks + Math.max(0, P('prog.est.confirm_weeks') - st.est_confirm_weeks), preWeeks, lrCap,
+    // v5.3: on the experienced path the baseline is confirmed by EXP-005 at the end of the calibration weeks (projected as
+    // passing, 07 §2b), and LOD-007's base is never below the claimed V_hold
+    confirmedFrom: st.baseline_confirmed ? 0 : st.exp.path === 'calibrating' && st.exp.calibration_until ? Math.max(0, Math.ceil((daysBetween(planStart, st.exp.calibration_until) + 1) / 7))
+      : ladderWeeks + Math.max(0, P('prog.est.confirm_weeks') - st.est_confirm_weeks), preWeeks, lrCap, estFloor: onExpPath(st.exp.path) ? st.V_hold_s : 0,
     prog: { slow: [P('prog.slow.week_max'), P('prog.slow.2wk_max')], standard: [P('prog.standard.week_max'), P('prog.standard.2wk_max')], est: P('prog.est.week_max'), window: P('prog.est.window_weeks') },
     deloadCut: P('deload.volume_cut'), taperCut: P('taper.volume_cut'), taperProfile: pval<Record<string, number[]>>(spec, 'taper.cut_profile')[String(T)] ?? [1], taperK0: frozen ? (parent!.weeks.find(w => w.start >= planStart && w.taper_k)?.taper_k ?? 1) : 1, taperT: T,
     ladder: ladderWeeksArr, gap, step: P('load.round_down_s'), history,
@@ -156,7 +160,7 @@ function layoutFor(c: Ctx, d: Demand, W: number, T: number, baseNeeded: number, 
   const curve = fits ? buildCurve(ci) : [];
   return { planStart, W, phases: frozen ? phases : lay.phases, deloads, curve, ladder, ladderKind, ladderRunsPerWeek, lrWeekday, runs, V_peak, L_target, lrCap, fits,
     indexOffset: frozen ? Math.max(0, (parent!.weeks.find(w => w.start === planStart)?.index ?? 1) - 1) : 0,
-    growth: { V_hold: ci.V_base0 ?? V_hold, prog: ci.prog, confirmedFrom: ci.confirmedFrom, preWeeks, step: ci.step, history } };
+    growth: { V_hold: ci.V_base0 ?? V_hold, prog: ci.prog, confirmedFrom: ci.confirmedFrom, preWeeks, step: ci.step, history, estFloor: ci.estFloor ?? 0 } };
 }
 
 export function assess(spec: Spec, input: GeneratorInput, st: DerivedState, gate: GateResult, av: Availability): Feasibility {
@@ -243,7 +247,8 @@ export function assess(spec: Spec, input: GeneratorInput, st: DerivedState, gate
   const pp = input.parent_plan;
   const ahead = pp && pp.goal_id === g.id && (pp.race_date ?? null) === (g.race_date ?? null) ? pp.weeks.filter(w => w.start >= planStart).map(w => w.phase) : null;
   const left = (ph: string, n: number) => (ahead && ahead.length === W ? Math.min(n, ahead.filter(x => x === ph).length) : n);
-  const onboard = left('ONBOARD', !measuredAnchor || st.log_status !== 'rich' ? P('phs.onboard_weeks') : 0);
+  // v5.3 (04 §1): never ONBOARD on the experienced path; its calibration weeks and declared race replace it
+  const onboard = left('ONBOARD', !onExpPath(st.exp.path) && (!measuredAnchor || st.log_status !== 'rich') ? P('phs.onboard_weeks') : 0);
   const build = left('BUILD', shortFinish || horizon === 'H1' ? 0 : P('phs.build_min'));
   const specific = left('SPECIFIC', shortFinish || horizon === 'H1' ? 0 : (pval<Record<string, number>>(spec, 'phs.specific_min')[dist] ?? 0));
 

@@ -19,7 +19,7 @@ function setup(id = 'p3-ana') {
     state: {
       L30_eff_time_s: st.L30_eff_time_s, L30_eff_dist_m: st.L30_eff_dist_m, L30_source: st.L30_source, V_hold_s: st.V_hold_s, L_hold_s: st.L_hold_s,
       tol_level: st.levels.TOL, tol_confidence: st.level_confidence.TOL, levels: { ...st.levels }, ladderEndDate: null, max_tolerated_g_h: null,
-      profileByWeek: plan.weeks.map((_, i) => (i < 3 ? 'slow' : 'standard')), age_low: st.age_low, age_high: st.age_high, logged: [],
+      profileByWeek: plan.weeks.map((_, i) => (i < 3 ? 'slow' : 'standard')), age_low: st.age_low, age_high: st.age_high, logged: [], exp_path: st.exp.path,
     },
     demand: { L_req_time_s: r.feasibility.demand.L_req_time_s, floor_dist_m: r.feasibility.demand.floor_dist_m, met_by_logged_distance: false, family: 'road_classic', distance: 'M', time_cap_s: 180 * 60, runs: 4 },
     anchor: null,

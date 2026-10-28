@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://running-method/spec/schema/fixture-input.schema.json",
-  "title": "Persona input fixture (v5.2)",
+  "title": "Persona input fixture (v5.3)",
   "description": "One persona of 13 or 14: the generator input at day 0, plus how the runner behaves afterwards and scripted events. INPUTS ONLY: expected outputs belong to the oracle (B-5). Every value carries its provenance: a 'spec' value cites the line of 13/14 it comes from; an 'invented' value was chosen in v5.2 to complete the persona and must be reviewed (gap/oracle.md §7).",
   "type": "object",
   "required": ["fixture_id", "persona", "sources", "release", "input", "behaviour", "provenance"],
